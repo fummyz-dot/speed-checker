@@ -1,4 +1,5 @@
 import { Brand } from './components/Brand'
+import { ConnectionInfo } from './components/ConnectionInfo'
 import { MeasurementStatus } from './components/MeasurementStatus'
 import { MetricsGrid } from './components/MetricsGrid'
 import { Notice } from './components/Notice'
@@ -28,6 +29,8 @@ function App() {
           <p className="hero__lead">
             現在の回線品質をCloudflareのエッジネットワークで測定します。
           </p>
+
+          <ConnectionInfo />
 
           <div className="speed-display" aria-label="ダウンロード速度">
             <span className="speed-display__label">DOWNLOAD</span>
@@ -79,11 +82,15 @@ function App() {
 
       <footer className="site-footer">
         <span>© {new Date().getFullYear()} Speed Checker</span>
-        <span>Powered by Cloudflare Speedtest</span>
+        <div className="site-footer__links">
+          <a href="https://github.com/fummyz-dot/speed-checker" target="_blank" rel="noreferrer noopener">
+            GitHubでソースコードを見る
+          </a>
+          <span>Powered by Cloudflare Speedtest</span>
+        </div>
       </footer>
     </div>
   )
 }
 
 export default App
-
