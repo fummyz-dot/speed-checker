@@ -8,6 +8,9 @@ import {
   type SpeedTestMetrics,
   type TestPhase,
 } from '../types/speedTest'
+import type { SpeedMeasurementResult } from '../types/measurement'
+import { createMeasurementResult, toValidMetric } from '../lib/measurementValidation'
+import { bandwidthBitsToMbps } from '../lib/speedValue'
 
 const measurements: MeasurementConfig[] = [
   { type: 'latency', numPackets: 20 },
@@ -21,16 +24,13 @@ const measurements: MeasurementConfig[] = [
   { type: 'upload', bytes: 25_000_000, count: 2 },
 ]
 
-const valueOrNull = (value: number | null | undefined): number | null =>
-  typeof value === 'number' && Number.isFinite(value) ? value : null
-
 const readMetrics = (results: Results): SpeedTestMetrics => ({
-  download: valueOrNull(results.getDownloadBandwidth()),
-  upload: valueOrNull(results.getUploadBandwidth()),
-  latency: valueOrNull(results.getUnloadedLatency()),
-  jitter: valueOrNull(results.getUnloadedJitter()),
-  downloadLoadedLatency: valueOrNull(results.getDownLoadedLatency()),
-  uploadLoadedLatency: valueOrNull(results.getUpLoadedLatency()),
+  download: toValidMetric(results.getDownloadBandwidth()),
+  upload: toValidMetric(results.getUploadBandwidth()),
+  latency: toValidMetric(results.getUnloadedLatency()),
+  jitter: toValidMetric(results.getUnloadedJitter()),
+  downloadLoadedLatency: toValidMetric(results.getDownLoadedLatency()),
+  uploadLoadedLatency: toValidMetric(results.getUpLoadedLatency()),
 })
 
 const toErrorMessage = (error: unknown): string => {
@@ -44,6 +44,8 @@ export interface UseSpeedTestResult {
   phase: TestPhase
   isRunning: boolean
   error: string | null
+  completedResult: SpeedMeasurementResult | null
+  confirmedDownloadMbps: number | null
   start: () => void
 }
 
@@ -51,10 +53,13 @@ export const useSpeedTest = (): UseSpeedTestResult => {
   const engineRef = useRef<SpeedTest | null>(null)
   const runIdRef = useRef(0)
   const mountedRef = useRef(true)
+  const confirmedDownloadRef = useRef<number | null>(null)
   const [metrics, setMetrics] = useState<SpeedTestMetrics>(EMPTY_METRICS)
   const [phase, setPhase] = useState<TestPhase>('idle')
   const [isRunning, setIsRunning] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [completedResult, setCompletedResult] = useState<SpeedMeasurementResult | null>(null)
+  const [confirmedDownloadMbps, setConfirmedDownloadMbps] = useState<number | null>(null)
 
   const stopCurrentTest = useCallback(() => {
     runIdRef.current += 1
@@ -67,6 +72,9 @@ export const useSpeedTest = (): UseSpeedTestResult => {
 
     const runId = runIdRef.current
     setMetrics(EMPTY_METRICS)
+    setCompletedResult(null)
+    confirmedDownloadRef.current = null
+    setConfirmedDownloadMbps(null)
     setError(null)
     setPhase('latency')
     setIsRunning(true)
@@ -89,6 +97,15 @@ export const useSpeedTest = (): UseSpeedTestResult => {
           measurement.type === 'download' ||
           measurement.type === 'upload'
         ) {
+          if (measurement.type === 'upload') {
+            // upload開始時点の確定済みdownload値を、レース開始と同じ描画で渡す。
+            const nextMetrics = readMetrics(engine.results)
+            setMetrics(nextMetrics)
+            if (confirmedDownloadRef.current === null) {
+              confirmedDownloadRef.current = bandwidthBitsToMbps(nextMetrics.download)
+              setConfirmedDownloadMbps(confirmedDownloadRef.current)
+            }
+          }
           setPhase(measurement.type)
         }
       }
@@ -100,8 +117,16 @@ export const useSpeedTest = (): UseSpeedTestResult => {
 
       engine.onFinish = (results) => {
         if (!isCurrentRun()) return
-        setMetrics(readMetrics(results))
-        setPhase('complete')
+        const finalMetrics = readMetrics(results)
+        const measurement = createMeasurementResult(finalMetrics)
+        setMetrics(finalMetrics)
+        setCompletedResult(measurement)
+        if (measurement && confirmedDownloadRef.current === null) {
+          confirmedDownloadRef.current = measurement.downloadMbps
+          setConfirmedDownloadMbps(measurement.downloadMbps)
+        }
+        setPhase(measurement ? 'complete' : 'error')
+        setError(measurement ? null : '速度の測定値を取得できませんでした。もう一度お試しください。')
         setIsRunning(false)
         engineRef.current = null
       }
@@ -134,5 +159,13 @@ export const useSpeedTest = (): UseSpeedTestResult => {
     }
   }, [stopCurrentTest])
 
-  return { metrics, phase, isRunning, error, start }
+  return {
+    metrics,
+    phase,
+    isRunning,
+    error,
+    completedResult,
+    confirmedDownloadMbps,
+    start,
+  }
 }
