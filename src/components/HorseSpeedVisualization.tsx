@@ -1,5 +1,11 @@
 import type { CSSProperties } from 'react'
-import { useHorseRaceAnimation, type HorseRaceState } from '../hooks/useHorseRaceAnimation'
+import {
+  GROUP_JUMP_DURATION_MS,
+  useHorseRaceAnimation,
+  WARMUP_DURATION_MS,
+  WARMUP_MAX_PROGRESS,
+  type HorseRaceState,
+} from '../hooks/useHorseRaceAnimation'
 import { useLiveSpeedDisplay } from '../hooks/useLiveSpeedDisplay'
 import { getUserHorseJumpHeight } from '../lib/horseVisualization'
 import { HORSE_RACE_LANES, type HorseId } from '../lib/horseRaceLanes'
@@ -7,6 +13,7 @@ import { formatFinalSpeedDisplay, formatLiveSpeedDisplay } from '../lib/speedVal
 import type { SpeedMeasurementResult } from '../types/measurement'
 import type { TestPhase } from '../types/speedTest'
 import { GoalFocusFrontView } from './GoalFocusFrontView'
+import { RunnerSideView } from './RunnerSideView'
 
 interface HorseSpeedVisualizationProps {
   downloadMbps: number | null
@@ -21,27 +28,20 @@ type RaceStyle = CSSProperties & {
   '--fast-duration': string
   '--user-duration': string
   '--user-jump-height': string
+  '--race-start-progress': string
+  '--warmup-duration': string
+  '--warmup-max-progress': string
+  '--group-jump-duration': string
 }
-
-interface HorseIconProps {
-  label: string
-}
-
-const HorseIcon = ({ label }: HorseIconProps) => (
-  <svg viewBox="0 0 96 66" role="img" aria-label={label}>
-    <path d="M17 39C8 34 4 25 3 17c8 7 14 9 23 10 8-13 22-18 38-13l9-8 3 11c10 3 16 10 17 20-7-3-13-4-19-2-8 3-13 10-24 10-13 0-24-2-33-6Z" />
-    <path d="m29 43-13 18M47 45l-3 17M61 42l15 17M73 35l17 12" />
-    <circle cx="82" cy="25" r="1.8" />
-  </svg>
-)
 
 const getHelperText = (state: HorseRaceState, hasUploadResult: boolean): string => {
   switch (state) {
     case 'idle': return '測定開始を待っています'
     case 'measuringDownload': return 'ダウンロード測定中…'
+    case 'warmingUp': return 'ダウンロード測定中・ウォームアップ走行中…'
     case 'running': return hasUploadResult ? 'レース進行中' : 'レース進行中・アップロード測定中…'
-    case 'waitingForAllFinish': return '先着馬はゴールで待機中…'
-    case 'transitionToFrontView': return 'ALL HORSES FINISHED'
+    case 'waitingForAllFinish': return '先着ランナーはゴールで待機中…'
+    case 'transitionToFrontView': return 'ALL RUNNERS FINISHED'
     case 'groupJumpFrontView': return 'GOAL!'
     case 'finished': return 'FINISH'
   }
@@ -58,6 +58,7 @@ export const HorseSpeedVisualization = ({
     state,
     userRunDuration,
     referenceDurations,
+    raceStartProgress,
     hasFinished,
     canReplay,
     replay,
@@ -87,14 +88,21 @@ export const HorseSpeedVisualization = ({
     '--fast-duration': `${referenceDurations.fast}s`,
     '--user-duration': `${userRunDuration.toFixed(2)}s`,
     '--user-jump-height': `${getUserHorseJumpHeight(result?.uploadMbps ?? 0).toFixed(0)}px`,
+    '--race-start-progress': `${(raceStartProgress * 100).toFixed(3)}%`,
+    '--warmup-duration': `${WARMUP_DURATION_MS}ms`,
+    '--warmup-max-progress': `${WARMUP_MAX_PROGRESS * 100}%`,
+    '--group-jump-duration': `${GROUP_JUMP_DURATION_MS}ms`,
   }
   const raceIsActive = state === 'running' || state === 'waitingForAllFinish'
   const frontViewIsActive = state === 'transitionToFrontView'
     || state === 'groupJumpFrontView'
     || state === 'finished'
+  const showUploadResult = result !== null
+    && (state === 'groupJumpFrontView' || state === 'finished')
   const getRunnerStateClass = (horse: HorseId): string => {
     if (frontViewIsActive) return 'race-runner--finished'
     if (hasFinished[horse]) return 'race-runner--waiting'
+    if (state === 'warmingUp') return 'race-runner--warming'
     return raceIsActive ? 'race-runner--racing' : 'race-runner--idle'
   }
 
@@ -105,6 +113,13 @@ export const HorseSpeedVisualization = ({
           <span className="result-panel__eyebrow">SPEED RACE</span>
           <h2 id="horse-title">回線速度レース</h2>
         </div>
+        {showUploadResult && (
+          <div className="race-upload-result" data-final-upload-result>
+            <span>UPLOAD</span>
+            <strong>{formatFinalSpeedDisplay(result.uploadMbps)}</strong>
+            <small>Mbps</small>
+          </div>
+        )}
         <button className="secondary-button" type="button" onClick={replay} disabled={!canReplay}>
           もう一度見る
         </button>
@@ -139,15 +154,13 @@ export const HorseSpeedVisualization = ({
 
           {HORSE_RACE_LANES.map((lane) => (
             <div
-              className={`horse-runner race-runner race-runner--${lane.id} ${getRunnerStateClass(lane.id)}`}
-              data-horse={lane.id}
+              className={`race-runner race-runner--${lane.id} ${getRunnerStateClass(lane.id)}`}
+              data-runner={lane.id}
               data-finished={hasFinished[lane.id]}
               key={lane.id}
             >
-              <div className={`horse-jumper horse-jumper--${lane.id === 'user' ? 'user' : 'reference'}`}>
-                <div className={`horse-body horse-body--${lane.id}`}>
-                  <HorseIcon label={lane.sideViewLabel} />
-                </div>
+              <div className="runner-mover">
+                <RunnerSideView id={lane.id} label={lane.sideViewLabel} />
               </div>
             </div>
           ))}

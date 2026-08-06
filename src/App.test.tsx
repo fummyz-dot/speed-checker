@@ -23,7 +23,7 @@ describe('App', () => {
     expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('インターネット速度を、シンプルに。')
   })
 
-  it('測定前から開始ボタンとidle状態の馬コースを表示する', () => {
+  it('測定前から開始ボタンとidle状態のランナーコースを表示する', () => {
     const { container } = render(<App />)
 
     expect(screen.getByRole('button', { name: '測定開始' })).toBeVisible()

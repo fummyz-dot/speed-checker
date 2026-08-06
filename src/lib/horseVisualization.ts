@@ -20,5 +20,5 @@ export const getUserHorseRunDuration = (downloadMbps: number): number => {
 
 export const getUserHorseJumpHeight = (uploadMbps: number): number => {
   const speed = normalizeSpeedValue(uploadMbps) ?? 0
-  return clamp(10 + Math.log10(1 + speed) * 14, 10, 52)
+  return clamp(22 + Math.log10(1 + speed) * 32, 22, 100)
 }

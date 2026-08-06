@@ -10,6 +10,7 @@ import type { TestPhase } from '../types/speedTest'
 export type HorseRaceState =
   | 'idle'
   | 'measuringDownload'
+  | 'warmingUp'
   | 'running'
   | 'waitingForAllFinish'
   | 'transitionToFrontView'
@@ -31,7 +32,9 @@ const EMPTY_FINISH_STATE: HorseFinishState = {
 }
 
 export const FRONT_VIEW_TRANSITION_DURATION_MS = 520
-export const GROUP_JUMP_DURATION_MS = 780
+export const GROUP_JUMP_DURATION_MS = 1_800
+export const WARMUP_MAX_PROGRESS = 0.15
+export const WARMUP_DURATION_MS = 12_000
 
 const allHorsesFinished = (finishState: HorseFinishState): boolean =>
   finishState.standard && finishState.fast && finishState.user
@@ -44,6 +47,8 @@ export const useHorseRaceAnimation = ({
   const [state, setState] = useState<HorseRaceState>('idle')
   const [hasFinished, setHasFinished] = useState<HorseFinishState>(EMPTY_FINISH_STATE)
   const [userRunDuration, setUserRunDuration] = useState(() => getUserHorseRunDuration(0))
+  const [referenceDurations, setReferenceDurations] = useState(getReferenceHorseDurations)
+  const [raceStartProgress, setRaceStartProgress] = useState(0)
   const [raceSequence, setRaceSequence] = useState(0)
   const [raceTimersActive, setRaceTimersActive] = useState(false)
   const animationFrameRef = useRef<number | null>(null)
@@ -52,7 +57,7 @@ export const useHorseRaceAnimation = ({
   const resultRef = useRef(result)
   const raceStartedRef = useRef(false)
   const finishStateRef = useRef<HorseFinishState>(EMPTY_FINISH_STATE)
-  const referenceDurations = getReferenceHorseDurations()
+  const warmupStartedAtRef = useRef<number | null>(null)
 
   resultRef.current = result
 
@@ -67,14 +72,27 @@ export const useHorseRaceAnimation = ({
     }
   }, [])
 
-  const startRaceFromStart = useCallback((measuredDownload: number, waitForCameraReset = false) => {
+  const startRace = useCallback((
+    measuredDownload: number,
+    initialProgress = 0,
+    waitForCameraReset = false,
+    resetVisual = true,
+  ) => {
     cancelScheduledStart()
     raceStartedRef.current = true
+    warmupStartedAtRef.current = null
     finishStateRef.current = EMPTY_FINISH_STATE
     setHasFinished(EMPTY_FINISH_STATE)
     setRaceTimersActive(false)
-    setUserRunDuration(getUserHorseRunDuration(measuredDownload))
-    setState('idle')
+    const remainingCourse = 1 - initialProgress
+    const baseReferenceDurations = getReferenceHorseDurations()
+    setReferenceDurations({
+      standard: baseReferenceDurations.standard * remainingCourse,
+      fast: baseReferenceDurations.fast * remainingCourse,
+    })
+    setUserRunDuration(getUserHorseRunDuration(measuredDownload) * remainingCourse)
+    setRaceStartProgress(initialProgress)
+    if (resetVisual) setState('idle')
 
     const scheduleRunningFrame = () => {
       animationFrameRef.current = window.requestAnimationFrame(() => {
@@ -103,32 +121,54 @@ export const useHorseRaceAnimation = ({
     if (phase === 'idle') {
       cancelScheduledStart()
       raceStartedRef.current = false
+      warmupStartedAtRef.current = null
       finishStateRef.current = EMPTY_FINISH_STATE
       setHasFinished(EMPTY_FINISH_STATE)
       setRaceTimersActive(false)
+      setRaceStartProgress(0)
       setState('idle')
-    } else if (phase === 'latency' || phase === 'download') {
+    } else if (phase === 'latency' && previousPhase !== 'latency') {
       cancelScheduledStart()
       raceStartedRef.current = false
+      warmupStartedAtRef.current = null
       finishStateRef.current = EMPTY_FINISH_STATE
       setHasFinished(EMPTY_FINISH_STATE)
       setRaceTimersActive(false)
+      setRaceStartProgress(0)
       setState('measuringDownload')
+    } else if (phase === 'download' && previousPhase !== 'download') {
+      cancelScheduledStart()
+      raceStartedRef.current = false
+      warmupStartedAtRef.current = Date.now()
+      finishStateRef.current = EMPTY_FINISH_STATE
+      setHasFinished(EMPTY_FINISH_STATE)
+      setRaceTimersActive(false)
+      setRaceStartProgress(0)
+      setState('warmingUp')
     } else if (phase === 'upload' && previousPhase !== 'upload') {
-      startRaceFromStart(downloadMbps ?? 0)
+      const warmupElapsed = warmupStartedAtRef.current === null
+        ? 0
+        : Date.now() - warmupStartedAtRef.current
+      const warmupProgress = Math.min(
+        WARMUP_MAX_PROGRESS,
+        (warmupElapsed / WARMUP_DURATION_MS) * WARMUP_MAX_PROGRESS,
+      )
+      startRace(downloadMbps ?? 0, warmupProgress, false, false)
     } else if (phase === 'complete' && result && !raceStartedRef.current) {
-      startRaceFromStart(result.downloadMbps)
+      startRace(result.downloadMbps)
     } else if (phase === 'error') {
       cancelScheduledStart()
       raceStartedRef.current = false
+      warmupStartedAtRef.current = null
       finishStateRef.current = EMPTY_FINISH_STATE
       setHasFinished(EMPTY_FINISH_STATE)
       setRaceTimersActive(false)
+      setRaceStartProgress(0)
       setState('idle')
     }
 
     previousPhaseRef.current = phase
-  }, [cancelScheduledStart, downloadMbps, phase, result, startRaceFromStart])
+  }, [cancelScheduledStart, downloadMbps, phase, result, startRace])
 
   useEffect(() => cancelScheduledStart, [cancelScheduledStart])
 
@@ -180,7 +220,7 @@ export const useHorseRaceAnimation = ({
 
   const replay = () => {
     if (!result || phase !== 'complete') return
-    startRaceFromStart(result.downloadMbps, true)
+    startRace(result.downloadMbps, 0, true)
   }
 
   return {
@@ -188,6 +228,7 @@ export const useHorseRaceAnimation = ({
     hasFinished,
     userRunDuration,
     referenceDurations,
+    raceStartProgress,
     canReplay: Boolean(result) && phase === 'complete' && state === 'finished',
     replay,
   }

@@ -27,12 +27,12 @@ describe('horseVisualization', () => {
     expect(getUserHorseRunDuration(speed)).toBeCloseTo(expected, 1)
   })
 
-  it('速度が上がるほどユーザー馬の走行時間を短くする', () => {
+  it('速度が上がるほどユーザーランナーの走行時間を短くする', () => {
     expect(getUserHorseRunDuration(0)).toBeGreaterThan(getUserHorseRunDuration(10))
     expect(getUserHorseRunDuration(10)).toBeGreaterThan(getUserHorseRunDuration(1_000))
   })
 
-  it('標準馬と高速馬に比較しやすい固定走行時間を返す', () => {
+  it('標準ランナーと高速ランナーに比較しやすい固定走行時間を返す', () => {
     expect(getReferenceHorseDurations()).toEqual({ standard: 13.5, fast: 11.5 })
   })
 
@@ -40,14 +40,23 @@ describe('horseVisualization', () => {
     '上り %s Mbps を画面内のジャンプ高へ変換する',
     (speed) => {
       const height = getUserHorseJumpHeight(speed)
-      expect(height).toBeGreaterThanOrEqual(10)
-      expect(height).toBeLessThanOrEqual(52)
+      expect(height).toBeGreaterThanOrEqual(22)
+      expect(height).toBeLessThanOrEqual(100)
       expect(Number.isFinite(height)).toBe(true)
     },
   )
 
-  it('速度が上がるほどユーザー馬のジャンプを高くする', () => {
+  it('速度が上がるほどユーザーランナーのジャンプを高くする', () => {
     expect(getUserHorseJumpHeight(0)).toBeLessThan(getUserHorseJumpHeight(10))
     expect(getUserHorseJumpHeight(10)).toBeLessThan(getUserHorseJumpHeight(1_000))
+  })
+
+  it.each([
+    [0, 22],
+    [10, 55.3],
+    [100, 86.1],
+    [1_000, 100],
+  ])('%s Mbpsを明確な高さ差のジャンプへ変換する', (speed, expected) => {
+    expect(getUserHorseJumpHeight(speed)).toBeCloseTo(expected, 1)
   })
 })

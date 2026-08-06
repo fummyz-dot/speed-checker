@@ -34,10 +34,14 @@ describe('ConnectionInfo', () => {
     expect(container).not.toHaveTextContent(/\b(?:\d{1,3}\.){3}\d{1,3}\b/)
   })
 
-  it('errorを表示して再取得できる', async () => {
-    mockedHook.mockReturnValue({ state: { status: 'error', message: '取得失敗' }, retry })
+  it('404相当のエラーを技術コードなしで案内して再取得できる', async () => {
+    mockedHook.mockReturnValue({
+      state: { status: 'error', message: '接続情報は現在利用できません。' },
+      retry,
+    })
     render(<ConnectionInfo />)
-    expect(screen.getByRole('alert')).toHaveTextContent('速度測定は引き続き利用できます')
+    expect(screen.getByRole('alert')).toHaveTextContent('速度測定は通常どおり利用できます')
+    expect(screen.getByRole('alert')).not.toHaveTextContent('404')
     await userEvent.click(screen.getByRole('button', { name: '再取得' }))
     expect(retry).toHaveBeenCalledOnce()
   })

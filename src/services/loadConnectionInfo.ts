@@ -68,7 +68,10 @@ export const loadConnectionInfo = async ({
       headers: { Accept: 'application/json' },
       signal: controller.signal,
     })
-    if (!response.ok) throw new Error(`接続情報を取得できませんでした（${response.status}）。`)
+    if (!response.ok) {
+      if (response.status === 404) throw new Error('接続情報は現在利用できません。')
+      throw new Error(`接続情報を取得できませんでした（${response.status}）。`)
+    }
     return parseConnectionInfo(await response.json())
   } catch (error) {
     if (timedOut) throw new Error('接続情報の取得がタイムアウトしました。')

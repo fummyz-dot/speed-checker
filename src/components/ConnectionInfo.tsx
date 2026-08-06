@@ -25,7 +25,7 @@ export const ConnectionInfo = () => {
           <h2 id="connection-title">接続情報</h2>
         </div>
         <div className="connection-info__error" role="alert">
-          <span>{state.message} 速度測定は引き続き利用できます。</span>
+          <span>{state.message} 速度測定は通常どおり利用できます。</span>
           <button type="button" onClick={retry}>再取得</button>
         </div>
       </section>

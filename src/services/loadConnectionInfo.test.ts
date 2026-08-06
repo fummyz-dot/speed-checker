@@ -30,6 +30,14 @@ describe('parseConnectionInfo', () => {
 })
 
 describe('loadConnectionInfo', () => {
+  it('404を利用者向けメッセージへ変換する', async () => {
+    const fetchImpl = vi.fn().mockResolvedValue(new Response('', { status: 404 }))
+    const error = await loadConnectionInfo({ fetchImpl }).catch((caught: unknown) => caught)
+    expect(error).toBeInstanceOf(Error)
+    expect((error as Error).message).toBe('接続情報は現在利用できません。')
+    expect((error as Error).message).not.toContain('404')
+  })
+
   it('HTTPエラーを処理する', async () => {
     const fetchImpl = vi.fn().mockResolvedValue(new Response('', { status: 503 }))
     await expect(loadConnectionInfo({ fetchImpl })).rejects.toThrow('503')
