@@ -38,7 +38,7 @@ export const CompletedMeasurement = ({ result }: CompletedMeasurementProps) => {
       <UseCaseEvaluation evaluations={evaluations} />
       <MeasurementComment comment={comment} />
       <PreviousMeasurementComparison current={result} previous={previous} onClear={clearHistory} />
-      <MeasurementHistoryTrend history={history} />
+      <MeasurementHistoryTrend history={history} currentResult={result} />
       <ShareResultButton result={result} evaluations={evaluations} />
     </div>
   )

@@ -183,6 +183,8 @@ For each metric, one or two valid samples are a reference value; three or more a
 
 The result screen also visualizes the most recent 12 browser-local measurements in chronological order: download/upload speed and ping/loaded-latency increase. This graph is historical context only and never changes the current result or its evaluation.
 
+When at least two labeled measurements exist, the result screen also groups the browser-local history by the exact canonical condition label. It shows up to five most recently used conditions and calculates each displayed metric independently using its median: download, upload, idle ping, and the per-measurement loaded-latency increase. Unlabeled and legacy measurements are excluded from this grouping. One or two valid samples are shown as reference values; three or more are shown as a trend. This comparison is descriptive only: time of day and current network conditions can vary, so it does not establish that a condition caused a difference.
+
 ## Candidate future: packet loss
 
 Packet loss is not currently implemented.

@@ -9,9 +9,11 @@ import { toValidTimezoneOffsetMinutes } from '../lib/measurementValidation'
 import { formatFinalSpeedDisplay } from '../lib/speedValue'
 import { formatMilliseconds } from '../utils/formatMetric'
 import type { SpeedMeasurementResult } from '../types/measurement'
+import { MeasurementConditionTrend } from './MeasurementConditionTrend'
 
 interface MeasurementHistoryTrendProps {
   history: SpeedMeasurementResult[]
+  currentResult?: SpeedMeasurementResult | null
 }
 
 interface ChartSeries {
@@ -218,7 +220,7 @@ const HistoryLineChart = ({
   )
 }
 
-export const MeasurementHistoryTrend = ({ history }: MeasurementHistoryTrendProps) => {
+export const MeasurementHistoryTrend = ({ history, currentResult }: MeasurementHistoryTrendProps) => {
   const trend = getRecentMeasurementTrend(history)
   const timeBandSummaries = summarizeMeasurementsByTimeBand(history.map((measurement) => ({
     measurement,
@@ -278,6 +280,7 @@ export const MeasurementHistoryTrend = ({ history }: MeasurementHistoryTrendProp
           />
         </div>
       )}
+      <MeasurementConditionTrend history={history} currentResult={currentResult} />
       <section className="measurement-history__time-bands" aria-labelledby="time-band-title">
         <div className="measurement-history__time-band-heading">
           <h4 id="time-band-title">時間帯別の傾向</h4>

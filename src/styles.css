@@ -1887,6 +1887,117 @@ a:focus-visible {
   border-top: 1px solid var(--line);
 }
 
+.measurement-condition-trends {
+  margin-top: 26px;
+  padding-top: 24px;
+  border-top: 1px solid var(--line);
+}
+
+.condition-trends__limit-note {
+  margin: 12px 0 0;
+  color: #7d8796;
+  font-size: 0.68rem;
+}
+
+.condition-trends__table {
+  display: grid;
+  margin-top: 17px;
+  gap: 8px;
+}
+
+.condition-trends__columns {
+  display: grid;
+  padding: 0 14px;
+  grid-template-columns: minmax(130px, 1.25fr) repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  color: #7d8796;
+  font-size: 0.62rem;
+  font-weight: 600;
+}
+
+.condition-trends__row {
+  display: grid;
+  min-width: 0;
+  padding: 14px;
+  grid-template-columns: minmax(130px, 1.25fr) minmax(0, 4fr);
+  align-items: stretch;
+  gap: 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(17, 24, 36, 0.5);
+}
+
+.condition-trends__condition {
+  min-width: 0;
+}
+
+.condition-trends__condition h5 {
+  display: inline;
+  margin: 0;
+  overflow-wrap: anywhere;
+  color: #dce3eb;
+  font-size: 0.78rem;
+  line-height: 1.45;
+}
+
+.condition-trends__condition p {
+  margin: 6px 0 0;
+  color: #7d8796;
+  font-size: 0.62rem;
+}
+
+.condition-trends__current-badge {
+  display: inline-block;
+  margin-left: 7px;
+  padding: 2px 5px;
+  border: 1px solid rgba(117, 229, 194, 0.35);
+  border-radius: 999px;
+  color: var(--accent);
+  font-size: 0.58rem;
+  font-weight: 700;
+  vertical-align: 1px;
+}
+
+.condition-trends__metrics {
+  display: grid;
+  min-width: 0;
+  margin: 0;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.condition-trends__metric {
+  display: grid;
+  min-width: 0;
+  align-content: start;
+  gap: 4px;
+}
+
+.condition-trends__metric dt {
+  color: var(--muted);
+  font-size: 0.62rem;
+}
+
+.condition-trends__metric dd {
+  display: grid;
+  min-width: 0;
+  margin: 0;
+  gap: 4px;
+}
+
+.condition-trends__metric strong {
+  overflow-wrap: anywhere;
+  color: #dce3eb;
+  font-size: 0.72rem;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.4;
+}
+
+.condition-trends__metric small {
+  color: #7d8796;
+  font-size: 0.58rem;
+}
+
 .measurement-history__time-band-heading h4 {
   margin: 0;
   font-size: 0.92rem;
@@ -2343,6 +2454,28 @@ a:focus-visible {
 
   .history-chart {
     padding: 16px;
+  }
+
+  .condition-trends__columns {
+    display: none;
+  }
+
+  .condition-trends__row {
+    grid-template-columns: 1fr;
+    gap: 13px;
+  }
+
+  .condition-trends__metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 13px 12px;
+  }
+
+  .condition-trends__metric dt {
+    font-size: 0.64rem;
+  }
+
+  .condition-trends__metric strong {
+    font-size: 0.76rem;
   }
 
   .time-band-grid {

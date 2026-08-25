@@ -2,10 +2,13 @@ import { describe, expect, it } from 'vitest'
 import type { SpeedMeasurementResult } from '../types/measurement'
 import {
   classifyTimeBand,
+  getSampleQuality,
   getLoadedLatencyIncreaseMs,
   getRecentMeasurementTrend,
   median,
   RECENT_TREND_LIMIT,
+  summarizeMeasurementsByCondition,
+  summarizeMetric,
   summarizeMeasurementsByTimeBand,
 } from './measurementHistoryAnalysis'
 
@@ -36,6 +39,25 @@ describe('median', () => {
     median(values)
 
     expect(values).toEqual([30, 10, 20])
+  })
+})
+
+describe('sample quality', () => {
+  it.each([
+    [0, 'none'],
+    [1, 'reference'],
+    [2, 'reference'],
+    [3, 'trend'],
+  ] as const)('sampleCount %sを%sとして扱う', (sampleCount, quality) => {
+    expect(getSampleQuality(sampleCount)).toBe(quality)
+  })
+
+  it('metricごとに有効なsampleだけを数える', () => {
+    expect(summarizeMetric([10, Number.NaN, 30])).toEqual({
+      median: 20,
+      sampleCount: 2,
+      quality: 'reference',
+    })
   })
 })
 
@@ -143,6 +165,73 @@ describe('summarizeMeasurementsByTimeBand', () => {
     expect(summaries[0]).toMatchObject({
       measurementCount: 3,
       loadedLatencyIncreaseMs: { median: 20, sampleCount: 1, quality: 'reference' },
+    })
+  })
+})
+
+describe('summarizeMeasurementsByCondition', () => {
+  it('labelなし・null・不正labelを除外し、同じcanonical labelをまとめる', () => {
+    const analysis = summarizeMeasurementsByCondition([
+      measurement('living-new', '2026-08-24T12:00:00.000Z', { conditionLabel: '  リビング 5GHz  ', downloadMbps: 300 }),
+      measurement('unlabeled', '2026-08-23T12:00:00.000Z'),
+      measurement('living-old', '2026-08-22T12:00:00.000Z', { conditionLabel: 'リビング 5GHz', downloadMbps: 100 }),
+      measurement('null', '2026-08-21T12:00:00.000Z', { conditionLabel: null }),
+      measurement('invalid', '2026-08-20T12:00:00.000Z', { conditionLabel: 123 as unknown as string }),
+      measurement('wired', '2026-08-19T12:00:00.000Z', { conditionLabel: '有線LAN' }),
+    ])
+
+    expect(analysis.labeledMeasurementCount).toBe(3)
+    expect(analysis.summaries).toHaveLength(2)
+    expect(analysis.summaries[0]).toMatchObject({
+      conditionLabel: 'リビング 5GHz',
+      totalMeasurements: 2,
+      latestMeasuredAt: '2026-08-24T12:00:00.000Z',
+      downloadMbps: { median: 200, sampleCount: 2, quality: 'reference' },
+    })
+    expect(analysis.summaries[1].conditionLabel).toBe('有線LAN')
+  })
+
+  it('最後に使われた日時の新しい順で最大5条件を返す', () => {
+    const history = Array.from({ length: 6 }, (_, index) => measurement(
+      String(index),
+      `2026-08-${String(26 - index).padStart(2, '0')}T12:00:00.000Z`,
+      { conditionLabel: `条件${index + 1}` },
+    ))
+
+    const analysis = summarizeMeasurementsByCondition(history)
+
+    expect(analysis.summaries.map(({ conditionLabel }) => conditionLabel)).toEqual([
+      '条件1', '条件2', '条件3', '条件4', '条件5',
+    ])
+    expect(analysis.totalConditionCount).toBe(6)
+    expect(analysis.hasMoreConditions).toBe(true)
+  })
+
+  it('metric別のsampleCountを保ち、測定単位の混雑時増加を中央値にする', () => {
+    const analysis = summarizeMeasurementsByCondition([
+      measurement('1', '2026-08-24T12:00:00.000Z', {
+        conditionLabel: '有線LAN', pingMs: 20, downloadLoadedLatencyMs: 40,
+      }),
+      measurement('2', '2026-08-23T12:00:00.000Z', {
+        conditionLabel: '有線LAN', pingMs: 20, uploadLoadedLatencyMs: 80,
+      }),
+      measurement('3', '2026-08-22T12:00:00.000Z', {
+        conditionLabel: '有線LAN', pingMs: null,
+      }),
+      measurement('4', '2026-08-21T12:00:00.000Z', {
+        conditionLabel: '有線LAN', pingMs: 20,
+      }),
+      measurement('5', '2026-08-20T12:00:00.000Z', {
+        conditionLabel: '有線LAN', pingMs: 20,
+      }),
+    ])
+
+    expect(analysis.summaries[0]).toMatchObject({
+      totalMeasurements: 5,
+      downloadMbps: { sampleCount: 5, quality: 'trend' },
+      uploadMbps: { sampleCount: 5, quality: 'trend' },
+      pingMs: { sampleCount: 4, quality: 'trend' },
+      loadedLatencyIncreaseMs: { median: 40, sampleCount: 2, quality: 'reference' },
     })
   })
 })

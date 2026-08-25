@@ -1,8 +1,9 @@
 import { evaluateLoadedLatencyResponsiveness } from './loadedLatencyEvaluation'
-import { toValidMetric } from './measurementValidation'
+import { normalizeConditionLabel, toValidMetric } from './measurementValidation'
 import type { SpeedMeasurementResult } from '../types/measurement'
 
 export const RECENT_TREND_LIMIT = 12
+export const MAX_CONDITION_TREND_SUMMARIES = 5
 
 export type TimeBandId = 'morning' | 'daytime' | 'evening' | 'lateNight'
 
@@ -33,6 +34,23 @@ export interface MetricSummary {
   quality: 'none' | 'reference' | 'trend'
 }
 
+export interface ConditionSummary {
+  conditionLabel: string
+  totalMeasurements: number
+  latestMeasuredAt: string
+  downloadMbps: MetricSummary
+  uploadMbps: MetricSummary
+  pingMs: MetricSummary
+  loadedLatencyIncreaseMs: MetricSummary
+}
+
+export interface ConditionTrendAnalysis {
+  summaries: ConditionSummary[]
+  labeledMeasurementCount: number
+  totalConditionCount: number
+  hasMoreConditions: boolean
+}
+
 export interface TimeBandSummary extends TimeBandDefinition {
   measurementCount: number
   downloadMbps: MetricSummary
@@ -49,12 +67,16 @@ export interface TimeBandMeasurement {
 const isFiniteNumber = (value: unknown): value is number =>
   typeof value === 'number' && Number.isFinite(value)
 
-const metricSummary = (values: readonly number[]): MetricSummary => {
-  const sampleCount = values.length
+export const getSampleQuality = (sampleCount: number): MetricSummary['quality'] =>
+  sampleCount === 0 ? 'none' : sampleCount < 3 ? 'reference' : 'trend'
+
+export const summarizeMetric = (values: readonly number[]): MetricSummary => {
+  const validValues = values.filter(isFiniteNumber)
+  const sampleCount = validValues.length
   return {
-    median: median(values),
+    median: median(validValues),
     sampleCount,
-    quality: sampleCount === 0 ? 'none' : sampleCount < 3 ? 'reference' : 'trend',
+    quality: getSampleQuality(sampleCount),
   }
 }
 
@@ -124,10 +146,10 @@ const emptySummary = (): TimeBandSummary => ({
   id: 'morning',
   label: '朝',
   measurementCount: 0,
-  downloadMbps: metricSummary([]),
-  uploadMbps: metricSummary([]),
-  pingMs: metricSummary([]),
-  loadedLatencyIncreaseMs: metricSummary([]),
+  downloadMbps: summarizeMetric([]),
+  uploadMbps: summarizeMetric([]),
+  pingMs: summarizeMetric([]),
+  loadedLatencyIncreaseMs: summarizeMetric([]),
 })
 
 export const summarizeMeasurementsByTimeBand = (
@@ -172,10 +194,93 @@ export const summarizeMeasurementsByTimeBand = (
       id,
       label,
       measurementCount: values.measurementCount,
-      downloadMbps: metricSummary(values.downloadMbps),
-      uploadMbps: metricSummary(values.uploadMbps),
-      pingMs: metricSummary(values.pingMs),
-      loadedLatencyIncreaseMs: metricSummary(values.loadedLatencyIncreaseMs),
+      downloadMbps: summarizeMetric(values.downloadMbps),
+      uploadMbps: summarizeMetric(values.uploadMbps),
+      pingMs: summarizeMetric(values.pingMs),
+      loadedLatencyIncreaseMs: summarizeMetric(values.loadedLatencyIncreaseMs),
     }
   })
+}
+
+interface ConditionValues {
+  conditionLabel: string
+  totalMeasurements: number
+  latestMeasuredAt: string
+  latestMeasuredAtMs: number
+  latestIndex: number
+  downloadMbps: number[]
+  uploadMbps: number[]
+  pingMs: number[]
+  loadedLatencyIncreaseMs: number[]
+}
+
+const measuredAtTimestamp = (measuredAt: string): number => {
+  const timestamp = Date.parse(measuredAt)
+  return Number.isNaN(timestamp) ? Number.NEGATIVE_INFINITY : timestamp
+}
+
+export const summarizeMeasurementsByCondition = (
+  measurements: readonly SpeedMeasurementResult[],
+): ConditionTrendAnalysis => {
+  const valuesByCondition = new Map<string, ConditionValues>()
+  let labeledMeasurementCount = 0
+
+  measurements.forEach((measurement, index) => {
+    const conditionLabel = normalizeConditionLabel(measurement.conditionLabel)
+    if (conditionLabel === null) return
+
+    labeledMeasurementCount += 1
+    const measuredAtMs = measuredAtTimestamp(measurement.measuredAt)
+    const existing = valuesByCondition.get(conditionLabel)
+    const values = existing ?? {
+      conditionLabel,
+      totalMeasurements: 0,
+      latestMeasuredAt: measurement.measuredAt,
+      latestMeasuredAtMs: measuredAtMs,
+      latestIndex: index,
+      downloadMbps: [],
+      uploadMbps: [],
+      pingMs: [],
+      loadedLatencyIncreaseMs: [],
+    }
+
+    values.totalMeasurements += 1
+    if (measuredAtMs > values.latestMeasuredAtMs || (
+      measuredAtMs === values.latestMeasuredAtMs && index < values.latestIndex
+    )) {
+      values.latestMeasuredAt = measurement.measuredAt
+      values.latestMeasuredAtMs = measuredAtMs
+      values.latestIndex = index
+    }
+
+    const download = toValidMetric(measurement.downloadMbps)
+    const upload = toValidMetric(measurement.uploadMbps)
+    const ping = toValidMetric(measurement.pingMs)
+    const loadedLatencyIncrease = getLoadedLatencyIncreaseMs(measurement)
+    if (download !== null) values.downloadMbps.push(download)
+    if (upload !== null) values.uploadMbps.push(upload)
+    if (ping !== null) values.pingMs.push(ping)
+    if (loadedLatencyIncrease !== null) values.loadedLatencyIncreaseMs.push(loadedLatencyIncrease)
+
+    valuesByCondition.set(conditionLabel, values)
+  })
+
+  const allSummaries = [...valuesByCondition.values()]
+    .sort((left, right) => right.latestMeasuredAtMs - left.latestMeasuredAtMs || left.latestIndex - right.latestIndex)
+    .map((values): ConditionSummary => ({
+      conditionLabel: values.conditionLabel,
+      totalMeasurements: values.totalMeasurements,
+      latestMeasuredAt: values.latestMeasuredAt,
+      downloadMbps: summarizeMetric(values.downloadMbps),
+      uploadMbps: summarizeMetric(values.uploadMbps),
+      pingMs: summarizeMetric(values.pingMs),
+      loadedLatencyIncreaseMs: summarizeMetric(values.loadedLatencyIncreaseMs),
+    }))
+
+  return {
+    summaries: allSummaries.slice(0, MAX_CONDITION_TREND_SUMMARIES),
+    labeledMeasurementCount,
+    totalConditionCount: allSummaries.length,
+    hasMoreConditions: allSummaries.length > MAX_CONDITION_TREND_SUMMARIES,
+  }
 }

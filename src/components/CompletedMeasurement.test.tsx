@@ -22,13 +22,14 @@ describe('CompletedMeasurement history', () => {
 
   afterEach(() => vi.restoreAllMocks())
 
-  it('前回比較の後、共有の前に履歴グラフを表示し、削除時に即座に空状態へ戻す', async () => {
-    const previous = measurement('previous')
-    const current = measurement('current')
+  it('前回比較の後、共有の前に履歴グラフを表示し、削除時に条件傾向も即座に消す', async () => {
+    const previous = { ...measurement('previous'), conditionLabel: '有線LAN' }
+    const current = { ...measurement('current'), conditionLabel: '有線LAN' }
     saveMeasurement(previous)
     const { container } = render(<CompletedMeasurement result={current} />)
 
     await screen.findByRole('heading', { name: '速度の推移' })
+    expect(screen.getByRole('heading', { name: '測定条件ごとの傾向' })).toBeVisible()
     const panels = [...container.querySelectorAll('.completed-measurement > *')]
     expect(panels.findIndex((panel) => panel.classList.contains('measurement-history')))
       .toBeGreaterThan(panels.findIndex((panel) => panel.querySelector('#comparison-title')))
@@ -41,6 +42,7 @@ describe('CompletedMeasurement history', () => {
       expect(screen.getByText('あと1回以上測定すると、回線品質の変化を確認できます。')).toBeVisible()
     })
     expect(screen.queryByRole('heading', { name: '速度の推移' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('heading', { name: '測定条件ごとの傾向' })).not.toBeInTheDocument()
     expect(screen.getAllByText('未測定')).toHaveLength(4)
     expect(loadMeasurements()).toEqual([])
   })

@@ -103,6 +103,8 @@ The condition label is a user-entered memo only; the browser does not infer a co
 
 The measurement-condition selector keeps its current choice in page state. On page load it restores only the valid label from the latest successful history record. Recent labels (up to five, newest-first and deduplicated) are derived from this same history whenever the selector opens; no condition-specific LocalStorage key is used.
 
+Condition-level trends are also derived in the browser from this existing history only. They use up to five most recently used labels and do not create another LocalStorage key or send comparison data to a Worker, external API, analytics, or sharing flow.
+
 ## Share image
 
 The share image is generated in the browser using Canvas APIs. It uses the approved race idle-horse assets when available and falls back to an image without horses if they cannot load.
