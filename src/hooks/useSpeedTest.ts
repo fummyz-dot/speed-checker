@@ -9,7 +9,11 @@ import {
   type TestPhase,
 } from '../types/speedTest'
 import type { SpeedMeasurementResult } from '../types/measurement'
-import { createMeasurementResult, toValidMetric } from '../lib/measurementValidation'
+import {
+  createMeasurementResult,
+  normalizeConditionLabel,
+  toValidMetric,
+} from '../lib/measurementValidation'
 import { bandwidthBitsToMbps } from '../lib/speedValue'
 
 const measurements: MeasurementConfig[] = [
@@ -46,7 +50,11 @@ export interface UseSpeedTestResult {
   error: string | null
   completedResult: SpeedMeasurementResult | null
   confirmedDownloadMbps: number | null
-  start: () => void
+  start: (options?: StartSpeedTestOptions) => void
+}
+
+export interface StartSpeedTestOptions {
+  conditionLabel?: string | null
 }
 
 export const useSpeedTest = (): UseSpeedTestResult => {
@@ -54,6 +62,7 @@ export const useSpeedTest = (): UseSpeedTestResult => {
   const runIdRef = useRef(0)
   const mountedRef = useRef(true)
   const confirmedDownloadRef = useRef<number | null>(null)
+  const runConditionLabelRef = useRef<string | null>(null)
   const [metrics, setMetrics] = useState<SpeedTestMetrics>(EMPTY_METRICS)
   const [phase, setPhase] = useState<TestPhase>('idle')
   const [isRunning, setIsRunning] = useState(false)
@@ -67,10 +76,11 @@ export const useSpeedTest = (): UseSpeedTestResult => {
     engineRef.current = null
   }, [])
 
-  const start = useCallback(() => {
+  const start = useCallback((options?: StartSpeedTestOptions) => {
     stopCurrentTest()
 
     const runId = runIdRef.current
+    runConditionLabelRef.current = normalizeConditionLabel(options?.conditionLabel)
     setMetrics(EMPTY_METRICS)
     setCompletedResult(null)
     confirmedDownloadRef.current = null
@@ -118,7 +128,9 @@ export const useSpeedTest = (): UseSpeedTestResult => {
       engine.onFinish = (results) => {
         if (!isCurrentRun()) return
         const finalMetrics = readMetrics(results)
-        const measurement = createMeasurementResult(finalMetrics)
+        const measurement = createMeasurementResult(finalMetrics, new Date(), {
+          conditionLabel: runConditionLabelRef.current,
+        })
         setMetrics(finalMetrics)
         setCompletedResult(measurement)
         if (measurement && confirmedDownloadRef.current === null) {

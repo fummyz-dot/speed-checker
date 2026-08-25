@@ -4,6 +4,7 @@ export interface SpeedMeasurementResult {
   downloadMbps: number
   uploadMbps: number
   pingMs: number | null
+  conditionLabel?: string | null
 }
 
 export type EvaluationLevel = 'comfortable' | 'available' | 'difficult' | 'unknown'

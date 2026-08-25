@@ -1,8 +1,10 @@
+import { useState } from 'react'
 import { Brand } from './components/Brand'
 import { CompletedMeasurement } from './components/CompletedMeasurement'
 import { ConnectionInfo } from './components/ConnectionInfo'
 import { HorseSpeedVisualization } from './components/HorseSpeedVisualization'
 import { MeasurementStatus } from './components/MeasurementStatus'
+import { MeasurementConditionSelector } from './components/MeasurementConditionSelector'
 import { MetricsGrid } from './components/MetricsGrid'
 import { Notice } from './components/Notice'
 import { useSpeedTest } from './hooks/useSpeedTest'
@@ -10,6 +12,11 @@ import {
   bandwidthBitsToMbps,
   formatFinalSpeedDisplay,
 } from './lib/speedValue'
+import { loadMeasurements } from './lib/measurementStorage'
+import { normalizeConditionLabel } from './lib/measurementValidation'
+
+const getInitialConditionLabel = (): string | null =>
+  normalizeConditionLabel(loadMeasurements()[0]?.conditionLabel)
 
 function App() {
   const {
@@ -21,6 +28,8 @@ function App() {
     confirmedDownloadMbps,
     start,
   } = useSpeedTest()
+  const [conditionLabel, setConditionLabel] = useState<string | null>(getInitialConditionLabel)
+  const [isConditionEditing, setIsConditionEditing] = useState(false)
   const displayedDownload = formatFinalSpeedDisplay(confirmedDownloadMbps)
   const hasStarted = phase !== 'idle'
   const buttonLabel = isRunning
@@ -28,6 +37,10 @@ function App() {
     : phase === 'complete' || phase === 'error'
       ? 'もう一度測定'
       : '測定開始'
+  const startMeasurement = () => {
+    if (isConditionEditing) return
+    start({ conditionLabel })
+  }
 
   return (
     <div className="site-shell">
@@ -49,6 +62,13 @@ function App() {
           <div className="hero__dashboard">
             <div className="hero__controls">
               <ConnectionInfo />
+
+              <MeasurementConditionSelector
+                value={conditionLabel}
+                disabled={isRunning}
+                onChange={setConditionLabel}
+                onEditingChange={setIsConditionEditing}
+              />
 
               <div className="hero__measurement">
                 <div className="speed-display" aria-label="ダウンロード速度">
@@ -72,15 +92,17 @@ function App() {
                   <button
                     className="test-button"
                     type="button"
-                    onClick={start}
-                    disabled={isRunning}
+                    onClick={startMeasurement}
+                    disabled={isRunning || isConditionEditing}
                     aria-describedby="test-button-hint"
                   >
                     <span>{buttonLabel}</span>
                     {!isRunning && <span aria-hidden="true">→</span>}
                   </button>
                   <p className="button-hint" id="test-button-hint">
-                    {hasStarted
+                    {isConditionEditing
+                      ? '測定条件を確定またはキャンセルしてください'
+                      : hasStarted
                       ? 'Wi-Fiや回線の状態により、結果は変動します'
                       : '測定には数十秒かかる場合があります'}
                   </p>

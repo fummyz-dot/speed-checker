@@ -1,8 +1,9 @@
 import type { SpeedMeasurementResult } from '../types/measurement'
-import { isValidMeasurementResult } from './measurementValidation'
+import { isValidMeasurementResult, normalizeConditionLabel } from './measurementValidation'
 
 export const MEASUREMENT_STORAGE_KEY = 'speed-checker:measurements:v1'
 export const MAX_MEASUREMENT_HISTORY = 30
+export const MAX_RECENT_CONDITION_LABELS = 5
 
 const getBrowserStorage = (): Storage | null => {
   try {
@@ -10,6 +11,23 @@ const getBrowserStorage = (): Storage | null => {
   } catch {
     return null
   }
+}
+
+const normalizeStoredMeasurement = (value: unknown): SpeedMeasurementResult | null => {
+  if (!value || typeof value !== 'object') return null
+  const result = value as Partial<SpeedMeasurementResult>
+  const baseResult = {
+    id: result.id,
+    measuredAt: result.measuredAt,
+    downloadMbps: result.downloadMbps,
+    uploadMbps: result.uploadMbps,
+    pingMs: result.pingMs,
+  }
+
+  if (!isValidMeasurementResult(baseResult)) return null
+  return result.conditionLabel === undefined
+    ? baseResult
+    : { ...baseResult, conditionLabel: normalizeConditionLabel(result.conditionLabel) }
 }
 
 export const loadMeasurements = (
@@ -22,7 +40,10 @@ export const loadMeasurements = (
     if (!raw) return []
     const parsed: unknown = JSON.parse(raw)
     if (!Array.isArray(parsed)) return []
-    return parsed.filter(isValidMeasurementResult).slice(0, MAX_MEASUREMENT_HISTORY)
+    return parsed
+      .map(normalizeStoredMeasurement)
+      .filter((result): result is SpeedMeasurementResult => result !== null)
+      .slice(0, MAX_MEASUREMENT_HISTORY)
   } catch {
     return []
   }
@@ -32,12 +53,13 @@ export const saveMeasurement = (
   result: SpeedMeasurementResult,
   storage: Storage | null = getBrowserStorage(),
 ): SpeedMeasurementResult[] => {
-  if (!storage || !isValidMeasurementResult(result)) return loadMeasurements(storage)
+  const normalizedResult = normalizeStoredMeasurement(result)
+  if (!storage || !normalizedResult) return loadMeasurements(storage)
 
   const existing = loadMeasurements(storage)
-  if (existing.some((item) => item.id === result.id)) return existing
+  if (existing.some((item) => item.id === normalizedResult.id)) return existing
 
-  const updated = [result, ...existing].slice(0, MAX_MEASUREMENT_HISTORY)
+  const updated = [normalizedResult, ...existing].slice(0, MAX_MEASUREMENT_HISTORY)
   try {
     storage.setItem(MEASUREMENT_STORAGE_KEY, JSON.stringify(updated))
     return updated
@@ -56,6 +78,22 @@ export const clearMeasurements = (
   } catch {
     return false
   }
+}
+
+export const getRecentConditionLabels = (
+  history: readonly SpeedMeasurementResult[],
+): string[] => {
+  const labels = new Set<string>()
+
+  for (const measurement of history) {
+    const label = normalizeConditionLabel(measurement.conditionLabel)
+    if (!label || labels.has(label)) continue
+
+    labels.add(label)
+    if (labels.size === MAX_RECENT_CONDITION_LABELS) break
+  }
+
+  return [...labels]
 }
 
 export interface MetricComparison {
