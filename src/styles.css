@@ -608,22 +608,23 @@ a:focus-visible {
 }
 
 .results {
-  padding: 66px 0 84px;
+  padding: 42px 0 72px;
   border-top: 1px solid var(--line);
 }
 
 .section-heading {
   display: flex;
-  margin-bottom: 44px;
+  margin-bottom: 20px;
   align-items: flex-end;
   justify-content: space-between;
   gap: 32px;
 }
 
 .section-heading h2 {
-  margin: 10px 0 0;
-  font-size: clamp(1.55rem, 3vw, 2.25rem);
-  letter-spacing: -0.04em;
+  margin: 5px 0 0;
+  font-size: clamp(1.05rem, 1.7vw, 1.35rem);
+  line-height: 1.15;
+  letter-spacing: -0.02em;
 }
 
 .section-heading p {
@@ -643,8 +644,8 @@ a:focus-visible {
 }
 
 .metric-card {
-  min-height: 166px;
-  padding: 28px;
+  min-height: 116px;
+  padding: 20px;
   border-right: 1px solid var(--line);
   border-bottom: 1px solid var(--line);
   background: rgba(13, 18, 28, 0.52);
@@ -656,19 +657,19 @@ a:focus-visible {
 
 .metric-card dt {
   color: var(--muted);
-  font-size: 0.76rem;
+  font-size: 0.7rem;
   font-weight: 500;
 }
 
 .metric-card dd {
   display: flex;
-  margin: 30px 0 0;
+  margin: 17px 0 0;
   align-items: baseline;
   gap: 8px;
 }
 
 .metric-card dd span {
-  font-size: clamp(2rem, 4vw, 3rem);
+  font-size: clamp(1.65rem, 3vw, 2.25rem);
   font-variant-numeric: tabular-nums;
   font-weight: 500;
   letter-spacing: -0.055em;
@@ -676,7 +677,7 @@ a:focus-visible {
 
 .metric-card dd small {
   color: var(--accent);
-  font-size: 0.72rem;
+  font-size: 0.68rem;
   font-weight: 600;
 }
 
@@ -2417,11 +2418,11 @@ a:focus-visible {
   }
 
   .results {
-    padding: 64px 0 72px;
+    padding: 42px 0 64px;
   }
 
   .section-heading {
-    margin-bottom: 30px;
+    margin-bottom: 20px;
     align-items: flex-start;
     flex-direction: column;
     gap: 16px;
@@ -2432,12 +2433,12 @@ a:focus-visible {
   }
 
   .metric-card {
-    min-height: 145px;
-    padding: 22px;
+    min-height: 118px;
+    padding: 18px;
   }
 
   .metric-card dd {
-    margin-top: 25px;
+    margin-top: 17px;
   }
 
   .evaluation-grid {
