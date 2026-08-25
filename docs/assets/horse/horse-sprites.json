@@ -1,0 +1,349 @@
+{
+  "frameCount": 7,
+  "runtimeCell": {
+    "width": 160,
+    "height": 135
+  },
+  "runtimeSprite": {
+    "width": 1120,
+    "height": 135
+  },
+  "rows": {
+    "user": {
+      "spriteWebP": "/assets/horse/horse-user-gallop.webp",
+      "spritePNG": "/assets/horse/horse-user-gallop.png",
+      "idleWebP": "/assets/horse/horse-user-idle.webp",
+      "frames": [
+        {
+          "index": 0,
+          "sourceBox": [
+            22,
+            46,
+            305,
+            229
+          ],
+          "masterPlacement": [
+            6,
+            21,
+            307,
+            231
+          ]
+        },
+        {
+          "index": 1,
+          "sourceBox": [
+            293,
+            42,
+            272,
+            233
+          ],
+          "masterPlacement": [
+            23,
+            17,
+            274,
+            235
+          ]
+        },
+        {
+          "index": 2,
+          "sourceBox": [
+            551,
+            40,
+            260,
+            235
+          ],
+          "masterPlacement": [
+            29,
+            15,
+            262,
+            237
+          ]
+        },
+        {
+          "index": 3,
+          "sourceBox": [
+            793,
+            35,
+            276,
+            224
+          ],
+          "masterPlacement": [
+            21,
+            10,
+            278,
+            226
+          ]
+        },
+        {
+          "index": 4,
+          "sourceBox": [
+            1045,
+            43,
+            265,
+            233
+          ],
+          "masterPlacement": [
+            26,
+            18,
+            267,
+            235
+          ]
+        },
+        {
+          "index": 5,
+          "sourceBox": [
+            1277,
+            56,
+            274,
+            223
+          ],
+          "masterPlacement": [
+            22,
+            31,
+            276,
+            225
+          ]
+        },
+        {
+          "index": 6,
+          "sourceBox": [
+            1530,
+            55,
+            270,
+            224
+          ],
+          "masterPlacement": [
+            24,
+            30,
+            272,
+            226
+          ]
+        }
+      ]
+    },
+    "standard": {
+      "spriteWebP": "/assets/horse/horse-standard-gallop.webp",
+      "spritePNG": "/assets/horse/horse-standard-gallop.png",
+      "idleWebP": "/assets/horse/horse-standard-idle.webp",
+      "frames": [
+        {
+          "index": 0,
+          "sourceBox": [
+            11,
+            313,
+            289,
+            245
+          ],
+          "masterPlacement": [
+            14,
+            11,
+            291,
+            245
+          ]
+        },
+        {
+          "index": 1,
+          "sourceBox": [
+            270,
+            313,
+            265,
+            244
+          ],
+          "masterPlacement": [
+            26,
+            11,
+            267,
+            245
+          ]
+        },
+        {
+          "index": 2,
+          "sourceBox": [
+            522,
+            313,
+            262,
+            243
+          ],
+          "masterPlacement": [
+            28,
+            11,
+            264,
+            245
+          ]
+        },
+        {
+          "index": 3,
+          "sourceBox": [
+            758,
+            312,
+            273,
+            219
+          ],
+          "masterPlacement": [
+            22,
+            10,
+            275,
+            220
+          ]
+        },
+        {
+          "index": 4,
+          "sourceBox": [
+            1013,
+            316,
+            266,
+            241
+          ],
+          "masterPlacement": [
+            26,
+            14,
+            268,
+            243
+          ]
+        },
+        {
+          "index": 5,
+          "sourceBox": [
+            1251,
+            328,
+            278,
+            234
+          ],
+          "masterPlacement": [
+            20,
+            26,
+            280,
+            235
+          ]
+        },
+        {
+          "index": 6,
+          "sourceBox": [
+            1515,
+            326,
+            281,
+            237
+          ],
+          "masterPlacement": [
+            18,
+            24,
+            283,
+            238
+          ]
+        }
+      ]
+    },
+    "fast": {
+      "spriteWebP": "/assets/horse/horse-fast-gallop.webp",
+      "spritePNG": "/assets/horse/horse-fast-gallop.png",
+      "idleWebP": "/assets/horse/horse-fast-idle.webp",
+      "frames": [
+        {
+          "index": 0,
+          "sourceBox": [
+            17,
+            595,
+            313,
+            240
+          ],
+          "masterPlacement": [
+            2,
+            17,
+            315,
+            242
+          ]
+        },
+        {
+          "index": 1,
+          "sourceBox": [
+            284,
+            598,
+            272,
+            234
+          ],
+          "masterPlacement": [
+            23,
+            20,
+            274,
+            236
+          ]
+        },
+        {
+          "index": 2,
+          "sourceBox": [
+            529,
+            596,
+            260,
+            237
+          ],
+          "masterPlacement": [
+            29,
+            18,
+            262,
+            239
+          ]
+        },
+        {
+          "index": 3,
+          "sourceBox": [
+            767,
+            588,
+            279,
+            229
+          ],
+          "masterPlacement": [
+            19,
+            10,
+            281,
+            231
+          ]
+        },
+        {
+          "index": 4,
+          "sourceBox": [
+            1013,
+            602,
+            274,
+            238
+          ],
+          "masterPlacement": [
+            22,
+            24,
+            276,
+            240
+          ]
+        },
+        {
+          "index": 5,
+          "sourceBox": [
+            1250,
+            617,
+            284,
+            225
+          ],
+          "masterPlacement": [
+            17,
+            39,
+            286,
+            227
+          ]
+        },
+        {
+          "index": 6,
+          "sourceBox": [
+            1511,
+            601,
+            284,
+            239
+          ],
+          "masterPlacement": [
+            17,
+            23,
+            286,
+            241
+          ]
+        }
+      ]
+    }
+  }
+}

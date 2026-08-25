@@ -1,5 +1,10 @@
 import type { SpeedMeasurementResult } from '../types/measurement'
-import { isValidMeasurementResult, normalizeConditionLabel } from './measurementValidation'
+import {
+  isValidMeasurementResult,
+  normalizeConditionLabel,
+  toValidMetric,
+  toValidTimezoneOffsetMinutes,
+} from './measurementValidation'
 
 export const MEASUREMENT_STORAGE_KEY = 'speed-checker:measurements:v1'
 export const MAX_MEASUREMENT_HISTORY = 30
@@ -25,9 +30,22 @@ const normalizeStoredMeasurement = (value: unknown): SpeedMeasurementResult | nu
   }
 
   if (!isValidMeasurementResult(baseResult)) return null
-  return result.conditionLabel === undefined
-    ? baseResult
-    : { ...baseResult, conditionLabel: normalizeConditionLabel(result.conditionLabel) }
+
+  const normalized: SpeedMeasurementResult = { ...baseResult }
+  if (result.jitterMs !== undefined) normalized.jitterMs = toValidMetric(result.jitterMs)
+  if (result.downloadLoadedLatencyMs !== undefined) {
+    normalized.downloadLoadedLatencyMs = toValidMetric(result.downloadLoadedLatencyMs)
+  }
+  if (result.uploadLoadedLatencyMs !== undefined) {
+    normalized.uploadLoadedLatencyMs = toValidMetric(result.uploadLoadedLatencyMs)
+  }
+  if (result.timezoneOffsetMinutes !== undefined) {
+    normalized.timezoneOffsetMinutes = toValidTimezoneOffsetMinutes(result.timezoneOffsetMinutes)
+  }
+  if (result.conditionLabel !== undefined) {
+    normalized.conditionLabel = normalizeConditionLabel(result.conditionLabel)
+  }
+  return normalized
 }
 
 export const loadMeasurements = (

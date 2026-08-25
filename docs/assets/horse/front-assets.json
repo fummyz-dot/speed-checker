@@ -1,0 +1,44 @@
+{
+  "version": 2,
+  "jockeyRuntimeSize": [
+    180,
+    180
+  ],
+  "horseRuntimeSize": [
+    170,
+    170
+  ],
+  "cleanup": "rank2/rank3 cell contamination removed by keeping the main connected sprite component",
+  "lanes": {
+    "standard": {
+      "jockey": {
+        "1": "/assets/horse/front/front-jockey-standard-rank1.webp",
+        "2": "/assets/horse/front/front-jockey-standard-rank2.webp",
+        "3": "/assets/horse/front/front-jockey-standard-rank3.webp"
+      },
+      "horse": {
+        "webp": "/assets/horse/front/front-horse-standard.webp"
+      }
+    },
+    "user": {
+      "jockey": {
+        "1": "/assets/horse/front/front-jockey-user-rank1.webp",
+        "2": "/assets/horse/front/front-jockey-user-rank2.webp",
+        "3": "/assets/horse/front/front-jockey-user-rank3.webp"
+      },
+      "horse": {
+        "webp": "/assets/horse/front/front-horse-user.webp"
+      }
+    },
+    "fast": {
+      "jockey": {
+        "1": "/assets/horse/front/front-jockey-fast-rank1.webp",
+        "2": "/assets/horse/front/front-jockey-fast-rank2.webp",
+        "3": "/assets/horse/front/front-jockey-fast-rank3.webp"
+      },
+      "horse": {
+        "webp": "/assets/horse/front/front-horse-fast.webp"
+      }
+    }
+  }
+}

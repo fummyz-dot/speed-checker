@@ -8,6 +8,15 @@ import {
 export const toValidMetric = (value: unknown): number | null =>
   typeof value === 'number' && Number.isFinite(value) && value >= 0 ? value : null
 
+export const toValidTimezoneOffsetMinutes = (value: unknown): number | null =>
+  typeof value === 'number'
+  && Number.isFinite(value)
+  && Number.isInteger(value)
+  && value >= -840
+  && value <= 840
+    ? value
+    : null
+
 export const MAX_CONDITION_LABEL_LENGTH = 24
 
 export const normalizeConditionLabel = (value: unknown): string | null => {
@@ -31,12 +40,23 @@ const createMeasurementId = (): string => {
 export const createMeasurementResult = (
   metrics: SpeedTestMetrics,
   measuredAt = new Date(),
+  timezoneOffsetMinutesOrOptions: number | CreateMeasurementResultOptions = measuredAt.getTimezoneOffset(),
   options?: CreateMeasurementResultOptions,
 ): SpeedMeasurementResult | null => {
   const download = bandwidthBitsToMbps(metrics.download)
   const upload = bandwidthBitsToMbps(metrics.upload)
   const ping = toValidMetric(metrics.latency)
-  const conditionLabel = normalizeConditionLabel(options?.conditionLabel)
+  const jitter = toValidMetric(metrics.jitter)
+  const downloadLoadedLatency = toValidMetric(metrics.downloadLoadedLatency)
+  const uploadLoadedLatency = toValidMetric(metrics.uploadLoadedLatency)
+  const timezoneOffsetMinutes = typeof timezoneOffsetMinutesOrOptions === 'number'
+    ? timezoneOffsetMinutesOrOptions
+    : measuredAt.getTimezoneOffset()
+  const measurementOptions = typeof timezoneOffsetMinutesOrOptions === 'number'
+    ? options
+    : timezoneOffsetMinutesOrOptions
+  const timezoneOffset = toValidTimezoneOffsetMinutes(timezoneOffsetMinutes)
+  const conditionLabel = normalizeConditionLabel(measurementOptions?.conditionLabel)
 
   if (download === null || upload === null) return null
 
@@ -46,9 +66,19 @@ export const createMeasurementResult = (
     downloadMbps: download,
     uploadMbps: upload,
     pingMs: ping,
+    jitterMs: jitter,
+    downloadLoadedLatencyMs: downloadLoadedLatency,
+    uploadLoadedLatencyMs: uploadLoadedLatency,
+    timezoneOffsetMinutes: timezoneOffset,
     conditionLabel,
   }
 }
+
+const isOptionalMetric = (value: unknown): boolean =>
+  value === undefined || value === null || toValidMetric(value) !== null
+
+const isOptionalTimezoneOffset = (value: unknown): boolean =>
+  value === undefined || value === null || toValidTimezoneOffsetMinutes(value) !== null
 
 const isOptionalConditionLabel = (value: unknown): boolean =>
   value === undefined
@@ -69,6 +99,10 @@ export const isValidMeasurementResult = (
     isSpeedValueInDisplayRange(result.downloadMbps) &&
     isSpeedValueInDisplayRange(result.uploadMbps) &&
     (result.pingMs === null || toValidMetric(result.pingMs) !== null) &&
+    isOptionalMetric(result.jitterMs) &&
+    isOptionalMetric(result.downloadLoadedLatencyMs) &&
+    isOptionalMetric(result.uploadLoadedLatencyMs) &&
+    isOptionalTimezoneOffset(result.timezoneOffsetMinutes) &&
     isOptionalConditionLabel(result.conditionLabel)
   )
 }

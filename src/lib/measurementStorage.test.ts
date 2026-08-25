@@ -67,15 +67,22 @@ describe('measurementStorage', () => {
     }])
   })
 
+  it('24文字の測定条件ラベルを保存・読込する', () => {
+    const storage = new MemoryStorage()
+    const conditionLabel = 'あ'.repeat(24)
+    setHistory(storage, [{ ...measurement('max-length'), conditionLabel }])
+
+    expect(loadMeasurements(storage)).toEqual([{
+      ...measurement('max-length'),
+      conditionLabel,
+    }])
+  })
+
   it.each([
     ['空文字', ''],
     ['空白のみ', '     '],
     ['null', null],
-    ['25文字以上', 'あ'.repeat(25)],
-    ['number', 123],
-    ['object', {}],
-    ['array', []],
-  ])('不正または未設定の測定条件ラベル（%s）だけをnullとして履歴本体を保持する', (_description, conditionLabel) => {
+  ])('未設定の測定条件ラベル（%s）をnullとして履歴本体を保持する', (_description, conditionLabel) => {
     const storage = new MemoryStorage()
     setHistory(storage, [{ ...measurement('unconfigured'), conditionLabel }])
 
@@ -83,6 +90,119 @@ describe('measurementStorage', () => {
       ...measurement('unconfigured'),
       conditionLabel: null,
     }])
+  })
+
+  it.each([
+    ['25文字以上', 'あ'.repeat(25)],
+    ['number', 123],
+    ['object', {}],
+    ['array', []],
+  ])('不正な測定条件ラベル（%s）だけをnullとして履歴本体を保持する', (_description, conditionLabel) => {
+    const storage = new MemoryStorage()
+    setHistory(storage, [{ ...measurement('invalid-condition'), conditionLabel }])
+
+    expect(loadMeasurements(storage)).toEqual([{
+      ...measurement('invalid-condition'),
+      conditionLabel: null,
+    }])
+  })
+
+  it('新しい測定結果のjitterとLoaded latencyを保存して読み込む', () => {
+    const storage = new MemoryStorage()
+    const current: SpeedMeasurementResult = {
+      ...measurement('new'),
+      jitterMs: 2.5,
+      downloadLoadedLatencyMs: 35.2,
+      uploadLoadedLatencyMs: 41.8,
+      timezoneOffsetMinutes: -540,
+    }
+
+    saveMeasurement(current, storage)
+
+    expect(JSON.parse(storage.getItem(MEASUREMENT_STORAGE_KEY) ?? 'null')).toEqual([current])
+    expect(loadMeasurements(storage)).toEqual([current])
+  })
+
+  it('新しいoptional指標がすべてnullでも保存して読み込む', () => {
+    const storage = new MemoryStorage()
+    const current: SpeedMeasurementResult = {
+      ...measurement('null-metrics'),
+      jitterMs: null,
+      downloadLoadedLatencyMs: null,
+      uploadLoadedLatencyMs: null,
+      timezoneOffsetMinutes: null,
+    }
+
+    saveMeasurement(current, storage)
+
+    expect(JSON.parse(storage.getItem(MEASUREMENT_STORAGE_KEY) ?? 'null')).toEqual([current])
+    expect(loadMeasurements(storage)).toEqual([current])
+  })
+
+  it('新旧形式が混在する履歴を順序を保って読み込む', () => {
+    const storage = new MemoryStorage()
+    const legacy = measurement('legacy')
+    const current: SpeedMeasurementResult = {
+      ...measurement('current'),
+      jitterMs: 3,
+      downloadLoadedLatencyMs: 27,
+      uploadLoadedLatencyMs: 32,
+      conditionLabel: '  有線LAN  ',
+    }
+    const anotherLegacy = measurement('another-legacy')
+    const anotherCurrent: SpeedMeasurementResult = {
+      ...measurement('another-current'),
+      conditionLabel: '寝室 5GHz',
+    }
+    setHistory(storage, [legacy, current, anotherLegacy, anotherCurrent])
+
+    expect(loadMeasurements(storage)).toEqual([
+      legacy,
+      { ...current, conditionLabel: '有線LAN' },
+      anotherLegacy,
+      anotherCurrent,
+    ])
+  })
+
+  it('不正なoptional指標だけをnullへ正規化し、基本履歴を保持する', () => {
+    const storage = new MemoryStorage()
+    setHistory(storage, [{
+      ...measurement('invalid-optional'),
+      jitterMs: 'invalid',
+      downloadLoadedLatencyMs: -1,
+      uploadLoadedLatencyMs: { value: 20 },
+    }])
+
+    expect(loadMeasurements(storage)).toEqual([{
+      ...measurement('invalid-optional'),
+      jitterMs: null,
+      downloadLoadedLatencyMs: null,
+      uploadLoadedLatencyMs: null,
+    }])
+  })
+
+  it('不正なtimezone offsetだけをnullへ正規化し、基本履歴を保持する', () => {
+    const storage = new MemoryStorage()
+    setHistory(storage, [{
+      ...measurement('invalid-timezone'),
+      timezoneOffsetMinutes: 900,
+    }])
+
+    expect(loadMeasurements(storage)).toEqual([{
+      ...measurement('invalid-timezone'),
+      timezoneOffsetMinutes: null,
+    }])
+  })
+
+  it('必須の基本測定値が不正な履歴を除外する', () => {
+    const storage = new MemoryStorage()
+    const valid = measurement('valid')
+    setHistory(storage, [
+      { ...measurement('invalid'), downloadMbps: -1, jitterMs: 2 },
+      valid,
+    ])
+
+    expect(loadMeasurements(storage)).toEqual([valid])
   })
 
   it(`保存上限を${MAX_MEASUREMENT_HISTORY}件にする`, () => {
@@ -120,6 +240,17 @@ describe('measurementStorage', () => {
       '書斎 5GHz',
     ])
     expect(getRecentConditionLabels(history)).toHaveLength(MAX_RECENT_CONDITION_LABELS)
+  })
+
+  it('不正またはLegacyのconditionLabelを最近使った条件へ含めない', () => {
+    const history = [
+      measurement('legacy'),
+      { ...measurement('invalid-number'), conditionLabel: 123 as unknown as string },
+      { ...measurement('invalid-long'), conditionLabel: 'あ'.repeat(25) },
+      { ...measurement('valid'), conditionLabel: '有線LAN' },
+    ]
+
+    expect(getRecentConditionLabels(history)).toEqual(['有線LAN'])
   })
 
   it('LocalStorage例外でも測定側へ例外を伝播しない', () => {

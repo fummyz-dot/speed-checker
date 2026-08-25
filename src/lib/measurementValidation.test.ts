@@ -5,6 +5,7 @@ import {
   isValidMeasurementResult,
   MAX_CONDITION_LABEL_LENGTH,
   normalizeConditionLabel,
+  toValidTimezoneOffsetMinutes,
 } from './measurementValidation'
 
 describe('measurementValidation', () => {
@@ -14,11 +15,19 @@ describe('measurementValidation', () => {
       download: 250_710_162,
       upload: 80_450_000,
       latency: 12.4,
-    }, new Date('2026-08-05T00:00:00.000Z'))
+      jitter: 1.2,
+      downloadLoadedLatency: 30.5,
+      uploadLoadedLatency: 40.6,
+    }, new Date('2026-08-05T00:00:00.000Z'), -540)
 
     expect(result?.downloadMbps).toBeCloseTo(250.710162, 6)
     expect(result?.uploadMbps).toBeCloseTo(80.45, 6)
     expect(result?.pingMs).toBe(12.4)
+    expect(result?.jitterMs).toBe(1.2)
+    expect(result?.downloadLoadedLatencyMs).toBe(30.5)
+    expect(result?.uploadLoadedLatencyMs).toBe(40.6)
+    expect(result?.timezoneOffsetMinutes).toBe(-540)
+    expect(result?.conditionLabel).toBeNull()
   })
 
   it('測定条件ラベルをtrimして新規測定結果へ保存する', () => {
@@ -29,6 +38,16 @@ describe('measurementValidation', () => {
     }, new Date('2026-08-05T00:00:00.000Z'), { conditionLabel: '  有線LAN  ' })
 
     expect(result?.conditionLabel).toBe('有線LAN')
+  })
+
+  it('測定条件ラベルなしの既存呼び出しを未設定として維持する', () => {
+    const result = createMeasurementResult({
+      ...EMPTY_METRICS,
+      download: 10_000_000,
+      upload: 10_000_000,
+    })
+
+    expect(result?.conditionLabel).toBeNull()
   })
 
   it.each([
@@ -44,6 +63,34 @@ describe('measurementValidation', () => {
     ['array', [], null],
   ])('測定条件ラベルの%sを正規化する', (_description, value, expected) => {
     expect(normalizeConditionLabel(value)).toBe(expected)
+  })
+
+  it('追加Latency指標の異常値をnullとして確定結果へ保存する', () => {
+    const result = createMeasurementResult({
+      ...EMPTY_METRICS,
+      download: 10_000_000,
+      upload: 10_000_000,
+      jitter: Number.NaN,
+      downloadLoadedLatency: Number.POSITIVE_INFINITY,
+      uploadLoadedLatency: -1,
+    })
+
+    expect(result).toMatchObject({
+      jitterMs: null,
+      downloadLoadedLatencyMs: null,
+      uploadLoadedLatencyMs: null,
+    })
+  })
+
+  it('測定日時と同じ時点のtimezone offsetを既定で保存する', () => {
+    const measuredAt = new Date('2026-08-20T12:00:00.000Z')
+    const result = createMeasurementResult({
+      ...EMPTY_METRICS,
+      download: 10_000_000,
+      upload: 10_000_000,
+    }, measuredAt)
+
+    expect(result?.timezoneOffsetMinutes).toBe(measuredAt.getTimezoneOffset())
   })
 
   it('異常な帯域値は確定結果でも10000 Mbpsへクランプする', () => {
@@ -64,6 +111,46 @@ describe('measurementValidation', () => {
       downloadMbps: 250_710_162,
       uploadMbps: 80,
       pingMs: 12,
+    })).toBe(false)
+  })
+
+  it('追加Latency指標のない既存結果を有効として扱う', () => {
+    expect(isValidMeasurementResult({
+      id: 'legacy-result',
+      measuredAt: '2026-08-05T00:00:00.000Z',
+      downloadMbps: 250,
+      uploadMbps: 80,
+      pingMs: 12,
+    })).toBe(true)
+  })
+
+  it('追加Latency指標に異常値を許可しない', () => {
+    expect(isValidMeasurementResult({
+      id: 'invalid-loaded-latency',
+      measuredAt: '2026-08-05T00:00:00.000Z',
+      downloadMbps: 250,
+      uploadMbps: 80,
+      pingMs: 12,
+      downloadLoadedLatencyMs: Number.NaN,
+    })).toBe(false)
+  })
+
+  it.each([-540, 0, 330])('timezone offset %sを有効として扱う', (offset) => {
+    expect(toValidTimezoneOffsetMinutes(offset)).toBe(offset)
+  })
+
+  it.each([Number.NaN, Number.POSITIVE_INFINITY, -841, 841, 1.5, '0', {}])('不正なtimezone offsetをnullにする', (offset) => {
+    expect(toValidTimezoneOffsetMinutes(offset)).toBeNull()
+  })
+
+  it('timezone offsetが不正な結果を有効な保存結果として扱わない', () => {
+    expect(isValidMeasurementResult({
+      id: 'invalid-timezone',
+      measuredAt: '2026-08-05T00:00:00.000Z',
+      downloadMbps: 250,
+      uploadMbps: 80,
+      pingMs: 12,
+      timezoneOffsetMinutes: 900,
     })).toBe(false)
   })
 

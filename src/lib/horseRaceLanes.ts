@@ -1,21 +1,21 @@
 export const HORSE_RACE_LANES = [
   {
     id: 'standard',
-    label: '地区優勝',
-    sideViewLabel: '横向きに走る標準速度のランナー',
-    frontViewLabel: '正面を向いた標準速度のランナー',
+    label: '地方馬',
+    sideViewLabel: '横向きに走る標準速度の競走馬',
+    frontViewLabel: '正面で喜ぶ標準速度の騎手と競走馬',
   },
   {
     id: 'user',
     label: 'あなた',
-    sideViewLabel: '横向きに走るあなたの回線速度のランナー',
-    frontViewLabel: '正面を向いたあなたの回線速度のランナー',
+    sideViewLabel: '横向きに走るあなたの回線速度の競走馬',
+    frontViewLabel: '正面で喜ぶあなたの回線速度の騎手と競走馬',
   },
   {
     id: 'fast',
-    label: 'オリンピアン',
-    sideViewLabel: '横向きに走る高速のランナー',
-    frontViewLabel: '正面を向いた高速のランナー',
+    label: 'オグリキャップ',
+    sideViewLabel: '横向きに走る高速の競走馬',
+    frontViewLabel: '正面で喜ぶ高速の騎手と競走馬',
   },
 ] as const
 

@@ -120,7 +120,7 @@ function App() {
           </div>
         </section>
 
-        <section className="results" aria-labelledby="results-title">
+        <section className="results" id="measurement-results" aria-labelledby="results-title">
           <div className="section-heading">
             <div>
               <span>DETAILS</span>

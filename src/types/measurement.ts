@@ -4,6 +4,10 @@ export interface SpeedMeasurementResult {
   downloadMbps: number
   uploadMbps: number
   pingMs: number | null
+  jitterMs?: number | null
+  downloadLoadedLatencyMs?: number | null
+  uploadLoadedLatencyMs?: number | null
+  timezoneOffsetMinutes?: number | null
   conditionLabel?: string | null
 }
 

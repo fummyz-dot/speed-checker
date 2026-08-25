@@ -717,6 +717,125 @@ a:focus-visible {
   letter-spacing: -0.025em;
 }
 
+.loaded-latency {
+  border-left: 3px solid #7d8796;
+}
+
+.loaded-latency--good {
+  border-left-color: var(--accent);
+}
+
+.loaded-latency--notice {
+  border-left-color: #88bfff;
+}
+
+.loaded-latency--poor {
+  border-left-color: var(--warm);
+}
+
+.loaded-latency__badge {
+  padding: 6px 9px;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  color: #aeb8c6;
+  font-size: 0.68rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.loaded-latency__badge--good,
+.loaded-latency__level--good {
+  color: var(--accent);
+}
+
+.loaded-latency__badge--notice,
+.loaded-latency__level--notice {
+  color: #88bfff;
+}
+
+.loaded-latency__badge--poor,
+.loaded-latency__level--poor {
+  color: var(--warm);
+}
+
+.loaded-latency__lead {
+  margin: 15px 0 0;
+  color: var(--muted);
+  font-size: 0.76rem;
+  line-height: 1.7;
+}
+
+.loaded-latency__table {
+  width: 100%;
+  margin-top: 21px;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 0.76rem;
+}
+
+.loaded-latency__table th,
+.loaded-latency__table td {
+  padding: 13px 14px;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+}
+
+.loaded-latency__table thead th {
+  padding-top: 0;
+  color: #7d8796;
+  font-size: 0.62rem;
+  font-weight: 600;
+}
+
+.loaded-latency__table tbody th {
+  color: #dce3eb;
+  font-weight: 600;
+}
+
+.loaded-latency__table td:last-child {
+  text-align: right;
+}
+
+.loaded-latency__value,
+.loaded-latency__increase {
+  color: #e7ecf2;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.loaded-latency__increase {
+  color: #b9c3d1;
+}
+
+.loaded-latency__level {
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.loaded-latency__summary {
+  margin-top: 22px;
+}
+
+.loaded-latency__summary h4 {
+  margin: 0;
+  font-size: 0.94rem;
+}
+
+.loaded-latency__summary p,
+.loaded-latency__partial {
+  max-width: 850px;
+  margin: 9px 0 0;
+  color: #dce3eb;
+  font-size: 0.82rem;
+  line-height: 1.8;
+}
+
+.loaded-latency__partial {
+  padding-left: 11px;
+  border-left: 2px solid #88bfff;
+  color: #aeb8c6;
+}
+
 .secondary-button,
 .text-button {
   flex: 0 0 auto;
@@ -864,21 +983,51 @@ a:focus-visible {
 
 .race-runner--standard {
   bottom: 126px;
-  --runner-color: #8794a8;
+  --horse-width: 64px;
+  --horse-gallop-image: url('/assets/horse/horse-standard-gallop.webp');
+  --horse-idle-image: url('/assets/horse/horse-standard-idle.webp');
+  --horse-coat: #a9653c;
+  --horse-coat-shadow: #774127;
+  --horse-mane: #38241e;
+  --horse-hoof: #251a18;
+  --jockey-primary: #8994a1;
+  --jockey-secondary: #c1c8cf;
+  --saddle-color: #4c5967;
+  --number-color: #e9edf0;
   --race-duration: var(--standard-duration);
   --stride-duration: 820ms;
 }
 
 .race-runner--fast {
   bottom: 30px;
-  --runner-color: #9cb9d5;
+  --horse-width: 64px;
+  --horse-gallop-image: url('/assets/horse/horse-fast-gallop.webp');
+  --horse-idle-image: url('/assets/horse/horse-fast-idle.webp');
+  --horse-coat: #c6ced0;
+  --horse-coat-shadow: #919da3;
+  --horse-mane: #4b5660;
+  --horse-hoof: #3c464e;
+  --jockey-primary: #659bd0;
+  --jockey-secondary: #c9e0f3;
+  --saddle-color: #527fa9;
+  --number-color: #f5f8fa;
   --race-duration: var(--fast-duration);
   --stride-duration: 720ms;
 }
 
 .race-runner--user {
   bottom: 78px;
-  --runner-color: var(--accent);
+  --horse-width: 68px;
+  --horse-gallop-image: url('/assets/horse/horse-user-gallop.webp');
+  --horse-idle-image: url('/assets/horse/horse-user-idle.webp');
+  --horse-coat: #98623e;
+  --horse-coat-shadow: #68402b;
+  --horse-mane: #30221d;
+  --horse-hoof: #241a17;
+  --jockey-primary: var(--accent);
+  --jockey-secondary: #c6f5e7;
+  --saddle-color: #4fc4ab;
+  --number-color: #11231f;
   --race-duration: var(--user-duration);
   --stride-duration: 780ms;
 }
@@ -887,12 +1036,10 @@ a:focus-visible {
   position: absolute;
   bottom: -1px;
   left: 0;
-  width: 34px;
-  color: var(--runner-color);
+  width: var(--horse-width);
 }
 
 .race-runner--user .runner-mover {
-  width: 39px;
   filter: drop-shadow(0 0 7px rgba(117, 229, 194, 0.34));
 }
 
@@ -917,76 +1064,188 @@ a:focus-visible {
   left: 100%;
 }
 
-.runner-side-view {
+.horse-sprite {
+  display: block;
+  width: var(--horse-width);
+  height: calc(var(--horse-width) * 0.84375);
+  background-image: var(--horse-idle-image);
+  background-position: 0 0;
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+}
+
+.horse-sprite--galloping {
+  background-image: var(--horse-gallop-image);
+  background-size: calc(var(--horse-width) * 7) calc(var(--horse-width) * 0.84375);
+}
+
+.race-runner--warming .horse-sprite--galloping {
+  animation: horse-sprite-gallop 700ms steps(7) infinite;
+}
+
+.race-runner--racing .horse-sprite--galloping {
+  animation: horse-sprite-gallop 500ms steps(7) infinite;
+}
+
+.race-horse {
   display: block;
   width: 100%;
   overflow: visible;
-  fill: none;
 }
 
-.runner-side-view__head {
-  fill: currentColor;
-  transform-box: view-box;
-  transform-origin: 34px 10px;
+.race-horse__body,
+.race-horse__neck,
+.race-horse__head,
+.race-horse__muzzle,
+.race-horse__ear,
+.race-horse__leg {
+  fill: var(--horse-coat);
+  stroke: #202832;
+  stroke-linejoin: round;
+  stroke-width: 1.25;
 }
 
-.runner-side-view__torso,
-.runner-side-view__limb {
+.race-horse__body-shadow {
+  fill: var(--horse-coat-shadow);
+}
+
+.race-horse__leg--far {
+  fill: var(--horse-coat-shadow);
+}
+
+.race-horse__mane,
+.race-horse__tail {
+  fill: var(--horse-mane);
+  stroke: #202832;
+  stroke-linejoin: round;
+  stroke-width: 1;
+}
+
+.race-horse__hoof {
   fill: none;
-  stroke: currentColor;
+  stroke: var(--horse-hoof);
+  stroke-linecap: round;
+  stroke-width: 2.7;
+}
+
+.race-horse__eye {
+  fill: #18212a;
+}
+
+.race-horse__bridle {
+  fill: none;
+  stroke: #d8bd7f;
   stroke-linecap: round;
   stroke-linejoin: round;
+  stroke-width: 1.35;
+}
+
+.race-horse__saddle {
+  fill: var(--saddle-color);
+  stroke: #202832;
+  stroke-linejoin: round;
+  stroke-width: 1;
+}
+
+.race-horse__jockey-head {
+  fill: var(--jockey-secondary);
+  stroke: #202832;
+  stroke-width: 1;
+}
+
+.race-horse__jockey-cap,
+.race-horse__jockey-body,
+.race-horse__jockey-arm,
+.race-horse__jockey-leg {
+  fill: var(--jockey-primary);
+  stroke: #202832;
+  stroke-linejoin: round;
+  stroke-width: 1;
+}
+
+.race-horse__number-cloth {
+  fill: var(--saddle-color);
+  stroke: #202832;
+  stroke-linejoin: round;
+  stroke-width: 1;
+}
+
+.race-horse__number {
+  fill: var(--number-color);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 7px;
+  font-weight: 800;
+}
+
+.race-horse__body,
+.race-horse__neck,
+.race-horse__head,
+.race-horse__muzzle,
+.race-horse__leg {
   transform-box: view-box;
 }
 
-.runner-side-view__torso {
-  stroke-width: 8;
-  transform-origin: 27px 31px;
+.race-horse__tail,
+.race-horse__mane,
+.race-horse__jockey {
+  transform-box: view-box;
 }
 
-.runner-side-view__limb {
-  stroke-width: 5.5;
+.race-horse__body {
+  transform-origin: 70px 57px;
 }
 
-.runner-side-view__left-arm {
-  transform-origin: 30px 23px;
+.race-horse__neck,
+.race-horse__head,
+.race-horse__muzzle {
+  transform-origin: 136px 33px;
 }
 
-.runner-side-view__right-arm {
-  opacity: 0.76;
-  transform-origin: 29px 24px;
+.race-horse__leg--hind {
+  transform-origin: 66px 67px;
 }
 
-.runner-side-view__left-leg,
-.runner-side-view__right-leg {
-  transform-origin: 24px 40px;
+.race-horse__leg--front {
+  transform-origin: 114px 67px;
 }
 
-.runner-side-view__right-leg {
-  opacity: 0.76;
+.race-horse__tail {
+  transform-origin: 41px 48px;
 }
 
-.race-runner--warming .runner-side-view__torso,
-.race-runner--racing .runner-side-view__torso {
+.race-horse__mane {
+  transform-origin: 119px 31px;
+}
+
+.race-horse__jockey {
+  transform-origin: 91px 44px;
+}
+
+.race-runner--warming .race-horse__body,
+.race-runner--racing .race-horse__body {
   animation: runner-torso-bob var(--stride-duration) ease-in-out infinite;
 }
 
-.race-runner--warming .runner-side-view__head,
-.race-runner--racing .runner-side-view__head {
+.race-runner--warming .race-horse__neck,
+.race-runner--warming .race-horse__head,
+.race-runner--warming .race-horse__muzzle,
+.race-runner--racing .race-horse__neck,
+.race-runner--racing .race-horse__head,
+.race-runner--racing .race-horse__muzzle {
   animation: runner-head-bob var(--stride-duration) ease-in-out infinite;
 }
 
-.race-runner--warming .runner-side-view__left-arm,
-.race-runner--warming .runner-side-view__right-leg,
-.race-runner--racing .runner-side-view__left-arm,
-.race-runner--racing .runner-side-view__right-leg {
+.race-runner--warming .race-horse__leg--hind-front,
+.race-runner--warming .race-horse__leg--front-forward,
+.race-runner--racing .race-horse__leg--hind-front,
+.race-runner--racing .race-horse__leg--front-forward {
   animation: runner-limb-forward var(--stride-duration) ease-in-out infinite;
 }
 
-.race-runner--warming .runner-side-view__right-arm,
-.race-runner--warming .runner-side-view__left-leg,
-.race-runner--racing .runner-side-view__right-arm,
-.race-runner--racing .runner-side-view__left-leg {
+.race-runner--warming .race-horse__leg--hind-back,
+.race-runner--warming .race-horse__leg--front-back,
+.race-runner--racing .race-horse__leg--hind-back,
+.race-runner--racing .race-horse__leg--front-back {
   animation: runner-limb-back var(--stride-duration) ease-in-out infinite;
 }
 
@@ -998,6 +1257,10 @@ a:focus-visible {
 @keyframes runner-race-run {
   0% { left: var(--race-start-progress); }
   100% { left: 100%; }
+}
+
+@keyframes horse-sprite-gallop {
+  to { background-position-x: calc(var(--horse-width) * -7); }
 }
 
 @keyframes runner-torso-bob {
@@ -1117,40 +1380,18 @@ a:focus-visible {
   gap: clamp(6px, 4vw, 42px);
 }
 
-.goal-focus-front-view__lineup::after {
-  position: absolute;
-  z-index: -1;
-  right: 2%;
-  bottom: 22px;
-  left: 2%;
-  height: 2px;
-  background: repeating-linear-gradient(90deg, var(--accent) 0 9px, transparent 9px 16px);
-  box-shadow: 0 4px 14px rgba(117, 229, 194, 0.16);
-  content: '';
-  opacity: 0.55;
-}
-
 .front-runner {
   display: flex;
   min-width: 0;
   flex-direction: column;
-  --front-runner-color: #8794a8;
-  --runner-hair: #4b3a33;
-  --runner-skin: #d6a982;
   --front-jump-height: 48px;
 }
 
 .front-runner--fast {
-  --front-runner-color: #9cb9d5;
-  --runner-hair: #18212b;
-  --runner-skin: #b98263;
   --front-jump-height: 76px;
 }
 
 .front-runner--user {
-  --front-runner-color: var(--accent);
-  --runner-hair: #263b45;
-  --runner-skin: #e5b48d;
   --front-jump-height: var(--user-jump-height);
 }
 
@@ -1174,108 +1415,6 @@ a:focus-visible {
   background: radial-gradient(circle, rgba(117, 229, 194, 0.1), transparent 68%);
   content: '';
   transform: translateX(-50%);
-}
-
-.front-runner__jumper {
-  position: relative;
-  z-index: 2;
-  width: 36px;
-  transform-origin: 50% 100%;
-}
-
-.front-runner--user .front-runner__jumper {
-  width: 42px;
-}
-
-.front-runner__figure {
-  color: var(--front-runner-color);
-  filter: drop-shadow(0 4px 5px rgba(0, 0, 0, 0.28));
-}
-
-.front-runner--user .front-runner__figure {
-  filter: drop-shadow(0 0 8px rgba(117, 229, 194, 0.34));
-}
-
-.front-runner__figure svg {
-  display: block;
-  width: 100%;
-  overflow: visible;
-  fill: none;
-}
-
-.runner-front-view__torso {
-  fill: currentColor;
-}
-
-.runner-face__shape,
-.runner-face__ear {
-  fill: var(--runner-skin);
-}
-
-.runner-face__shape {
-  stroke: color-mix(in srgb, var(--runner-skin) 74%, #111923);
-  stroke-width: 0.8;
-}
-
-.runner-face__hair {
-  fill: var(--runner-hair);
-}
-
-.runner-face__brow,
-.runner-face__mouth,
-.runner-face__eye--line {
-  fill: none;
-  stroke: #27313d;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-
-.runner-face__brow {
-  stroke-width: 1.15;
-}
-
-.runner-face__eye {
-  fill: #17202a;
-}
-
-.runner-face__eye--line {
-  stroke-width: 1.35;
-}
-
-.runner-face__mouth {
-  stroke: #70463f;
-  stroke-width: 1.2;
-}
-
-.runner-face__mouth--smile {
-  stroke-width: 1.45;
-}
-
-.front-runner--user .runner-face__shape {
-  filter: drop-shadow(0 0 1.5px rgba(245, 247, 251, 0.34));
-}
-
-.runner-front-view__arm,
-.runner-front-view__leg {
-  fill: none;
-  stroke: currentColor;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  stroke-width: 7;
-  transform-box: view-box;
-}
-
-.runner-front-view__arm circle {
-  fill: currentColor;
-  stroke: none;
-}
-
-.runner-front-view__arm--left {
-  transform-origin: 24px 29px;
-}
-
-.runner-front-view__arm--right {
-  transform-origin: 40px 29px;
 }
 
 .front-runner__shadow {
@@ -1309,27 +1448,8 @@ a:focus-visible {
   color: var(--accent);
 }
 
-.horse-course--groupJumpFrontView .front-runner__jumper {
-  animation: front-runner-jump var(--group-jump-duration) linear both;
-}
-
 .horse-course--groupJumpFrontView .front-runner__shadow {
   animation: front-runner-shadow var(--group-jump-duration) linear both;
-}
-
-.horse-course--groupJumpFrontView .runner-front-view__arm--left {
-  animation: front-runner-arm-left var(--group-jump-duration) linear both;
-}
-
-.horse-course--groupJumpFrontView .runner-front-view__arm--right {
-  animation: front-runner-arm-right var(--group-jump-duration) linear both;
-}
-
-@keyframes front-runner-jump {
-  0%, 100% { transform: translateY(0) scaleY(1); }
-  8% { transform: translateY(3px) scaleY(0.96); }
-  42%, 58% { transform: translateY(calc(var(--effective-front-jump-height, var(--front-jump-height)) * -1)) scaleY(1.02); }
-  88% { transform: translateY(0) scaleY(0.98); }
 }
 
 @keyframes front-runner-shadow {
@@ -1337,14 +1457,59 @@ a:focus-visible {
   42%, 58% { opacity: 0.22; transform: translateX(-50%) scale(0.46); }
 }
 
-@keyframes front-runner-arm-left {
-  0%, 28%, 84%, 100% { transform: rotate(0deg); }
-  42%, 64% { transform: rotate(95deg); }
+@keyframes front-jockey-jump {
+  0%, 100% { transform: translateX(-50%) translateY(0) scaleY(1); }
+  8% { transform: translateX(-50%) translateY(3px) scaleY(0.96); }
+  42%, 58% { transform: translateX(-50%) translateY(calc(var(--effective-front-jump-height, var(--front-jump-height)) * -1)) scaleY(1.02); }
+  88% { transform: translateX(-50%) translateY(0) scaleY(0.98); }
 }
 
-@keyframes front-runner-arm-right {
-  0%, 28%, 84%, 100% { transform: rotate(0deg); }
-  42%, 64% { transform: rotate(-95deg); }
+.front-unit .front-horse {
+  position: absolute;
+  z-index: 1;
+  bottom: -8px;
+  left: 50%;
+  display: block;
+  width: clamp(52px, 12.5vw, 67px);
+  height: auto;
+  opacity: 0.42;
+  filter: drop-shadow(0 3px 4px rgba(0, 0, 0, 0.24));
+  object-fit: contain;
+  transform: translateX(-50%);
+}
+
+.front-runner--user .front-horse {
+  width: clamp(56px, 13.75vw, 72px);
+  opacity: 0.5;
+}
+
+.front-jockey-jumper {
+  position: absolute;
+  z-index: 3;
+  bottom: 12px;
+  left: 50%;
+  width: clamp(62px, 14vw, 81px);
+  transform: translateX(-50%);
+  transform-origin: 50% 100%;
+}
+
+.front-runner--user .front-jockey-jumper {
+  width: clamp(65px, 15vw, 85px);
+}
+
+.horse-course--groupJumpFrontView .front-jockey-jumper {
+  animation: front-jockey-jump var(--group-jump-duration) linear both;
+}
+
+.front-jockey-image {
+  display: block;
+  width: 100%;
+  height: auto;
+  filter: drop-shadow(0 5px 6px rgba(0, 0, 0, 0.36));
+}
+
+.front-runner--user .front-jockey-image {
+  filter: drop-shadow(0 0 10px rgba(117, 229, 194, 0.36));
 }
 
 .horse-metrics {
@@ -1375,6 +1540,36 @@ a:focus-visible {
 .horse-metrics dd[data-live='true'] {
   color: var(--accent);
   letter-spacing: 0.01em;
+}
+
+.race-results-cta {
+  display: inline-flex;
+  min-height: 44px;
+  margin-top: 18px;
+  padding: 10px 13px;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  border: 1px solid rgba(117, 229, 194, 0.32);
+  border-radius: 8px;
+  background: rgba(117, 229, 194, 0.08);
+  color: var(--accent);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.race-results-cta:hover {
+  background: rgba(117, 229, 194, 0.14);
+}
+
+.race-results-cta__arrow {
+  font-size: 1rem;
+  line-height: 1;
+  transition: transform 160ms ease;
+}
+
+.race-results-cta:hover .race-results-cta__arrow {
+  transform: translateY(2px);
 }
 
 .result-note {
@@ -1552,36 +1747,297 @@ a:focus-visible {
   color: var(--warm);
 }
 
-.share-result {
+.measurement-history__empty {
+  margin: 22px 0 0;
+  color: var(--muted);
+  font-size: 0.78rem;
+  line-height: 1.7;
+}
+
+.measurement-history__charts {
+  display: grid;
+  margin-top: 22px;
+  gap: 24px;
+}
+
+.history-chart {
+  min-width: 0;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: rgba(17, 24, 36, 0.56);
+}
+
+.history-chart__heading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.history-chart__heading h4 {
+  margin: 0;
+  font-size: 0.88rem;
+}
+
+.history-chart__heading > span {
+  color: #7d8796;
+  font-size: 0.68rem;
+  font-weight: 600;
+}
+
+.history-chart__legend {
+  display: flex;
+  margin: 13px 0 0;
+  padding: 0;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+  list-style: none;
+}
+
+.history-chart__legend li {
   display: grid;
   align-items: center;
-  grid-template-columns: 1fr auto;
-  gap: 18px 28px;
+  grid-template-columns: auto auto auto;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 0.68rem;
+}
+
+.history-chart__legend strong {
+  color: #dce3eb;
+  font-size: 0.72rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.history-chart__legend-mark {
+  width: 16px;
+  height: 2px;
+  background: currentColor;
+}
+
+.history-chart__legend-mark--download,
+.history-chart__line--download,
+.history-chart__point--download {
+  color: var(--accent);
+  stroke: var(--accent);
+}
+
+.history-chart__legend-mark--upload,
+.history-chart__line--upload,
+.history-chart__point--upload {
+  color: #88bfff;
+  stroke: #88bfff;
+}
+
+.history-chart__legend-mark--ping,
+.history-chart__line--ping,
+.history-chart__point--ping {
+  color: #c8d2df;
+  stroke: #c8d2df;
+}
+
+.history-chart__legend-mark--loaded-latency,
+.history-chart__line--loaded-latency,
+.history-chart__point--loaded-latency {
+  color: var(--warm);
+  stroke: var(--warm);
+}
+
+.history-chart__svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin-top: 14px;
+  overflow: visible;
+}
+
+.history-chart__grid line {
+  stroke: rgba(255, 255, 255, 0.12);
+  stroke-width: 1;
+}
+
+.history-chart__grid text,
+.history-chart__x-labels text {
+  fill: #7d8796;
+  font-size: 10px;
+}
+
+.history-chart__line {
+  fill: none;
+  stroke-width: 2.25;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.history-chart__point {
+  fill: var(--surface-raised);
+  stroke-width: 2;
+}
+
+.history-chart__point--latest {
+  fill: currentColor;
+  stroke: #f5f7fb;
+  stroke-width: 1.5;
+}
+
+.measurement-history__time-bands {
+  margin-top: 26px;
+  padding-top: 24px;
+  border-top: 1px solid var(--line);
+}
+
+.measurement-history__time-band-heading h4 {
+  margin: 0;
+  font-size: 0.92rem;
+}
+
+.measurement-history__time-band-heading p {
+  margin: 8px 0 0;
+  color: var(--muted);
+  font-size: 0.72rem;
+  line-height: 1.7;
+}
+
+.time-band-grid {
+  display: grid;
+  margin-top: 17px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.time-band-card {
+  min-width: 0;
+  padding: 15px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(17, 24, 36, 0.5);
+}
+
+.time-band-card__heading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.time-band-card h5 {
+  margin: 0;
+  font-size: 0.78rem;
+}
+
+.time-band-card__heading span {
+  color: #7d8796;
+  font-size: 0.6rem;
+  white-space: nowrap;
+}
+
+.time-band-card dl {
+  display: grid;
+  margin: 14px 0 0;
+  gap: 11px;
+}
+
+.time-band-card__metric {
+  display: grid;
+  gap: 3px;
+}
+
+.time-band-card__metric dt {
+  color: var(--muted);
+  font-size: 0.62rem;
+}
+
+.time-band-card__metric dd {
+  display: grid;
+  margin: 0;
+  gap: 3px;
+}
+
+.time-band-card__metric strong {
+  color: #dce3eb;
+  font-size: 0.72rem;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.time-band-card__metric small {
+  color: #7d8796;
+  font-size: 0.58rem;
+}
+
+.time-band-card__empty {
+  margin: 14px 0 0;
+  color: var(--muted);
+  font-size: 0.68rem;
+  line-height: 1.7;
+}
+
+.measurement-history__legacy-timezone {
+  margin: 14px 0 0;
+  padding-left: 10px;
+  border-left: 2px solid #88bfff;
+  color: #aeb8c6;
+  font-size: 0.68rem;
+  line-height: 1.7;
+}
+
+.share-result {
+  display: block;
+  padding: 16px 18px;
   border-color: rgba(117, 229, 194, 0.2);
   background: linear-gradient(135deg, rgba(117, 229, 194, 0.08), rgba(13, 18, 28, 0.8));
 }
 
+.share-result__heading {
+  display: grid;
+  align-items: baseline;
+  grid-template-columns: auto 1fr;
+  gap: 0 10px;
+}
+
+.share-result h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+
 .share-result p {
-  margin: 9px 0 0;
+  margin: 5px 0 0;
   color: var(--muted);
-  font-size: 0.72rem;
-  line-height: 1.6;
+  font-size: 0.68rem;
+  line-height: 1.5;
+}
+
+.share-result__heading p {
+  grid-column: 1 / -1;
 }
 
 .share-button {
-  min-height: 48px;
-  padding: 13px 18px;
-  border: 0;
+  min-height: 42px;
+  padding: 9px 12px;
+  border: 1px solid var(--line);
   border-radius: 8px;
-  background: var(--accent);
-  color: #07110e;
+  background: rgba(117, 229, 194, 0.06);
+  color: #dce3eb;
   cursor: pointer;
-  font-size: 0.78rem;
+  font-size: 0.72rem;
   font-weight: 700;
+  white-space: nowrap;
 }
 
 .share-button:hover:not(:disabled) {
-  background: #92efd3;
+  border-color: rgba(117, 229, 194, 0.54);
+  background: rgba(117, 229, 194, 0.12);
+}
+
+.share-button--primary {
+  border-color: rgba(117, 229, 194, 0.42);
+  background: rgba(117, 229, 194, 0.14);
+  color: var(--accent);
+}
+
+.share-button--primary:hover:not(:disabled) {
+  background: rgba(117, 229, 194, 0.22);
 }
 
 .share-button:disabled {
@@ -1590,9 +2046,15 @@ a:focus-visible {
 }
 
 .share-result .share-result__status {
-  grid-column: 1 / -1;
-  margin: 0;
+  margin: 9px 0 0;
   color: #bdc5d0;
+}
+
+.share-result__actions {
+  display: grid;
+  margin-top: 12px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
 }
 
 .notice {
@@ -1700,6 +2162,10 @@ a:focus-visible {
 }
 
 @media (max-width: 760px) {
+  .share-result__actions {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .site-shell {
     width: min(100% - 32px, 620px);
   }
@@ -1875,6 +2341,14 @@ a:focus-visible {
     grid-template-columns: 1fr;
   }
 
+  .history-chart {
+    padding: 16px;
+  }
+
+  .time-band-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .notice {
     margin-bottom: 64px;
     padding: 24px;
@@ -1943,8 +2417,78 @@ a:focus-visible {
     padding: 22px 18px;
   }
 
+  .share-result {
+    padding: 14px 16px;
+  }
+
   .result-panel__heading {
     gap: 14px;
+  }
+
+  .loaded-latency__table {
+    margin-top: 18px;
+  }
+
+  .loaded-latency__table thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .loaded-latency__table,
+  .loaded-latency__table tbody,
+  .loaded-latency__table tr,
+  .loaded-latency__table th,
+  .loaded-latency__table td {
+    display: block;
+  }
+
+  .loaded-latency__table tbody {
+    display: grid;
+    gap: 10px;
+  }
+
+  .loaded-latency__table tr {
+    display: grid;
+    padding: 13px 0;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 8px 14px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .loaded-latency__table th,
+  .loaded-latency__table td {
+    padding: 0;
+    border: 0;
+  }
+
+  .loaded-latency__table tbody th {
+    grid-column: 1 / -1;
+  }
+
+  .loaded-latency__table td {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .loaded-latency__table td:last-child {
+    grid-column: 1 / -1;
+    text-align: left;
+  }
+
+  .loaded-latency__table td::before {
+    color: #7d8796;
+    font-size: 0.62rem;
+    content: attr(data-label);
+  }
+
+  .loaded-latency__summary {
+    margin-top: 18px;
   }
 
   .horse-course {
@@ -1967,25 +2511,17 @@ a:focus-visible {
   }
 
   .runner-mover {
-    width: 32px;
+    --horse-width: 56px;
   }
 
   .race-runner--user .runner-mover {
-    width: 37px;
+    --horse-width: 60px;
   }
 
   .goal-focus-front-view__lineup {
     right: 12px;
     left: 12px;
     gap: 4px;
-  }
-
-  .front-runner__jumper {
-    width: 34px;
-  }
-
-  .front-runner--user .front-runner__jumper {
-    width: 40px;
   }
 
   .front-runner--user .front-runner__stage::before {
@@ -2013,6 +2549,10 @@ a:focus-visible {
     align-items: flex-start;
     flex-direction: column;
     gap: 7px;
+  }
+
+  .race-results-cta {
+    width: 100%;
   }
 
   .evaluation-grid {
@@ -2048,8 +2588,18 @@ a:focus-visible {
     flex-direction: column;
   }
 
-  .share-result {
+  .history-chart__legend {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 7px;
+  }
+
+  .time-band-grid {
     grid-template-columns: 1fr;
+  }
+
+  .share-result {
+    display: block;
   }
 
   .share-button {
@@ -2076,6 +2626,10 @@ a:focus-visible {
 }
 
 @media (max-width: 340px) {
+  .share-result__actions {
+    grid-template-columns: 1fr;
+  }
+
   .site-shell {
     width: calc(100% - 24px);
   }
@@ -2108,12 +2662,23 @@ a:focus-visible {
     animation-iteration-count: 1 !important;
   }
 
-  .race-runner--warming .runner-side-view__head,
-  .race-runner--warming .runner-side-view__torso,
-  .race-runner--warming .runner-side-view__limb,
-  .race-runner--racing .runner-side-view__head,
-  .race-runner--racing .runner-side-view__torso,
-  .race-runner--racing .runner-side-view__limb {
+  .horse-sprite--galloping {
+    animation: none !important;
+    background-image: var(--horse-idle-image);
+    background-position: 0 0;
+    background-size: 100% 100%;
+  }
+
+  .race-runner--warming .race-horse__body,
+  .race-runner--warming .race-horse__neck,
+  .race-runner--warming .race-horse__head,
+  .race-runner--warming .race-horse__muzzle,
+  .race-runner--warming .race-horse__leg,
+  .race-runner--racing .race-horse__body,
+  .race-runner--racing .race-horse__neck,
+  .race-runner--racing .race-horse__head,
+  .race-runner--racing .race-horse__muzzle,
+  .race-runner--racing .race-horse__leg {
     animation-duration: 1200ms !important;
     animation-iteration-count: infinite !important;
   }
@@ -2124,8 +2689,8 @@ a:focus-visible {
     transition-duration: 520ms !important;
   }
 
-  .horse-course--groupJumpFrontView .front-runner__jumper {
-    --effective-front-jump-height: calc(var(--front-jump-height) * 0.86);
+  .horse-course--groupJumpFrontView .front-jockey-jumper {
+    --effective-front-jump-height: calc(var(--front-jump-height) * 0.62);
     animation-duration: 1600ms !important;
     animation-iteration-count: 1 !important;
   }
@@ -2135,8 +2700,4 @@ a:focus-visible {
     animation-iteration-count: 1 !important;
   }
 
-  .horse-course--groupJumpFrontView .runner-front-view__arm {
-    animation-duration: 1600ms !important;
-    animation-iteration-count: 1 !important;
-  }
 }

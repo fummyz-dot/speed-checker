@@ -13,7 +13,7 @@ import { formatFinalSpeedDisplay, formatLiveSpeedDisplay } from '../lib/speedVal
 import type { SpeedMeasurementResult } from '../types/measurement'
 import type { TestPhase } from '../types/speedTest'
 import { GoalFocusFrontView } from './GoalFocusFrontView'
-import { RunnerSideView } from './RunnerSideView'
+import { HorseSprite } from './HorseSprite'
 
 interface HorseSpeedVisualizationProps {
   downloadMbps: number | null
@@ -40,7 +40,7 @@ const getHelperText = (state: HorseRaceState, hasUploadResult: boolean): string 
     case 'measuringDownload': return 'ダウンロード測定中…'
     case 'warmingUp': return 'ダウンロード測定中・ウォームアップ走行中…'
     case 'running': return hasUploadResult ? 'レース進行中' : 'レース進行中・アップロード測定中…'
-    case 'waitingForAllFinish': return '先着ランナーはゴールで待機中…'
+    case 'waitingForAllFinish': return '先着馬はゴールで待機中…'
     case 'transitionToFrontView': return 'ALL RUNNERS FINISHED'
     case 'groupJumpFrontView': return 'GOAL!'
     case 'finished': return 'FINISH'
@@ -152,20 +152,26 @@ export const HorseSpeedVisualization = ({
             </span>
           ))}
 
-          {HORSE_RACE_LANES.map((lane) => (
-            <div
-              className={`race-runner race-runner--${lane.id} ${getRunnerStateClass(lane.id)}`}
-              data-runner={lane.id}
-              data-finished={hasFinished[lane.id]}
-              key={lane.id}
-            >
-              <div className="runner-mover">
-                <RunnerSideView id={lane.id} label={lane.sideViewLabel} />
+          {HORSE_RACE_LANES.map((lane) => {
+            const runnerStateClass = getRunnerStateClass(lane.id)
+            const isGalloping = runnerStateClass === 'race-runner--warming'
+              || runnerStateClass === 'race-runner--racing'
+
+            return (
+              <div
+                className={`race-runner race-runner--${lane.id} ${runnerStateClass}`}
+                data-runner={lane.id}
+                data-finished={hasFinished[lane.id]}
+                key={lane.id}
+              >
+                <div className="runner-mover">
+                  <HorseSprite id={lane.id} label={lane.sideViewLabel} isGalloping={isGalloping} />
+                </div>
               </div>
-            </div>
-          ))}
+            )
+          })}
         </div>
-        <GoalFocusFrontView state={state} />
+        <GoalFocusFrontView state={state} userUploadMbps={result?.uploadMbps ?? uploadMbps} />
       </div>
 
       <dl className="horse-metrics">
@@ -190,6 +196,12 @@ export const HorseSpeedVisualization = ({
           </dd>
         </div>
       </dl>
+      {state === 'finished' && (
+        <a className="race-results-cta" href="#measurement-results">
+          <span>詳しい測定結果を見る</span>
+          <span className="race-results-cta__arrow" aria-hidden="true">↓</span>
+        </a>
+      )}
     </section>
   )
 }

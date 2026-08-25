@@ -1,51 +1,66 @@
 import type { SpeedMeasurementResult, UseCaseEvaluationResult } from '../types/measurement'
+import {
+  evaluateLoadedLatencyResponsiveness,
+  type LoadedLatencyLevel,
+} from './loadedLatencyEvaluation'
 import { EVALUATION_LABELS } from './measurementEvaluation'
 import { formatFinalSpeedDisplay } from './speedValue'
 
 export const SHARE_IMAGE_WIDTH = 1200
 export const SHARE_IMAGE_HEIGHT = 630
 
+const SHARE_HORSE_IDLE_ASSETS = [
+  { id: 'standard', src: '/assets/horse/horse-standard-idle.webp', x: 880, y: 66, width: 74, height: 62 },
+  { id: 'user', src: '/assets/horse/horse-user-idle.webp', x: 950, y: 48, width: 98, height: 83 },
+  { id: 'fast', src: '/assets/horse/horse-fast-idle.webp', x: 1050, y: 66, width: 74, height: 62 },
+] as const
+
+const RESPONSIVENESS_LABELS: Record<LoadedLatencyLevel, string> = {
+  good: '良好',
+  notice: '注意',
+  poor: '要注意',
+  unknown: '判定不可',
+}
+
 const formatDate = (value: string): string => new Intl.DateTimeFormat('ja-JP', {
   year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit',
 }).format(new Date(value))
 
-const drawHorse = (context: CanvasRenderingContext2D, x: number, y: number): void => {
-  context.save()
-  context.translate(x, y)
-  context.fillStyle = '#75e5c2'
-  context.beginPath()
-  context.ellipse(40, 34, 37, 22, -0.12, 0, Math.PI * 2)
-  context.ellipse(77, 18, 18, 13, 0.15, 0, Math.PI * 2)
-  context.moveTo(87, 11)
-  context.lineTo(91, -2)
-  context.lineTo(80, 9)
-  context.moveTo(8, 29)
-  context.lineTo(-12, 14)
-  context.lineTo(12, 39)
-  context.fill()
-  context.strokeStyle = '#75e5c2'
-  context.lineWidth = 8
-  context.lineCap = 'round'
-  context.beginPath()
-  context.moveTo(22, 48)
-  context.lineTo(11, 76)
-  context.moveTo(48, 51)
-  context.lineTo(61, 76)
-  context.moveTo(58, 46)
-  context.lineTo(76, 66)
-  context.stroke()
-  context.restore()
+const loadImage = (src: string): Promise<HTMLImageElement> => new Promise((resolve, reject) => {
+  const image = new Image()
+  image.onload = () => resolve(image)
+  image.onerror = () => reject(new Error(`画像を読み込めませんでした: ${src}`))
+  image.src = src
+})
+
+const drawShareHorses = async (context: CanvasRenderingContext2D): Promise<void> => {
+  const assets = await Promise.all(SHARE_HORSE_IDLE_ASSETS.map(async (asset) => ({
+    ...asset,
+    image: await loadImage(asset.src).catch(() => null),
+  })))
+
+  assets.forEach(({ id, image, x, y, width, height }) => {
+    if (!image) return
+    context.save()
+    if (id === 'user') {
+      context.shadowColor = 'rgba(117, 229, 194, 0.42)'
+      context.shadowBlur = 12
+    }
+    context.drawImage(image, x, y, width, height)
+    context.restore()
+  })
 }
 
-export const createShareImageBlob = (
+export const createShareImageBlob = async (
   result: SpeedMeasurementResult,
   evaluations: UseCaseEvaluationResult[],
+  siteUrl: string,
 ): Promise<Blob> => {
   const canvas = document.createElement('canvas')
   canvas.width = SHARE_IMAGE_WIDTH
   canvas.height = SHARE_IMAGE_HEIGHT
   const context = canvas.getContext('2d')
-  if (!context) return Promise.reject(new Error('画像を生成できませんでした'))
+  if (!context) throw new Error('画像を生成できませんでした')
 
   const gradient = context.createLinearGradient(0, 0, SHARE_IMAGE_WIDTH, SHARE_IMAGE_HEIGHT)
   gradient.addColorStop(0, '#080b12')
@@ -65,7 +80,7 @@ export const createShareImageBlob = (
   context.fillStyle = '#929bab'
   context.font = '24px system-ui, sans-serif'
   context.fillText(formatDate(result.measuredAt), 78, 205)
-  drawHorse(context, 970, 90)
+  await drawShareHorses(context)
 
   const metrics = [
     { label: 'DOWNLOAD', value: result.downloadMbps, unit: 'Mbps', x: 76 },
@@ -89,19 +104,27 @@ export const createShareImageBlob = (
   })
 
   context.fillStyle = 'rgba(117, 229, 194, 0.08)'
-  context.fillRect(76, 410, 1048, 82)
+  context.fillRect(76, 410, 1048, 96)
   context.fillStyle = '#dce3eb'
   context.font = '600 21px system-ui, sans-serif'
   const summary = evaluations.slice(0, 3).map((item) =>
     `${item.label}: ${EVALUATION_LABELS[item.level]}`,
   ).join('　｜　')
-  context.fillText(summary, 102, 460)
+  context.fillText(summary, 102, 454)
+  const responsiveness = evaluateLoadedLatencyResponsiveness({
+    idleLatencyMs: result.pingMs,
+    downloadLoadedLatencyMs: result.downloadLoadedLatencyMs,
+    uploadLoadedLatencyMs: result.uploadLoadedLatencyMs,
+  })
+  context.fillStyle = '#929bab'
+  context.font = '600 19px system-ui, sans-serif'
+  context.fillText(`混雑時の応答性 ${RESPONSIVENESS_LABELS[responsiveness.overall]}`, 102, 486)
 
   context.fillStyle = '#929bab'
   context.font = '19px system-ui, sans-serif'
   context.fillText('今回の測定結果・参考値', 76, 548)
   context.textAlign = 'right'
-  context.fillText('speed-checker.web-tools-jp.workers.dev', 1124, 548)
+  context.fillText(siteUrl, 1124, 548)
 
   return new Promise((resolve, reject) => {
     canvas.toBlob((blob) => {

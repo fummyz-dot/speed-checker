@@ -4,8 +4,8 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import App from './App'
 import { useConnectionInfo } from './hooks/useConnectionInfo'
 import { useSpeedTest } from './hooks/useSpeedTest'
-import { MEASUREMENT_STORAGE_KEY } from './lib/measurementStorage'
 import { EMPTY_METRICS } from './types/speedTest'
+import { MEASUREMENT_STORAGE_KEY } from './lib/measurementStorage'
 
 vi.mock('./hooks/useConnectionInfo')
 vi.mock('./hooks/useSpeedTest')
@@ -24,9 +24,10 @@ describe('App', () => {
     render(<App />)
     expect(screen.getAllByRole('heading', { level: 1 })).toHaveLength(1)
     expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('インターネット速度を、シンプルに。')
+    expect(document.getElementById('measurement-results')).toHaveAttribute('aria-labelledby', 'results-title')
   })
 
-  it('測定前から開始ボタンとidle状態のランナーコースを表示する', () => {
+  it('測定前から開始ボタンとidle状態の馬コースを表示する', () => {
     const { container } = render(<App />)
 
     expect(screen.getByRole('button', { name: '測定開始' })).toBeVisible()
@@ -82,6 +83,16 @@ describe('App', () => {
     expect(screen.getByRole('button', { name: '測定開始' })).toBeDisabled()
     expect(screen.getByText('測定条件を確定またはキャンセルしてください')).toBeVisible()
     expect(start).not.toHaveBeenCalled()
+  })
+
+  it('測定中は測定条件を変更できない', () => {
+    vi.mocked(useSpeedTest).mockReturnValue({
+      metrics: EMPTY_METRICS, phase: 'download', isRunning: true, error: null, completedResult: null,
+      confirmedDownloadMbps: null, start: vi.fn(),
+    })
+
+    render(<App />)
+    expect(screen.getByRole('button', { name: '設定' })).toBeDisabled()
   })
 
   it('GitHubリンクを安全に新しいタブで開く', () => {

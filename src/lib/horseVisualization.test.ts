@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import {
+  getFrontViewUploadRanks,
   getReferenceHorseDurations,
   getUserHorseJumpHeight,
   getUserHorseRunDuration,
@@ -27,12 +28,12 @@ describe('horseVisualization', () => {
     expect(getUserHorseRunDuration(speed)).toBeCloseTo(expected, 1)
   })
 
-  it('速度が上がるほどユーザーランナーの走行時間を短くする', () => {
+  it('速度が上がるほどユーザー馬の走行時間を短くする', () => {
     expect(getUserHorseRunDuration(0)).toBeGreaterThan(getUserHorseRunDuration(10))
     expect(getUserHorseRunDuration(10)).toBeGreaterThan(getUserHorseRunDuration(1_000))
   })
 
-  it('標準ランナーと高速ランナーに比較しやすい固定走行時間を返す', () => {
+  it('標準馬と高速馬に比較しやすい固定走行時間を返す', () => {
     expect(getReferenceHorseDurations()).toEqual({ standard: 13.5, fast: 11.5 })
   })
 
@@ -46,7 +47,7 @@ describe('horseVisualization', () => {
     },
   )
 
-  it('速度が上がるほどユーザーランナーのジャンプを高くする', () => {
+  it('速度が上がるほどユーザー馬のジャンプを高くする', () => {
     expect(getUserHorseJumpHeight(0)).toBeLessThan(getUserHorseJumpHeight(10))
     expect(getUserHorseJumpHeight(10)).toBeLessThan(getUserHorseJumpHeight(1_000))
   })
@@ -58,5 +59,18 @@ describe('horseVisualization', () => {
     [1_000, 100],
   ])('%s Mbpsを明確な高さ差のジャンプへ変換する', (speed, expected) => {
     expect(getUserHorseJumpHeight(speed)).toBeCloseTo(expected, 1)
+  })
+
+  it('front viewの表情をupload相当値の順位で決める', () => {
+    expect(getFrontViewUploadRanks(80)).toEqual({
+      standard: { rank: 3, expression: 'disappointed' },
+      user: { rank: 1, expression: 'winner' },
+      fast: { rank: 2, expression: 'satisfied' },
+    })
+    expect(getFrontViewUploadRanks(1)).toEqual({
+      standard: { rank: 2, expression: 'satisfied' },
+      user: { rank: 3, expression: 'disappointed' },
+      fast: { rank: 1, expression: 'winner' },
+    })
   })
 })
