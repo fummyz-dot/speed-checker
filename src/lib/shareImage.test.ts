@@ -103,4 +103,13 @@ describe('shareImage', () => {
     expect(drawnText).toContain('https://custom.example.jp/check')
     expect(drawnText.join('\n')).not.toContain('workers.dev')
   })
+
+  it('測定条件ラベルを共有PNGへ描画しない', async () => {
+    installImageMock(false)
+
+    await createShareImageBlob(result({ conditionLabel: 'リビング 5GHz' }), [], 'https://example.com/speed')
+
+    const drawnText = (context.fillText as ReturnType<typeof vi.fn>).mock.calls.map(([text]) => text)
+    expect(drawnText).not.toContain('リビング 5GHz')
+  })
 })

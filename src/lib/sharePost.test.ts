@@ -30,6 +30,12 @@ describe('sharePost', () => {
     expect(text).not.toContain('Ping')
   })
 
+  it('測定条件ラベルを投稿文へ含めない', () => {
+    const text = createSharePostText(result({ conditionLabel: 'リビング 5GHz' }), 'https://example.com/')
+
+    expect(text).not.toContain('リビング 5GHz')
+  })
+
   it('X投稿用URLに投稿文をURL encodeする', () => {
     const postText = createSharePostText(result(), 'https://example.com/')
     const intentUrl = new URL(createXIntentUrl(postText))

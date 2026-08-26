@@ -7,6 +7,7 @@ import { MeasurementStatus } from './components/MeasurementStatus'
 import { MeasurementConditionSelector } from './components/MeasurementConditionSelector'
 import { MetricsGrid } from './components/MetricsGrid'
 import { Notice } from './components/Notice'
+import { useMediaQuery } from './hooks/useMediaQuery'
 import { useSpeedTest } from './hooks/useSpeedTest'
 import {
   bandwidthBitsToMbps,
@@ -35,6 +36,7 @@ function App() {
     confirmedDownloadMbps,
     start,
   } = useSpeedTest()
+  const isMobileLayout = useMediaQuery('(max-width: 760px)')
   const [conditionLabel, setConditionLabel] = useState<string | null>(getInitialConditionLabel)
   const [isConditionEditing, setIsConditionEditing] = useState(false)
   const [isRaceFocused, setIsRaceFocused] = useState(false)
@@ -123,6 +125,60 @@ function App() {
     start({ conditionLabel })
   }
 
+  const connectionInfo = <ConnectionInfo key="connection-info" />
+  const conditionSelector = (
+    <MeasurementConditionSelector
+      key="measurement-condition"
+      value={conditionLabel}
+      disabled={isRunning}
+      onChange={setConditionLabel}
+      onEditingChange={setIsConditionEditing}
+    />
+  )
+  const measurementControl = (
+    <div className="hero__measurement" key="hero-measurement">
+      <div className="speed-display" aria-label="ダウンロード速度">
+        <span className="speed-display__label">DOWNLOAD</span>
+        <div className="speed-display__reading" aria-live="polite">
+          <strong>{displayedDownload}</strong>
+          <span>Mbps</span>
+        </div>
+      </div>
+
+      <div className="measurement-actions">
+        <MeasurementStatus phase={phase} isRunning={isRunning} />
+
+        {error && (
+          <div className="error-message" role="alert">
+            <strong>エラー</strong>
+            <span>{error}</span>
+          </div>
+        )}
+
+        <button
+          className="test-button"
+          type="button"
+          onClick={startMeasurement}
+          disabled={isRunning || isConditionEditing}
+          aria-describedby="test-button-hint"
+        >
+          <span>{buttonLabel}</span>
+          {!isRunning && <span aria-hidden="true">→</span>}
+        </button>
+        <p className="button-hint" id="test-button-hint">
+          {isConditionEditing
+            ? '測定条件を確定またはキャンセルしてください'
+            : hasStarted
+            ? 'Wi-Fiや回線の状態により、結果は変動します'
+            : '測定には数十秒かかる場合があります'}
+        </p>
+      </div>
+    </div>
+  )
+  const heroControls = isMobileLayout
+    ? [conditionSelector, measurementControl, connectionInfo]
+    : [connectionInfo, conditionSelector, measurementControl]
+
   return (
     <div className={`site-shell${isRaceFocused ? ' site-shell--race-focused' : ''}`}>
       <header
@@ -157,53 +213,7 @@ function App() {
               aria-hidden={isRaceFocused || undefined}
               inert={isRaceFocused}
             >
-              <ConnectionInfo />
-
-              <MeasurementConditionSelector
-                value={conditionLabel}
-                disabled={isRunning}
-                onChange={setConditionLabel}
-                onEditingChange={setIsConditionEditing}
-              />
-
-              <div className="hero__measurement">
-                <div className="speed-display" aria-label="ダウンロード速度">
-                  <span className="speed-display__label">DOWNLOAD</span>
-                  <div className="speed-display__reading" aria-live="polite">
-                    <strong>{displayedDownload}</strong>
-                    <span>Mbps</span>
-                  </div>
-                </div>
-
-                <div className="measurement-actions">
-                  <MeasurementStatus phase={phase} isRunning={isRunning} />
-
-                  {error && (
-                    <div className="error-message" role="alert">
-                      <strong>エラー</strong>
-                      <span>{error}</span>
-                    </div>
-                  )}
-
-                  <button
-                    className="test-button"
-                    type="button"
-                    onClick={startMeasurement}
-                    disabled={isRunning || isConditionEditing}
-                    aria-describedby="test-button-hint"
-                  >
-                    <span>{buttonLabel}</span>
-                    {!isRunning && <span aria-hidden="true">→</span>}
-                  </button>
-                  <p className="button-hint" id="test-button-hint">
-                    {isConditionEditing
-                      ? '測定条件を確定またはキャンセルしてください'
-                      : hasStarted
-                      ? 'Wi-Fiや回線の状態により、結果は変動します'
-                      : '測定には数十秒かかる場合があります'}
-                  </p>
-                </div>
-              </div>
+              {heroControls}
             </div>
 
             <HorseSpeedVisualization

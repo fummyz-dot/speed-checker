@@ -693,6 +693,49 @@ a:focus-visible {
   gap: 22px;
 }
 
+.completed-condition-label {
+  display: grid;
+  min-width: 0;
+  padding: 2px 0 2px 12px;
+  border-left: 2px solid rgba(117, 229, 194, 0.55);
+  gap: 4px;
+}
+
+.completed-condition-label__eyebrow {
+  color: var(--muted);
+  font-size: 0.64rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+}
+
+.completed-condition-label__value {
+  display: flex;
+  min-width: 0;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 5px 10px;
+}
+
+.completed-condition-label__value strong {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  color: #dce3eb;
+  font-size: 0.88rem;
+  line-height: 1.45;
+}
+
+.completed-condition-label__saved {
+  flex: 0 0 auto;
+  padding: 3px 7px;
+  border: 1px solid rgba(117, 229, 194, 0.28);
+  border-radius: 999px;
+  color: var(--accent);
+  font-size: 0.62rem;
+  font-weight: 600;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
 .result-panel,
 .share-result {
   overflow: hidden;
@@ -2724,7 +2767,18 @@ a:focus-visible {
 
   .hero {
     min-height: auto;
-    padding: 78px 0 76px;
+    padding: clamp(22px, 5dvh, 40px) 0 60px;
+    gap: 10px;
+  }
+
+  .hero__intro,
+  .hero__dashboard {
+    min-width: 0;
+  }
+
+  .hero h1 {
+    width: auto;
+    font-size: clamp(1.3rem, 5.8vw, 1.45rem);
   }
 
   .hero__dashboard {
@@ -2766,7 +2820,7 @@ a:focus-visible {
   }
 
   .measurement-condition {
-    margin-top: 10px;
+    margin-top: 0;
   }
 
   .hero__measurement {
@@ -2782,18 +2836,18 @@ a:focus-visible {
   }
 
   .speed-display {
-    min-height: 200px;
-    margin-top: 35px;
+    min-height: 180px;
+    margin-top: 20px;
   }
 
   .speed-display::before {
-    width: 200px;
-    height: 200px;
+    width: 184px;
+    height: 184px;
   }
 
   .speed-display::after {
-    width: 146px;
-    height: 146px;
+    width: 134px;
+    height: 134px;
   }
 
   .speed-display__reading {
@@ -2829,19 +2883,19 @@ a:focus-visible {
   }
 
   .measurement-status {
-    margin-top: 18px;
+    margin-top: 12px;
   }
 
   .test-button {
     width: auto;
     min-width: 188px;
     min-height: 56px;
-    margin-top: 28px;
+    margin-top: 20px;
     padding: 15px 24px;
   }
 
   .button-hint {
-    margin-top: 13px;
+    margin-top: 10px;
   }
 
   .error-message {
@@ -2922,6 +2976,41 @@ a:focus-visible {
 
   .notice ul {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 760px) and (max-height: 680px) {
+  .hero {
+    padding-top: 16px;
+  }
+
+  .speed-display {
+    min-height: 168px;
+    margin-top: 14px;
+  }
+
+  .speed-display::before {
+    width: 172px;
+    height: 172px;
+  }
+
+  .speed-display::after {
+    width: 126px;
+    height: 126px;
+  }
+
+  .measurement-status {
+    margin-top: 10px;
+  }
+
+  .test-button {
+    margin-top: 16px;
+  }
+}
+
+@media (max-width: 360px) {
+  .hero h1 {
+    white-space: normal;
   }
 }
 

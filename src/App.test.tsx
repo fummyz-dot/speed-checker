@@ -1,6 +1,6 @@
-import { render, screen, waitFor } from '@testing-library/react'
+import { act, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import App from './App'
 import { useConnectionInfo } from './hooks/useConnectionInfo'
 import { useSpeedTest } from './hooks/useSpeedTest'
@@ -9,6 +9,46 @@ import { MEASUREMENT_STORAGE_KEY } from './lib/measurementStorage'
 
 vi.mock('./hooks/useConnectionInfo')
 vi.mock('./hooks/useSpeedTest')
+
+const installMatchMedia = (initialMatches: boolean) => {
+  const listeners = new Set<(event: MediaQueryListEvent) => void>()
+  const mediaQueryList = {
+    matches: initialMatches,
+    media: '(max-width: 760px)',
+    onchange: null,
+    addEventListener: vi.fn((_type: string, listener: (event: MediaQueryListEvent) => void) => {
+      listeners.add(listener)
+    }),
+    removeEventListener: vi.fn((_type: string, listener: (event: MediaQueryListEvent) => void) => {
+      listeners.delete(listener)
+    }),
+    addListener: vi.fn((listener: (event: MediaQueryListEvent) => void) => {
+      listeners.add(listener)
+    }),
+    removeListener: vi.fn((listener: (event: MediaQueryListEvent) => void) => {
+      listeners.delete(listener)
+    }),
+    dispatchEvent: vi.fn(),
+  } as unknown as MediaQueryList
+
+  vi.stubGlobal('matchMedia', vi.fn(() => mediaQueryList))
+
+  return {
+    setMatches: (matches: boolean) => {
+      Object.assign(mediaQueryList, { matches })
+      listeners.forEach((listener) => listener({ matches, media: mediaQueryList.media } as MediaQueryListEvent))
+    },
+    mediaQueryList,
+  }
+}
+
+const getHeroControlOrder = (container: HTMLElement): string[] =>
+  [...(container.querySelector('.hero__controls')?.children ?? [])].map((element) => {
+    if (element.classList.contains('connection-info')) return 'connection'
+    if (element.classList.contains('measurement-condition')) return 'condition'
+    if (element.classList.contains('hero__measurement')) return 'measurement'
+    return 'unknown'
+  })
 
 describe('App', () => {
   beforeEach(() => {
@@ -21,6 +61,8 @@ describe('App', () => {
       confirmedDownloadMbps: null, start: vi.fn(),
     })
   })
+
+  afterEach(() => vi.unstubAllGlobals())
 
   it('h1を1件だけ正しい文言で表示する', () => {
     render(<App />)
@@ -35,6 +77,66 @@ describe('App', () => {
     expect(screen.getByRole('button', { name: '測定開始' })).toBeVisible()
     expect(screen.getByRole('heading', { name: '回線速度レース' })).toBeVisible()
     expect(container.querySelector('.horse-course')).toHaveAttribute('data-animation-state', 'idle')
+  })
+
+  it('desktopとmobileでhero controlsのDOM順を切り替え、viewport変更にも追従する', async () => {
+    const matchMedia = installMatchMedia(false)
+    const { container } = render(<App />)
+
+    expect(getHeroControlOrder(container)).toEqual(['connection', 'condition', 'measurement'])
+
+    act(() => matchMedia.setMatches(true))
+    await waitFor(() => {
+      expect(getHeroControlOrder(container)).toEqual(['condition', 'measurement', 'connection'])
+    })
+
+    act(() => matchMedia.setMatches(false))
+    await waitFor(() => {
+      expect(getHeroControlOrder(container)).toEqual(['connection', 'condition', 'measurement'])
+    })
+  })
+
+  it('viewport変更で条件editorのdraftを失わず、listenerを解除する', async () => {
+    const user = userEvent.setup()
+    const matchMedia = installMatchMedia(false)
+    const { container, unmount } = render(<App />)
+
+    await user.click(screen.getByRole('button', { name: '設定' }))
+    const input = screen.getByRole('textbox', { name: '条件名' })
+    await user.type(input, 'リビング 5GHz')
+    expect(screen.getByRole('button', { name: '測定開始' })).toBeDisabled()
+
+    act(() => matchMedia.setMatches(true))
+    await waitFor(() => {
+      expect(getHeroControlOrder(container)).toEqual(['condition', 'measurement', 'connection'])
+    })
+    expect(screen.getByRole('textbox', { name: '条件名' })).toHaveValue('リビング 5GHz')
+    expect(screen.getByRole('button', { name: '測定開始' })).toBeDisabled()
+
+    unmount()
+    expect(matchMedia.mediaQueryList.removeEventListener).toHaveBeenCalledWith('change', expect.any(Function))
+  })
+
+  it('mobileでも確定した測定条件を渡してRace Focus Modeへ遷移し、editor中は開始できない', async () => {
+    const user = userEvent.setup()
+    const start = vi.fn()
+    installMatchMedia(true)
+    vi.mocked(useSpeedTest).mockReturnValue({
+      metrics: EMPTY_METRICS, phase: 'idle', isRunning: false, error: null, completedResult: null,
+      confirmedDownloadMbps: null, start,
+    })
+
+    render(<App />)
+    await user.click(screen.getByRole('button', { name: '設定' }))
+    await user.type(screen.getByRole('textbox', { name: '条件名' }), '有線LAN')
+    expect(screen.getByRole('button', { name: '測定開始' })).toBeDisabled()
+    expect(start).not.toHaveBeenCalled()
+
+    await user.click(screen.getByRole('button', { name: 'この条件を使う' }))
+    await user.click(screen.getByRole('button', { name: '測定開始' }))
+
+    expect(start).toHaveBeenCalledWith({ conditionLabel: '有線LAN' })
+    expect(screen.getByRole('dialog', { name: '回線速度レース' })).toBeVisible()
   })
 
   it('測定開始と同時にレースへ集中し、背景操作とbody scrollをロックする', async () => {
@@ -190,9 +292,9 @@ describe('App', () => {
     rerender(<App />)
     await waitFor(() => {
       expect(screen.queryByRole('dialog', { name: '回線速度レース' })).not.toBeInTheDocument()
+      expect(document.body).not.toHaveClass('race-focus-lock')
     })
     expect(screen.getByRole('alert')).toHaveTextContent('測定に失敗しました')
-    expect(document.body).not.toHaveClass('race-focus-lock')
   })
 
   it('unmount時にbody scroll lockを解除する', async () => {

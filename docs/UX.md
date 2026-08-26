@@ -31,6 +31,8 @@ Do not bury the primary measurement action under secondary content.
 
 The optional measurement-condition label is a compact, secondary control placed before the primary measurement action. It is user-entered only and may describe a location or connection setup; it must never imply an automatic connection-type detection. The inline editor supports a 24-character label, explicit unset, and up to five recent labels from browser-local history. While editing, measurement start is unavailable to avoid applying an unconfirmed draft; while measuring, the condition cannot be changed.
 
+When a valid label is used, the completed result shows it as compact metadata. The local-history confirmation is shown only after the result is present in the updated browser-local history; a label is never added to sharing output. On narrow mobile screens, the hero's DOM order prioritizes the condition control and primary measurement action before connection information, while desktop keeps connection information first.
+
 After measurement, labeled history can be summarized by condition in the analysis area. Present the median values and metric-specific sample counts without ranking conditions or implying a cause. Labels with one or two valid samples are reference values; three or more are trends. The responsive layout should show a compact table-like comparison on desktop and a two-by-two metric card per condition on narrow screens.
 
 ## Live speedometer effect
