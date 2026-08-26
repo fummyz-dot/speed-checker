@@ -75,8 +75,9 @@ Keep evaluation rules deterministic and testable.
 `wrangler.jsonc` configures:
 
 - Worker entry: `worker/index.ts`;
-- canonical public hostname: `netspeedrace.com` over HTTPS;
-- permanent redirects from `www.netspeedrace.com` and apex HTTP to the canonical hostname, before API and Static Assets handling;
+- apex `netspeedrace.com` as the Worker Custom Domain and canonical public hostname over HTTPS;
+- `www.netspeedrace.com` as a Cloudflare Redirect Rule target to the apex hostname, not a Worker Custom Domain;
+- permanent apex HTTP redirects to HTTPS before API and Static Assets handling;
 - disabled `workers.dev` hostname after the custom-domain migration;
 - static asset directory: `dist/`;
 - SPA fallback;
