@@ -23,6 +23,7 @@ interface HorseSpeedVisualizationProps {
   result: SpeedMeasurementResult | null
   focused?: boolean
   focusExiting?: boolean
+  showExpandButton?: boolean
   showShrinkButton?: boolean
   onRequestFocus?: () => void
   onRequestExitFocus?: () => void
@@ -61,6 +62,7 @@ export const HorseSpeedVisualization = ({
   result,
   focused = false,
   focusExiting = false,
+  showExpandButton = true,
   showShrinkButton = true,
   onRequestFocus,
   onRequestExitFocus,
@@ -189,7 +191,7 @@ export const HorseSpeedVisualization = ({
       tabIndex={focused ? -1 : undefined}
       onKeyDown={handleFocusedKeyDown}
     >
-      <div className="result-panel__heading">
+      <div className={`result-panel__heading${showUploadResult ? ' result-panel__heading--with-upload-result' : ''}`}>
         <div className="horse-visualization__title">
           <span className="result-panel__eyebrow">SPEED RACE</span>
           <h2 id="horse-title">回線速度レース</h2>
@@ -202,7 +204,7 @@ export const HorseSpeedVisualization = ({
           </div>
         )}
         <div className="horse-visualization__actions">
-          {!focused && canRequestFocus && (
+          {!focused && showExpandButton && canRequestFocus && (
             <button
               className="secondary-button horse-visualization__expand"
               data-race-focus-expand

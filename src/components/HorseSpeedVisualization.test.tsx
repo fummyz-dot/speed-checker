@@ -143,7 +143,7 @@ describe('HorseSpeedVisualization runner presentation', () => {
     expect(dialog).toHaveFocus()
   })
 
-  it('通常表示の測定中には、状態を保ったままレースを拡大できる', () => {
+  it('desktop通常表示の測定中には、状態を保ったままレースを拡大できる', () => {
     const onRequestFocus = vi.fn()
     render(
       <HorseSpeedVisualization
@@ -158,6 +158,22 @@ describe('HorseSpeedVisualization runner presentation', () => {
     fireEvent.click(screen.getByRole('button', { name: 'レースを拡大' }))
     expect(onRequestFocus).toHaveBeenCalledTimes(1)
     expect(screen.queryByRole('dialog', { name: '回線速度レース' })).not.toBeInTheDocument()
+  })
+
+  it('desktop通常完了時はレースを拡大できる', () => {
+    const onRequestFocus = vi.fn()
+    render(
+      <HorseSpeedVisualization
+        downloadMbps={120}
+        uploadMbps={80}
+        phase="complete"
+        result={result}
+        onRequestFocus={onRequestFocus}
+      />,
+    )
+
+    fireEvent.click(screen.getByRole('button', { name: 'レースを拡大' }))
+    expect(onRequestFocus).toHaveBeenCalledTimes(1)
   })
 
   it('横レースのレーン順を維持し、正面では承認済みの騎手・馬画像をオグリキャップ・あなた・地方馬の順にする', () => {
@@ -350,6 +366,37 @@ describe('HorseSpeedVisualization runner presentation', () => {
     startRace()
     expect(course()).toHaveAttribute('data-animation-state', 'running')
     expect(container.querySelectorAll('.race-runner--racing')).toHaveLength(3)
+  })
+
+  it('mobile通常完了時は拡大buttonをrenderせず、UPLOAD専用rowとReplayでfocusへ戻る', () => {
+    const onRequestFocus = vi.fn()
+    const { container } = render(
+      <HorseSpeedVisualization
+        downloadMbps={120}
+        uploadMbps={80}
+        phase="complete"
+        result={result}
+        showExpandButton={false}
+        onRequestFocus={onRequestFocus}
+      />,
+    )
+    const course = () => container.querySelector('.horse-course')
+
+    startRace()
+    act(() => vi.advanceTimersByTime(13_500))
+    act(() => vi.advanceTimersByTime(FRONT_VIEW_TRANSITION_DURATION_MS))
+    act(() => vi.advanceTimersByTime(GROUP_JUMP_DURATION_MS))
+
+    expect(course()).toHaveAttribute('data-animation-state', 'finished')
+    expect(screen.queryByRole('button', { name: 'レースを拡大' })).not.toBeInTheDocument()
+    expect(container.querySelector('.result-panel__heading')).toHaveClass('result-panel__heading--with-upload-result')
+    expect(container.querySelector('[data-final-upload-result]')).toHaveTextContent('UPLOAD80.0Mbps')
+
+    const replayButton = screen.getByRole('button', { name: 'もう一度見る' })
+    expect(replayButton).toBeEnabled()
+    fireEvent.click(replayButton)
+    expect(onRequestFocus).toHaveBeenCalledTimes(1)
+    expect(course()).toHaveAttribute('data-animation-state', 'idle')
   })
 
   it('集中画面ではreplay、詳細CTA、Tab循環を既存レースstateを保って扱う', () => {

@@ -106,8 +106,10 @@ function App() {
       target.focus()
       return
     }
-    document.querySelector<HTMLElement>('[data-race-focus-expand]')?.focus()
-  }, [isRaceFocused])
+    if (!isMobileLayout) {
+      document.querySelector<HTMLElement>('[data-race-focus-expand]')?.focus()
+    }
+  }, [isMobileLayout, isRaceFocused])
 
   useEffect(() => () => {
     if (raceFocusExitTimerRef.current !== null) {
@@ -224,6 +226,7 @@ function App() {
               result={completedResult}
               focused={isRaceFocused}
               focusExiting={isRaceFocusExiting}
+              showExpandButton={!isMobileLayout}
               showShrinkButton={!isMobileLayout}
               onRequestFocus={requestRaceFocus}
               onRequestExitFocus={exitRaceFocus}

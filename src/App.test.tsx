@@ -278,6 +278,29 @@ describe('App', () => {
     await waitFor(() => expect(screen.getByRole('button', { name: 'レースを拡大' })).toHaveFocus())
   })
 
+  it('mobileでは縮小後に存在しない拡大buttonをfocus fallbackにしない', async () => {
+    const user = userEvent.setup()
+    const start = vi.fn()
+    installMatchMedia(true)
+    let speedTest: ReturnType<typeof useSpeedTest> = {
+      metrics: EMPTY_METRICS, phase: 'idle', isRunning: false, error: null, completedResult: null,
+      confirmedDownloadMbps: null, start,
+    }
+    vi.mocked(useSpeedTest).mockImplementation(() => speedTest)
+
+    const { rerender } = render(<App />)
+    await user.click(screen.getByRole('button', { name: '測定開始' }))
+
+    speedTest = { ...speedTest, phase: 'latency', isRunning: true }
+    rerender(<App />)
+    await user.keyboard('{Escape}')
+
+    await waitFor(() => {
+      expect(screen.queryByRole('dialog', { name: '回線速度レース' })).not.toBeInTheDocument()
+    })
+    expect(screen.queryByRole('button', { name: 'レースを拡大' })).not.toBeInTheDocument()
+  })
+
   it('errorでは集中モードを解除して既存のerror表示へ戻る', async () => {
     const user = userEvent.setup()
     const start = vi.fn()
