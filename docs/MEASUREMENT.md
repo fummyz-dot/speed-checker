@@ -22,6 +22,8 @@ The current measurement sequence in `src/hooks/useSpeedTest.ts` is:
 
 Loaded-latency measurement is enabled for both download and upload.
 
+The Speedtest engine explicitly disables Cloudflare's completion-result aggregation logging (`logAimApiUrl: null`). Direct latency, download, and upload measurement traffic to Cloudflare Edge continues as configured above.
+
 Do not casually adjust the sequence, sizes, counts, or loaded-latency settings based on a single local test. These parameters affect traffic volume, duration, high-speed accuracy, and UX.
 
 ## Metrics

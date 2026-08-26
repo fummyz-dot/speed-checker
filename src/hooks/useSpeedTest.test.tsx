@@ -17,6 +17,7 @@ const { instances, MockSpeedTest } = vi.hoisted(() => {
     onResultsChange?: () => void
     onFinish?: (results: unknown) => void
     onError?: (message: unknown) => void
+    config: unknown
   }> = []
 
   class FakeSpeedTest {
@@ -34,8 +35,10 @@ const { instances, MockSpeedTest } = vi.hoisted(() => {
     onResultsChange?: () => void
     onFinish?: (results: unknown) => void
     onError?: (message: unknown) => void
+    config: unknown
 
-    constructor() {
+    constructor(config: unknown) {
+      this.config = config
       createdInstances.push(this)
     }
   }
@@ -48,6 +51,32 @@ vi.mock('@cloudflare/speedtest', () => ({ default: MockSpeedTest }))
 import { useSpeedTest } from './useSpeedTest'
 
 describe('useSpeedTest', () => {
+  it('Cloudflareの完了時集計ログを無効にし、既存の測定設定を維持する', () => {
+    const { result } = renderHook(() => useSpeedTest())
+
+    act(() => {
+      result.current.start()
+    })
+
+    expect(instances.at(-1)?.config).toEqual({
+      autoStart: false,
+      measurements: [
+        { type: 'latency', numPackets: 20 },
+        { type: 'download', bytes: 100_000, count: 5, bypassMinDuration: true },
+        { type: 'download', bytes: 1_000_000, count: 6 },
+        { type: 'download', bytes: 10_000_000, count: 4 },
+        { type: 'download', bytes: 25_000_000, count: 2 },
+        { type: 'upload', bytes: 100_000, count: 5, bypassMinDuration: true },
+        { type: 'upload', bytes: 1_000_000, count: 6 },
+        { type: 'upload', bytes: 10_000_000, count: 4 },
+        { type: 'upload', bytes: 25_000_000, count: 2 },
+      ],
+      measureDownloadLoadedLatency: true,
+      measureUploadLoadedLatency: true,
+      logAimApiUrl: null,
+    })
+  })
+
   it('start時のconditionLabelをtrimして完了結果へ固定する', () => {
     const { result } = renderHook(() => useSpeedTest())
 

@@ -79,6 +79,8 @@ Keep evaluation rules deterministic and testable.
 - SPA fallback;
 - Worker-first handling for `/api/*`.
 
+`public/_headers` supplies security headers for static asset responses. It is copied into `dist/` during the Vite build and interpreted by Workers Static Assets rather than served as a downloadable asset. Worker-generated API responses retain their own header policy.
+
 ## Connection metadata boundary
 
 The Worker may expose selected non-unique network context such as ASN owner, ASN, region/city, colo, and protocol.

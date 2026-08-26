@@ -28,6 +28,14 @@ const measurements: MeasurementConfig[] = [
   { type: 'upload', bytes: 25_000_000, count: 2 },
 ]
 
+const speedTestConfig = {
+  autoStart: false,
+  measurements,
+  measureDownloadLoadedLatency: true,
+  measureUploadLoadedLatency: true,
+  logAimApiUrl: null,
+}
+
 const readMetrics = (results: Results): SpeedTestMetrics => ({
   download: toValidMetric(results.getDownloadBandwidth()),
   upload: toValidMetric(results.getUploadBandwidth()),
@@ -92,12 +100,7 @@ export const useSpeedTest = (): UseSpeedTestResult => {
     const isCurrentRun = () => mountedRef.current && runIdRef.current === runId
 
     try {
-      const engine = new SpeedTest({
-        autoStart: false,
-        measurements,
-        measureDownloadLoadedLatency: true,
-        measureUploadLoadedLatency: true,
-      })
+      const engine = new SpeedTest(speedTestConfig)
       engineRef.current = engine
 
       engine.onPhaseChange = ({ measurement }) => {
