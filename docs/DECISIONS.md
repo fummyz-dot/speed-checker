@@ -117,7 +117,7 @@ Prefer conditional, comparison-oriented guidance.
 
 ## D-008 — Use loaded latency for responsiveness evaluation
 
-**Status:** Accepted and implemented  
+**Status:** Accepted and implemented
 **Date:** 2026-08-20
 
 The application compares idle latency with download-loaded and upload-loaded latency to give an explainable, direction-specific responsiveness result.
@@ -128,14 +128,14 @@ Do not replace this with an opaque score or claim a specific root cause from the
 
 ---
 
-## D-009 — Acquire a custom domain before serious SEO expansion
+## D-009 — Use netspeedrace.com as the canonical public domain
 
-**Status:** Direction accepted; domain TBD  
-**Date:** 2026-08-19
+**Status:** Accepted and implemented
+**Date:** 2026-08-27
 
-A custom domain is part of the growth plan.
+`netspeedrace.com` is connected as the Custom Domain for the `speed-checker` Worker and is the canonical public origin.
 
-Do not invent a domain. Once selected, migrate canonical/OG/sitemap/deployment/search configuration coherently.
+SEO metadata, Open Graph metadata, the sitemap, robots reference, and share destinations use `https://netspeedrace.com/`.
 
 ---
 
@@ -149,3 +149,14 @@ Keep repository `AGENTS.md` concise.
 Put detailed durable knowledge in focused files under `docs/`.
 
 Use nested `AGENTS.md` only where directory-specific constraints are genuinely useful.
+
+---
+
+## D-011 — Public brand is Net Speed Race
+
+**Status:** Accepted and implemented
+**Date:** 2026-08-27
+
+The public brand is **Net Speed Race** and its domain is `netspeedrace.com`.
+
+The repository, Cloudflare Worker, LocalStorage key, and other internal identifiers may remain `speed-checker` to preserve stability and compatibility.

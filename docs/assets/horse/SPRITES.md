@@ -1,6 +1,6 @@
 # Approved horse gallop assets
 
-These assets are the approved visual basis for the Speed Checker race.
+These assets are the approved visual basis for the Net Speed Race visualization.
 
 ## Production assets
 

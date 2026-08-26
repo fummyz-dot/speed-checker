@@ -2,9 +2,8 @@
 
 ## Product
 
-**Name:** Speed Checker  
-**Current production URL:** `https://speed-checker.web-tools-jp.workers.dev/`  
-**Future custom domain:** TBD
+**Name:** Net Speed Race
+**Current production URL:** `https://netspeedrace.com/`
 
 ## Mission
 
@@ -14,7 +13,7 @@ The product should be technically credible without becoming a dry engineering da
 
 ## Positioning
 
-Speed Checker should not be designed as a clone of a large generic speed-test service.
+Net Speed Race should not be designed as a clone of a large generic speed-test service.
 
 The intended position is:
 

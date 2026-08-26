@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { SpeedMeasurementResult } from '../types/measurement'
-import { createShareImageBlob } from './shareImage'
+import { PUBLIC_SITE_URL } from './publicSite'
+import { createShareFilename, createShareImageBlob } from './shareImage'
 
 const result = (overrides: Partial<SpeedMeasurementResult> = {}): SpeedMeasurementResult => ({
   id: 'measurement-1',
@@ -67,7 +68,7 @@ describe('shareImage', () => {
   it('旧Canvas馬のprimitiveを使わず、承認済みidle馬アセット3頭を描画する', async () => {
     const sources = installImageMock(false)
 
-    await expect(createShareImageBlob(result(), [], 'https://example.com/speed')).resolves.toBe(pngBlob)
+    await expect(createShareImageBlob(result(), [])).resolves.toBe(pngBlob)
 
     expect(sources).toEqual([
       '/assets/horse/horse-standard-idle.webp',
@@ -76,12 +77,13 @@ describe('shareImage', () => {
     ])
     expect(context.drawImage).toHaveBeenCalledTimes(3)
     expect(context.drawImage).toHaveBeenCalledWith(expect.anything(), 950, 48, 98, 83)
+    expect(context.fillText).toHaveBeenCalledWith('NET SPEED RACE', 76, 94)
   })
 
   it('既存の応答性評価に基づくラベルを描画する', async () => {
     installImageMock(false)
 
-    await createShareImageBlob(result(), [], 'https://example.com/speed')
+    await createShareImageBlob(result(), [])
 
     expect(context.fillText).toHaveBeenCalledWith('混雑時の応答性 要注意', 102, 486)
   })
@@ -89,27 +91,31 @@ describe('shareImage', () => {
   it('馬アセットの読込みが失敗してもPNGを生成する', async () => {
     installImageMock(true)
 
-    await expect(createShareImageBlob(result(), [], 'https://example.com/speed')).resolves.toBe(pngBlob)
+    await expect(createShareImageBlob(result(), [])).resolves.toBe(pngBlob)
 
     expect(context.drawImage).not.toHaveBeenCalled()
   })
 
-  it('呼出し側から渡されたサイトURLを描画し、固定workers.dev URLを使わない', async () => {
+  it('canonical public URLを描画する', async () => {
     installImageMock(false)
 
-    await createShareImageBlob(result(), [], 'https://custom.example.jp/check')
+    await createShareImageBlob(result(), [])
 
     const drawnText = (context.fillText as ReturnType<typeof vi.fn>).mock.calls.map(([text]) => text)
-    expect(drawnText).toContain('https://custom.example.jp/check')
+    expect(drawnText).toContain(PUBLIC_SITE_URL)
     expect(drawnText.join('\n')).not.toContain('workers.dev')
   })
 
   it('測定条件ラベルを共有PNGへ描画しない', async () => {
     installImageMock(false)
 
-    await createShareImageBlob(result({ conditionLabel: 'リビング 5GHz' }), [], 'https://example.com/speed')
+    await createShareImageBlob(result({ conditionLabel: 'リビング 5GHz' }), [])
 
     const drawnText = (context.fillText as ReturnType<typeof vi.fn>).mock.calls.map(([text]) => text)
     expect(drawnText).not.toContain('リビング 5GHz')
+  })
+
+  it('ダウンロード用のファイル名に公開ブランドを使う', () => {
+    expect(createShareFilename(result().measuredAt)).toMatch(/^net-speed-race-\d{8}-\d{4}\.png$/)
   })
 })

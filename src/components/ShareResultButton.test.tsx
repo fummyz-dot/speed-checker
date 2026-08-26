@@ -49,7 +49,7 @@ describe('ShareResultButton', () => {
     shareDescriptor = Object.getOwnPropertyDescriptor(navigator, 'share')
     canShareDescriptor = Object.getOwnPropertyDescriptor(navigator, 'canShare')
     shareImageMocks.createShareImageBlob.mockResolvedValue(blob)
-    shareImageMocks.createShareFilename.mockReturnValue('speed-checker-20260820-1200.png')
+    shareImageMocks.createShareFilename.mockReturnValue('net-speed-race-20260820-1200.png')
   })
 
   afterEach(() => {
@@ -83,7 +83,7 @@ describe('ShareResultButton', () => {
     fireEvent.click(screen.getByRole('button', { name: '画像をコピー' }))
 
     expect(await screen.findByRole('status')).toHaveTextContent('結果画像をコピーしました。')
-    expect(shareImageMocks.createShareImageBlob).toHaveBeenCalledWith(result, [], `${window.location.origin}/`)
+    expect(shareImageMocks.createShareImageBlob).toHaveBeenCalledWith(result, [])
     expect(write).toHaveBeenCalledTimes(1)
     expect(ClipboardItemMock.supports).toHaveBeenCalledWith('image/png')
     const item = write.mock.calls[0][0][0] as ClipboardItemMock
@@ -122,9 +122,9 @@ describe('ShareResultButton', () => {
     fireEvent.click(screen.getByRole('button', { name: 'PNGを保存' }))
 
     expect(await screen.findByRole('status')).toHaveTextContent('PNG画像を保存しました。')
-    expect(shareImageMocks.createShareImageBlob).toHaveBeenCalledWith(result, [], `${window.location.origin}/`)
+    expect(shareImageMocks.createShareImageBlob).toHaveBeenCalledWith(result, [])
     expect(shareImageMocks.createShareFilename).toHaveBeenCalledWith(result.measuredAt)
-    expect(shareImageMocks.downloadBlob).toHaveBeenCalledWith(blob, 'speed-checker-20260820-1200.png')
+    expect(shareImageMocks.downloadBlob).toHaveBeenCalledWith(blob, 'net-speed-race-20260820-1200.png')
   })
 
   it('投稿文をClipboardへコピーする', async () => {
@@ -136,7 +136,7 @@ describe('ShareResultButton', () => {
     fireEvent.click(screen.getByRole('button', { name: '投稿文をコピー' }))
 
     expect(await screen.findByRole('status')).toHaveTextContent('投稿文をコピーしました。')
-    expect(writeText).toHaveBeenCalledWith(expect.stringContaining(`${window.location.origin}/result`))
+    expect(writeText).toHaveBeenCalledWith(expect.stringContaining('https://netspeedrace.com/'))
     expect(shareImageMocks.createShareImageBlob).not.toHaveBeenCalled()
   })
 

@@ -1,6 +1,6 @@
 # Horse visual reference
 
-This directory contains design-reference assets for the Speed Checker race visualization.
+This directory contains design-reference assets for the Net Speed Race visualization.
 
 ## horse-reference-user.png
 

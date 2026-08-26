@@ -87,13 +87,10 @@ Allow labels such as:
 
 Use user-controlled labels rather than falsely detecting conditions the browser cannot reliably know.
 
-## Gate — custom domain and SEO expansion
+## Gate — production domain and SEO expansion
 
-Before significant indexable content expansion:
+The production domain and canonical/OG/sitemap migration to `https://netspeedrace.com/` are complete. Before significant indexable content expansion:
 
-- select custom domain;
-- configure production host;
-- migrate canonical/OG/sitemap;
 - set up search tooling;
 - verify redirects/canonical behavior.
 

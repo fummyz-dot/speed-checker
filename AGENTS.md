@@ -1,10 +1,16 @@
-# Speed Checker — Agent Guide
+# Net Speed Race — Agent Guide
 
 This file is the repository-level map for coding agents. Keep it concise. Detailed product, architecture, measurement, UX, growth, and roadmap context lives under `docs/`.
 
 ## Project purpose
 
-Speed Checker is a Japanese web application that measures internet connection quality using Cloudflare's edge network and presents the result in a way that is technically useful, easy to understand, and memorable.
+Net Speed Race is a Japanese web application that measures internet connection quality using Cloudflare's edge network and presents the result in a way that is technically useful, easy to understand, and memorable.
+
+Public brand: **Net Speed Race**
+
+Production domain: `https://netspeedrace.com/`
+
+The repository, Cloudflare Worker, LocalStorage key, and other internal identifiers remain `speed-checker` for stability and compatibility.
 
 The product is not intended to win by being "another generic speed test." Its differentiation is the combination of:
 
@@ -42,7 +48,7 @@ Preserve these unless the task explicitly changes them:
 7. Keep the application lightweight. Prefer CSS transforms/opacity, compact SVG, or small sprite-style animation over video, 3D engines, or large animation dependencies.
 8. Do not expose or persist the client's IP address.
 9. Measurement history is currently browser-local. Do not add server-side tracking/storage without an explicit product and privacy decision.
-10. A custom domain is planned, but no domain has been selected. Do not invent or hard-code a new production domain.
+10. The public production domain is `https://netspeedrace.com/`. Do not replace it or change internal `speed-checker` identifiers without an explicit decision.
 
 Production deployment is prohibited unless the user explicitly requests deployment in the current task. Never run npm run deploy, wrangler deploy, npx wrangler deploy, or trigger equivalent VS Code / CI deployment actions autonomously.
 

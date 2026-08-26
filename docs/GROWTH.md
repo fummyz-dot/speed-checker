@@ -4,7 +4,7 @@ This document describes product-growth direction. It is not permission to add tr
 
 ## Strategic goal
 
-Grow Speed Checker from a useful single-page tool into a recognizable network-quality utility that can acquire traffic, create repeat usage, and eventually monetize without damaging trust.
+Grow Net Speed Race from a useful single-page tool into a recognizable network-quality utility that can acquire traffic, create repeat usage, and eventually monetize without damaging trust.
 
 The intended funnel is:
 
@@ -26,17 +26,11 @@ search / direct / share
 
 ## Custom domain
 
-A custom domain should be selected **before serious SEO/content expansion**, so backlinks, canonical URLs, Search Console history, and brand memory accumulate on the long-term domain.
+The production custom domain is **`netspeedrace.com`**. Its canonical origin is `https://netspeedrace.com/`, and its Custom Domain is connected to the `speed-checker` Worker.
 
-No custom domain has been selected yet.
+SEO and sharing must use this canonical origin. The repository, Worker, and other internal identifiers remain `speed-checker` for stability and compatibility.
 
-Until one is explicitly selected:
-
-- keep the current production URL functional;
-- do not invent a domain;
-- do not change canonical/OG/sitemap URLs speculatively.
-
-When a domain is selected, update at least:
+If the public domain changes in the future, update at least:
 
 - canonical URL;
 - Open Graph URL;

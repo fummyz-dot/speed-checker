@@ -1,4 +1,4 @@
-# Speed Checker Documentation Map
+# Net Speed Race Documentation Map
 
 This directory is the durable knowledge base for the project. `AGENTS.md` should stay short and point here rather than becoming a monolithic manual.
 

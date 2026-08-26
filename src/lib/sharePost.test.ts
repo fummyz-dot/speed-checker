@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { SpeedMeasurementResult } from '../types/measurement'
+import { PUBLIC_SITE_URL } from './publicSite'
 import { createSharePostText, createXIntentUrl, getSharePageUrl } from './sharePost'
 
 const result = (overrides: Partial<SpeedMeasurementResult> = {}): SpeedMeasurementResult => ({
@@ -12,15 +13,17 @@ const result = (overrides: Partial<SpeedMeasurementResult> = {}): SpeedMeasureme
 })
 
 describe('sharePost', () => {
-  it('投稿文にDownload、Upload、Ping、ハッシュタグと現在ページURLを含める', () => {
-    const text = createSharePostText(result(), 'https://example.com/speed?source=share#result')
+  it('投稿文にブランド、Download、Upload、Ping、ハッシュタグとcanonical URLを含める', () => {
+    const text = createSharePostText(result(), 'http://localhost:5173/result?source=share#result')
 
+    expect(text).toContain('Net Speed Raceで回線を測定しました')
     expect(text).toContain('↓ 528 Mbps')
     expect(text).toContain('↑ 49.6 Mbps')
     expect(text).toContain('Ping 59 ms')
-    expect(text).toContain('#SpeedChecker')
-    expect(text).toContain('https://example.com/speed')
+    expect(text).toContain('#NetSpeedRace')
+    expect(text).toContain(PUBLIC_SITE_URL)
     expect(text).not.toContain('source=share')
+    expect(text).not.toContain('localhost')
     expect(text).not.toContain('workers.dev')
   })
 
@@ -45,7 +48,7 @@ describe('sharePost', () => {
     expect(intentUrl.searchParams.get('text')).toBe(postText)
   })
 
-  it('URLとして解釈できない値はそのまま投稿文に使う', () => {
-    expect(getSharePageUrl('not a url')).toBe('not a url')
+  it('URLとして解釈できない値でもcanonical URLを使う', () => {
+    expect(getSharePageUrl('not a url')).toBe(PUBLIC_SITE_URL)
   })
 })

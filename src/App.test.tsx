@@ -344,12 +344,12 @@ describe('App', () => {
     expect(screen.getByRole('button', { name: '設定' })).toBeDisabled()
   })
 
-  it('GitHubリンクを安全に新しいタブで開く', () => {
+  it('footerに公開ブランドを表示し、公開ソースコードリンクを表示しない', () => {
     render(<App />)
-    const link = screen.getByRole('link', { name: 'GitHubでソースコードを見る' })
-    expect(link).toHaveAttribute('href', 'https://github.com/fummyz-dot/speed-checker')
-    expect(link).toHaveAttribute('target', '_blank')
-    expect(link).toHaveAttribute('rel', 'noreferrer noopener')
+
+    expect(screen.getByText(`© ${new Date().getFullYear()} Net Speed Race`)).toBeVisible()
+    expect(screen.getByText('Powered by Cloudflare Speedtest')).toBeVisible()
+    expect(screen.queryByRole('link', { name: 'GitHubでソースコードを見る' })).not.toBeInTheDocument()
   })
 
   it('測定エラーをalertで表示する', () => {

@@ -269,11 +269,8 @@ function App() {
         aria-hidden={isRaceFocused || undefined}
         inert={isRaceFocused}
       >
-        <span>© {new Date().getFullYear()} Speed Checker</span>
+        <span>© {new Date().getFullYear()} Net Speed Race</span>
         <div className="site-footer__links">
-          <a href="https://github.com/fummyz-dot/speed-checker" target="_blank" rel="noreferrer noopener">
-            GitHubでソースコードを見る
-          </a>
           <span>Powered by Cloudflare Speedtest</span>
         </div>
       </footer>

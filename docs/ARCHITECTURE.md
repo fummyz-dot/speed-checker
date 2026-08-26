@@ -2,7 +2,7 @@
 
 ## Overview
 
-Speed Checker is a React/TypeScript single-page application deployed on Cloudflare Workers with Workers Static Assets.
+Net Speed Race is a React/TypeScript single-page application deployed on Cloudflare Workers with Workers Static Assets.
 
 High-level flow:
 
@@ -115,7 +115,7 @@ The share image is generated in the browser using Canvas APIs. It uses the appro
 
 It should not silently include connection metadata or historical records that the user did not intend to share.
 
-Users explicitly choose whether to copy the PNG image, save it, open an X post with generated text, or copy that text. The application does not open an OS-native sharing menu. Images, generated post text, and measurement history remain browser-local unless the user takes one of those explicit actions. The share image uses the calling page's current site URL rather than a fixed deployment hostname.
+Users explicitly choose whether to copy the PNG image, save it, open an X post with generated text, or copy that text. The application does not open an OS-native sharing menu. Images, generated post text, and measurement history remain browser-local unless the user takes one of those explicit actions. The share image and post text use the canonical public URL, `https://netspeedrace.com/`, so sharing from a local or Workers development hostname never exposes a non-production URL.
 
 ## Build and deploy
 

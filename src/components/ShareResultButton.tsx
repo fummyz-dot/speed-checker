@@ -5,7 +5,7 @@ import {
   createShareImageBlob,
   downloadBlob,
 } from '../lib/shareImage'
-import { createSharePostText, createXIntentUrl, getSharePageUrl } from '../lib/sharePost'
+import { createSharePostText, createXIntentUrl } from '../lib/sharePost'
 
 interface ShareResultButtonProps {
   result: SpeedMeasurementResult
@@ -36,7 +36,7 @@ export const ShareResultButton = ({ result, evaluations }: ShareResultButtonProp
 
     setIsCopyingImage(true)
     try {
-      const blob = await createShareImageBlob(result, evaluations, getSharePageUrl(window.location.href))
+      const blob = await createShareImageBlob(result, evaluations)
       await navigator.clipboard.write([
         new ClipboardItemConstructor({ 'image/png': blob }),
       ])
@@ -52,7 +52,7 @@ export const ShareResultButton = ({ result, evaluations }: ShareResultButtonProp
     setIsDownloading(true)
     setMessage(null)
     try {
-      const blob = await createShareImageBlob(result, evaluations, getSharePageUrl(window.location.href))
+      const blob = await createShareImageBlob(result, evaluations)
       downloadBlob(blob, createShareFilename(result.measuredAt))
       setMessage('PNG画像を保存しました。')
     } catch {

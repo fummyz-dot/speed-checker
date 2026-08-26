@@ -1,6 +1,6 @@
-# Speed Checker
+# Net Speed Race
 
-[Speed Checker](https://speed-checker.web-tools-jp.workers.dev/) は、Cloudflare のエッジネットワークを使って現在のインターネット回線品質を測定する Web アプリです。ダークテーマのシンプルな画面で、速度測定と接続元ネットワーク情報を確認できます。
+[Net Speed Race](https://netspeedrace.com/) は、Cloudflare のエッジネットワークを使って現在のインターネット回線品質を測定する Web アプリです。ダークテーマのシンプルな画面で、速度測定と接続元ネットワーク情報を確認できます。
 
 ## 主な機能
 

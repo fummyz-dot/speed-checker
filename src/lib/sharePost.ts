@@ -1,14 +1,11 @@
 import type { SpeedMeasurementResult } from '../types/measurement'
 import { formatMilliseconds } from '../utils/formatMetric'
+import { PUBLIC_SITE_URL } from './publicSite'
 import { formatFinalSpeedDisplay } from './speedValue'
 
 export const getSharePageUrl = (currentUrl: string): string => {
-  try {
-    const url = new URL(currentUrl)
-    return `${url.origin}${url.pathname}`
-  } catch {
-    return currentUrl
-  }
+  void currentUrl
+  return PUBLIC_SITE_URL
 }
 
 export const createSharePostText = (
@@ -16,7 +13,7 @@ export const createSharePostText = (
   currentUrl: string,
 ): string => {
   const lines = [
-    'Speed Checkerで回線を測定しました',
+    'Net Speed Raceで回線を測定しました',
     '',
     `↓ ${formatFinalSpeedDisplay(result.downloadMbps)} Mbps`,
     `↑ ${formatFinalSpeedDisplay(result.uploadMbps)} Mbps`,
@@ -24,7 +21,7 @@ export const createSharePostText = (
 
   if (result.pingMs !== null) lines.push(`Ping ${formatMilliseconds(result.pingMs)} ms`)
 
-  lines.push('', '#SpeedChecker', getSharePageUrl(currentUrl))
+  lines.push('', '#NetSpeedRace', getSharePageUrl(currentUrl))
   return lines.join('\n')
 }
 

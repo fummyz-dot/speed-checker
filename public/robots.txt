@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://speed-checker.web-tools-jp.workers.dev/sitemap.xml
+Sitemap: https://netspeedrace.com/sitemap.xml

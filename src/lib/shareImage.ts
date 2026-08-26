@@ -4,6 +4,7 @@ import {
   type LoadedLatencyLevel,
 } from './loadedLatencyEvaluation'
 import { EVALUATION_LABELS } from './measurementEvaluation'
+import { PUBLIC_SITE_URL } from './publicSite'
 import { formatFinalSpeedDisplay } from './speedValue'
 
 export const SHARE_IMAGE_WIDTH = 1200
@@ -54,7 +55,6 @@ const drawShareHorses = async (context: CanvasRenderingContext2D): Promise<void>
 export const createShareImageBlob = async (
   result: SpeedMeasurementResult,
   evaluations: UseCaseEvaluationResult[],
-  siteUrl: string,
 ): Promise<Blob> => {
   const canvas = document.createElement('canvas')
   canvas.width = SHARE_IMAGE_WIDTH
@@ -73,7 +73,7 @@ export const createShareImageBlob = async (
 
   context.fillStyle = '#75e5c2'
   context.font = '700 25px system-ui, sans-serif'
-  context.fillText('SPEED CHECKER', 76, 94)
+  context.fillText('NET SPEED RACE', 76, 94)
   context.fillStyle = '#f5f7fb'
   context.font = '700 48px system-ui, sans-serif'
   context.fillText('今回のインターネット速度', 76, 162)
@@ -124,7 +124,7 @@ export const createShareImageBlob = async (
   context.font = '19px system-ui, sans-serif'
   context.fillText('今回の測定結果・参考値', 76, 548)
   context.textAlign = 'right'
-  context.fillText(siteUrl, 1124, 548)
+  context.fillText(PUBLIC_SITE_URL, 1124, 548)
 
   return new Promise((resolve, reject) => {
     canvas.toBlob((blob) => {
@@ -144,7 +144,7 @@ export const createShareFilename = (measuredAt: string): string => {
     String(date.getHours()).padStart(2, '0'),
     String(date.getMinutes()).padStart(2, '0'),
   ]
-  return `speed-checker-${parts.join('')}.png`
+  return `net-speed-race-${parts.join('')}.png`
 }
 
 export const downloadBlob = (blob: Blob, filename: string): void => {
