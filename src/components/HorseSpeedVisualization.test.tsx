@@ -4,6 +4,7 @@ import {
   getReferenceHorseDurations,
   getUserHorseJumpHeight,
   getUserHorseRunDuration,
+  OGURI_REFERENCE_UPLOAD_MBPS,
 } from '../lib/horseVisualization'
 import {
   FRONT_VIEW_TRANSITION_DURATION_MS,
@@ -65,6 +66,11 @@ describe('HorseSpeedVisualization runner presentation', () => {
     expect(
       [...container.querySelectorAll('[data-runner]')].map((runner) => runner.getAttribute('data-runner')),
     ).toEqual(['standard', 'user', 'fast'])
+    expect(screen.getAllByRole('img').map((horse) => horse.getAttribute('aria-label'))).toEqual([
+      '横向きに走る標準速度の競走馬',
+      '横向きに走るあなたの回線速度の競走馬',
+      '横向きに走る高速の競走馬',
+    ])
     expect(container.querySelector('.horse-course')).toHaveAttribute('data-animation-state', 'idle')
     expect(container.querySelectorAll('.race-runner--idle')).toHaveLength(3)
     expect(container.querySelectorAll('.race-runner > .runner-mover > .horse-sprite')).toHaveLength(3)
@@ -73,13 +79,13 @@ describe('HorseSpeedVisualization runner presentation', () => {
     expect(container.querySelector('[data-horse-sprite="standard"]'))
       .toHaveAttribute('data-idle-src', '/assets/horse/horse-standard-idle.webp')
     expect(container.querySelector('[data-horse-sprite="user"]'))
-      .toHaveAttribute('data-sprite-src', '/assets/horse/horse-user-gallop.webp')
-    expect(container.querySelector('[data-horse-sprite="user"]'))
-      .toHaveAttribute('data-idle-src', '/assets/horse/horse-user-idle.webp')
-    expect(container.querySelector('[data-horse-sprite="fast"]'))
       .toHaveAttribute('data-sprite-src', '/assets/horse/horse-fast-gallop.webp')
-    expect(container.querySelector('[data-horse-sprite="fast"]'))
+    expect(container.querySelector('[data-horse-sprite="user"]'))
       .toHaveAttribute('data-idle-src', '/assets/horse/horse-fast-idle.webp')
+    expect(container.querySelector('[data-horse-sprite="fast"]'))
+      .toHaveAttribute('data-sprite-src', '/assets/horse/horse-user-gallop.webp')
+    expect(container.querySelector('[data-horse-sprite="fast"]'))
+      .toHaveAttribute('data-idle-src', '/assets/horse/horse-user-idle.webp')
     expect(container.querySelectorAll('.horse-sprite--static')).toHaveLength(3)
     expect(container.querySelector('.goal-focus-front-view')).toHaveAttribute('data-front-view-active', 'false')
     expect(screen.getByRole('button', { name: 'もう一度見る' })).toBeDisabled()
@@ -176,7 +182,7 @@ describe('HorseSpeedVisualization runner presentation', () => {
     expect(onRequestFocus).toHaveBeenCalledTimes(1)
   })
 
-  it('横レースのレーン順を維持し、正面では承認済みの騎手・馬画像をオグリキャップ・あなた・地方馬の順にする', () => {
+  it('レーンと順位を維持したまま、正面のuser/fast visual assetsを入れ替える', () => {
     const { container } = render(
       <HorseSpeedVisualization downloadMbps={120} uploadMbps={80} phase="complete" result={result} />,
     )
@@ -202,22 +208,22 @@ describe('HorseSpeedVisualization runner presentation', () => {
         rank: jockey.getAttribute('data-upload-rank'),
       })),
     ).toEqual([
-      { id: 'fast', expression: 'satisfied', rank: '2' },
-      { id: 'user', expression: 'winner', rank: '1' },
+      { id: 'fast', expression: 'winner', rank: '1' },
+      { id: 'user', expression: 'satisfied', rank: '2' },
       { id: 'standard', expression: 'disappointed', rank: '3' },
     ])
     expect(
       [...container.querySelectorAll('.front-horse')].map((horse) => horse.getAttribute('src')),
     ).toEqual([
-      '/assets/horse/front/front-horse-fast.webp',
       '/assets/horse/front/front-horse-user.webp',
+      '/assets/horse/front/front-horse-fast.webp',
       '/assets/horse/front/front-horse-standard.webp',
     ])
     expect(
       [...container.querySelectorAll('.front-jockey-image')].map((jockey) => jockey.getAttribute('src')),
     ).toEqual([
-      '/assets/horse/front/front-jockey-fast-rank2.webp',
       '/assets/horse/front/front-jockey-user-rank1.webp',
+      '/assets/horse/front/front-jockey-fast-rank2.webp',
       '/assets/horse/front/front-jockey-standard-rank3.webp',
     ])
   })
@@ -235,8 +241,8 @@ describe('HorseSpeedVisualization runner presentation', () => {
         src: jockey.getAttribute('src'),
       })),
     ).toEqual([
-      { id: 'fast', rank: '1', src: '/assets/horse/front/front-jockey-fast-rank1.webp' },
-      { id: 'user', rank: '3', src: '/assets/horse/front/front-jockey-user-rank3.webp' },
+      { id: 'fast', rank: '1', src: '/assets/horse/front/front-jockey-user-rank1.webp' },
+      { id: 'user', rank: '3', src: '/assets/horse/front/front-jockey-fast-rank3.webp' },
       { id: 'standard', rank: '2', src: '/assets/horse/front/front-jockey-standard-rank2.webp' },
     ])
   })
@@ -279,6 +285,8 @@ describe('HorseSpeedVisualization runner presentation', () => {
     expect(course()).toHaveAttribute('data-animation-state', 'running')
     expect((course() as HTMLElement).style.getPropertyValue('--user-jump-height'))
       .toBe(`${getUserHorseJumpHeight(80).toFixed(0)}px`)
+    expect((course() as HTMLElement).style.getPropertyValue('--fast-jump-height'))
+      .toBe(`${getUserHorseJumpHeight(OGURI_REFERENCE_UPLOAD_MBPS).toFixed(0)}px`)
 
     const lastHorseTime = getReferenceHorseDurations().standard * 1_000
     act(() => vi.advanceTimersByTime(lastHorseTime - 1))

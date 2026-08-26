@@ -4,6 +4,8 @@ import {
   getReferenceHorseDurations,
   getUserHorseJumpHeight,
   getUserHorseRunDuration,
+  OGURI_REFERENCE_DOWNLOAD_MBPS,
+  OGURI_REFERENCE_UPLOAD_MBPS,
 } from './horseVisualization'
 
 describe('horseVisualization', () => {
@@ -33,8 +35,17 @@ describe('horseVisualization', () => {
     expect(getUserHorseRunDuration(10)).toBeGreaterThan(getUserHorseRunDuration(1_000))
   })
 
-  it('標準馬と高速馬に比較しやすい固定走行時間を返す', () => {
-    expect(getReferenceHorseDurations()).toEqual({ standard: 13.5, fast: 11.5 })
+  it('地方馬の基準を維持し、オグリキャップは700 Mbps相当の走行時間にする', () => {
+    const referenceDurations = getReferenceHorseDurations()
+
+    expect(OGURI_REFERENCE_DOWNLOAD_MBPS).toBe(700)
+    expect(referenceDurations.standard).toBe(13.5)
+    expect(referenceDurations.fast).toBeCloseTo(10.03, 2)
+    expect(referenceDurations.fast).toBe(getUserHorseRunDuration(OGURI_REFERENCE_DOWNLOAD_MBPS))
+    expect(referenceDurations.fast).not.toBe(11.5)
+    expect(getUserHorseRunDuration(699)).toBeGreaterThan(referenceDurations.fast)
+    expect(getUserHorseRunDuration(700)).toBeCloseTo(referenceDurations.fast, 10)
+    expect(getUserHorseRunDuration(701)).toBeLessThan(referenceDurations.fast)
   })
 
   it.each([0, 0.1, 1, 10, 100, 1_000, 10_000, -1, Number.NaN, Number.POSITIVE_INFINITY])(
@@ -61,8 +72,19 @@ describe('horseVisualization', () => {
     expect(getUserHorseJumpHeight(speed)).toBeCloseTo(expected, 1)
   })
 
-  it('front viewの表情をupload相当値の順位で決める', () => {
-    expect(getFrontViewUploadRanks(80)).toEqual({
+  it('front viewの表情をオグリキャップ250 Mbps基準のupload順位で決める', () => {
+    expect(OGURI_REFERENCE_UPLOAD_MBPS).toBe(250)
+    expect(getFrontViewUploadRanks(249)).toEqual({
+      standard: { rank: 3, expression: 'disappointed' },
+      user: { rank: 2, expression: 'satisfied' },
+      fast: { rank: 1, expression: 'winner' },
+    })
+    expect(getFrontViewUploadRanks(250)).toEqual({
+      standard: { rank: 3, expression: 'disappointed' },
+      user: { rank: 2, expression: 'satisfied' },
+      fast: { rank: 1, expression: 'winner' },
+    })
+    expect(getFrontViewUploadRanks(251)).toEqual({
       standard: { rank: 3, expression: 'disappointed' },
       user: { rank: 1, expression: 'winner' },
       fast: { rank: 2, expression: 'satisfied' },
@@ -72,5 +94,11 @@ describe('horseVisualization', () => {
       user: { rank: 3, expression: 'disappointed' },
       fast: { rank: 1, expression: 'winner' },
     })
+  })
+
+  it('オグリキャップのjump基準は250 Mbps相当で、ユーザーの式をそのまま使う', () => {
+    expect(getUserHorseJumpHeight(OGURI_REFERENCE_UPLOAD_MBPS)).toBeCloseTo(98.8, 1)
+    expect(getUserHorseJumpHeight(OGURI_REFERENCE_UPLOAD_MBPS)).toBeGreaterThan(76)
+    expect(getUserHorseJumpHeight(0)).toBe(22)
   })
 })

@@ -11,8 +11,8 @@ type FrontJockeyAssets = Record<1 | 2 | 3, string>
 
 const FRONT_HORSE_ASSETS: Record<RaceLane['id'], string> = {
   standard: '/assets/horse/front/front-horse-standard.webp',
-  user: '/assets/horse/front/front-horse-user.webp',
-  fast: '/assets/horse/front/front-horse-fast.webp',
+  user: '/assets/horse/front/front-horse-fast.webp',
+  fast: '/assets/horse/front/front-horse-user.webp',
 }
 
 const FRONT_JOCKEY_ASSETS: Record<RaceLane['id'], FrontJockeyAssets> = {
@@ -22,14 +22,14 @@ const FRONT_JOCKEY_ASSETS: Record<RaceLane['id'], FrontJockeyAssets> = {
     3: '/assets/horse/front/front-jockey-standard-rank3.webp',
   },
   user: {
-    1: '/assets/horse/front/front-jockey-user-rank1.webp',
-    2: '/assets/horse/front/front-jockey-user-rank2.webp',
-    3: '/assets/horse/front/front-jockey-user-rank3.webp',
-  },
-  fast: {
     1: '/assets/horse/front/front-jockey-fast-rank1.webp',
     2: '/assets/horse/front/front-jockey-fast-rank2.webp',
     3: '/assets/horse/front/front-jockey-fast-rank3.webp',
+  },
+  fast: {
+    1: '/assets/horse/front/front-jockey-user-rank1.webp',
+    2: '/assets/horse/front/front-jockey-user-rank2.webp',
+    3: '/assets/horse/front/front-jockey-user-rank3.webp',
   },
 }
 

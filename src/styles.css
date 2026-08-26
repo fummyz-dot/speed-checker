@@ -953,7 +953,8 @@ a:focus-visible {
   border: 0;
   border-radius: 0;
   background:
-    radial-gradient(circle at 50% 28%, rgba(53, 185, 153, 0.12), transparent 38rem),
+    radial-gradient(circle at 84% 30%, rgba(54, 212, 230, 0.14), transparent 38rem),
+    radial-gradient(circle at 42% 68%, rgba(35, 177, 153, 0.08), transparent 32rem),
     var(--background);
   isolation: isolate;
   overscroll-behavior: contain;
@@ -1000,6 +1001,8 @@ a:focus-visible {
 .horse-visualization--focused .horse-course {
   height: clamp(390px, 58dvh, 620px);
   margin-top: 14px;
+  --race-stage-glow: 0.15;
+  --race-goal-glow: 0.24;
   --race-start: clamp(100px, 7vw, 126px);
   --race-goal: calc(100% - clamp(100px, 7vw, 126px));
 }
@@ -1120,17 +1123,50 @@ a:focus-visible {
   height: 190px;
   margin-top: 10px;
   overflow: hidden;
+  isolation: isolate;
+  --race-stage-glow: 0.1;
+  --race-goal-glow: 0.17;
   --race-start: 82px;
   --race-goal: calc(100% - 72px);
-  border: 1px solid rgba(117, 229, 194, 0.14);
+  border: 1px solid rgba(91, 213, 222, 0.2);
   border-radius: 10px;
   background:
-    linear-gradient(180deg, rgba(117, 229, 194, 0.04), transparent 64%),
-    repeating-linear-gradient(90deg, transparent 0 58px, rgba(255, 255, 255, 0.025) 59px 60px);
+    radial-gradient(ellipse 68% 128% at 100% 52%, rgba(58, 224, 232, var(--race-goal-glow)), transparent 70%),
+    radial-gradient(ellipse 64% 120% at 50% 58%, rgba(35, 190, 160, var(--race-stage-glow)), transparent 72%),
+    linear-gradient(108deg, #050a17 0%, #071322 48%, #092437 77%, #0b3447 100%);
+}
+
+.horse-course::before,
+.horse-course::after {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  pointer-events: none;
+  content: '';
+}
+
+.horse-course::before {
+  background:
+    linear-gradient(90deg, rgba(1, 7, 17, 0.5), rgba(1, 8, 17, 0.16) 45%, rgba(1, 7, 17, 0.1) 72%, rgba(1, 7, 17, 0.24)),
+    linear-gradient(103deg, transparent 12%, rgba(84, 238, 220, 0.07) 52%, rgba(65, 213, 234, 0.13) 78%, transparent),
+    linear-gradient(180deg, rgba(3, 8, 19, 0.42) 0 22%, transparent 48%, rgba(1, 7, 16, 0.24));
+  opacity: 0.92;
+}
+
+.horse-course::after {
+  background: linear-gradient(
+    180deg,
+    transparent 0 28%,
+    rgba(100, 226, 214, 0.2) 28% calc(28% + 1px),
+    transparent calc(28% + 1px) 82%,
+    rgba(87, 207, 216, 0.14) 82% calc(82% + 1px),
+    transparent calc(82% + 1px)
+  );
 }
 
 .horse-course__track {
   position: absolute;
+  z-index: 1;
   inset: 0;
   opacity: 1;
   transform: translateX(0) scale(1);
@@ -1155,6 +1191,7 @@ a:focus-visible {
   font-size: 0.58rem;
   font-weight: 700;
   letter-spacing: 0.13em;
+  text-shadow: 0 1px 5px rgba(0, 0, 0, 0.72);
 }
 
 .horse-course__start {
@@ -1181,7 +1218,8 @@ a:focus-visible {
   right: 12px;
   left: 76px;
   height: 1px;
-  background: rgba(255, 255, 255, 0.17);
+  background: rgba(120, 218, 214, 0.15);
+  box-shadow: 0 1px rgba(3, 12, 24, 0.54);
 }
 
 .horse-course__lane--standard {
@@ -1218,6 +1256,7 @@ a:focus-visible {
 .horse-course__lane-label--user {
   bottom: 88px;
   color: var(--accent);
+  font-size: 0.54rem;
 }
 
 .race-runner {
@@ -1248,8 +1287,8 @@ a:focus-visible {
 .race-runner--fast {
   bottom: 30px;
   --horse-width: 64px;
-  --horse-gallop-image: url('/assets/horse/horse-fast-gallop.webp');
-  --horse-idle-image: url('/assets/horse/horse-fast-idle.webp');
+  --horse-gallop-image: url('/assets/horse/horse-user-gallop.webp');
+  --horse-idle-image: url('/assets/horse/horse-user-idle.webp');
   --horse-coat: #c6ced0;
   --horse-coat-shadow: #919da3;
   --horse-mane: #4b5660;
@@ -1265,8 +1304,8 @@ a:focus-visible {
 .race-runner--user {
   bottom: 78px;
   --horse-width: 68px;
-  --horse-gallop-image: url('/assets/horse/horse-user-gallop.webp');
-  --horse-idle-image: url('/assets/horse/horse-user-idle.webp');
+  --horse-gallop-image: url('/assets/horse/horse-fast-gallop.webp');
+  --horse-idle-image: url('/assets/horse/horse-fast-idle.webp');
   --horse-coat: #98623e;
   --horse-coat-shadow: #68402b;
   --horse-mane: #30221d;
@@ -1554,8 +1593,9 @@ a:focus-visible {
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(circle at 50% 84%, rgba(117, 229, 194, 0.12), transparent 38%),
-    linear-gradient(180deg, rgba(8, 15, 25, 0.1), rgba(8, 15, 25, 0.5));
+    radial-gradient(ellipse at 88% 54%, rgba(54, 207, 220, 0.1), transparent 46%),
+    radial-gradient(ellipse at 50% 88%, rgba(36, 176, 154, 0.08), transparent 45%),
+    linear-gradient(180deg, #060b17 0%, #071522 46%, #081e2c 100%);
   content: '';
 }
 
@@ -1635,7 +1675,7 @@ a:focus-visible {
 }
 
 .front-runner--fast {
-  --front-jump-height: 76px;
+  --front-jump-height: var(--fast-jump-height);
 }
 
 .front-runner--user {
@@ -1693,6 +1733,8 @@ a:focus-visible {
 
 .front-runner--user .front-runner__label {
   color: var(--accent);
+  font-size: clamp(0.48rem, 2vw, 0.63rem);
+  font-weight: 700;
 }
 
 .horse-course--groupJumpFrontView .front-runner__shadow {
@@ -3148,6 +3190,10 @@ a:focus-visible {
     font-size: 0.44rem;
   }
 
+  .horse-visualization--focused .horse-course__lane-label--user {
+    font-size: 0.5rem;
+  }
+
   .horse-visualization--focused .race-runner--standard,
   .horse-visualization--focused .race-runner--fast {
     --horse-width: clamp(58px, 16vw, 70px);
@@ -3357,6 +3403,14 @@ a:focus-visible {
     --race-goal: calc(100% - 62px);
   }
 
+  .horse-course::before {
+    opacity: 0.74;
+  }
+
+  .horse-course::after {
+    opacity: 0.66;
+  }
+
   .horse-course__lane {
     left: 64px;
   }
@@ -3364,6 +3418,10 @@ a:focus-visible {
   .horse-course__lane-label {
     width: 52px;
     font-size: 0.43rem;
+  }
+
+  .horse-course__lane-label--user {
+    font-size: 0.48rem;
   }
 
   .race-runner {

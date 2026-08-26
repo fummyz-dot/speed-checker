@@ -9,15 +9,18 @@ export interface ReferenceHorseDurations {
   fast: number
 }
 
-export const getReferenceHorseDurations = (): ReferenceHorseDurations => ({
-  standard: 13.5,
-  fast: 11.5,
-})
+export const OGURI_REFERENCE_DOWNLOAD_MBPS = 700
+export const OGURI_REFERENCE_UPLOAD_MBPS = 250
 
 export const getUserHorseRunDuration = (downloadMbps: number): number => {
   const speed = normalizeSpeedValue(downloadMbps) ?? 0
   return clamp(18 - 2.8 * Math.log10(Math.max(speed, 1)), 9.5, 18)
 }
+
+export const getReferenceHorseDurations = (): ReferenceHorseDurations => ({
+  standard: 13.5,
+  fast: getUserHorseRunDuration(OGURI_REFERENCE_DOWNLOAD_MBPS),
+})
 
 export const getUserHorseJumpHeight = (uploadMbps: number): number => {
   const speed = normalizeSpeedValue(uploadMbps) ?? 0
@@ -31,12 +34,12 @@ export interface FrontViewUploadRank {
   expression: FrontViewJockeyExpression
 }
 
-// These reference values align with the existing fixed front-view jump heights:
-// 6 Mbps maps close to the standard jockey's 48px jump and 50 Mbps to the fast
-// jockey's 76px jump. They are used only for the facial-expression comparison.
+// These reference values determine front-view facial-expression comparison.
+// The standard jockey keeps its existing 6 Mbps reference, while the fast jockey
+// shares the 250 Mbps Oguri benchmark used for its jump height.
 const FRONT_VIEW_REFERENCE_UPLOAD_MBPS: Record<Exclude<HorseId, 'user'>, number> = {
   standard: 6,
-  fast: 50,
+  fast: OGURI_REFERENCE_UPLOAD_MBPS,
 }
 
 const expressionForRank = (rank: FrontViewUploadRank['rank']): FrontViewJockeyExpression => {

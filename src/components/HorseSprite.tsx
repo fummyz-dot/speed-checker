@@ -6,12 +6,12 @@ const HORSE_SPRITE_ASSETS = {
     idle: '/assets/horse/horse-standard-idle.webp',
   },
   user: {
-    gallop: '/assets/horse/horse-user-gallop.webp',
-    idle: '/assets/horse/horse-user-idle.webp',
-  },
-  fast: {
     gallop: '/assets/horse/horse-fast-gallop.webp',
     idle: '/assets/horse/horse-fast-idle.webp',
+  },
+  fast: {
+    gallop: '/assets/horse/horse-user-gallop.webp',
+    idle: '/assets/horse/horse-user-idle.webp',
   },
 } as const satisfies Record<HorseId, { gallop: string, idle: string }>
 

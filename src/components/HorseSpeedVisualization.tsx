@@ -7,7 +7,10 @@ import {
   type HorseRaceState,
 } from '../hooks/useHorseRaceAnimation'
 import { useLiveSpeedDisplay } from '../hooks/useLiveSpeedDisplay'
-import { getUserHorseJumpHeight } from '../lib/horseVisualization'
+import {
+  getUserHorseJumpHeight,
+  OGURI_REFERENCE_UPLOAD_MBPS,
+} from '../lib/horseVisualization'
 import { HORSE_RACE_LANES, type HorseId } from '../lib/horseRaceLanes'
 import { formatFinalSpeedDisplay, formatLiveSpeedDisplay } from '../lib/speedValue'
 import type { SpeedMeasurementResult } from '../types/measurement'
@@ -34,6 +37,7 @@ type RaceStyle = CSSProperties & {
   '--standard-duration': string
   '--fast-duration': string
   '--user-duration': string
+  '--fast-jump-height': string
   '--user-jump-height': string
   '--race-start-progress': string
   '--warmup-duration': string
@@ -102,6 +106,7 @@ export const HorseSpeedVisualization = ({
     '--standard-duration': `${referenceDurations.standard}s`,
     '--fast-duration': `${referenceDurations.fast}s`,
     '--user-duration': `${userRunDuration.toFixed(2)}s`,
+    '--fast-jump-height': `${getUserHorseJumpHeight(OGURI_REFERENCE_UPLOAD_MBPS).toFixed(0)}px`,
     '--user-jump-height': `${getUserHorseJumpHeight(result?.uploadMbps ?? 0).toFixed(0)}px`,
     '--race-start-progress': `${(raceStartProgress * 100).toFixed(3)}%`,
     '--warmup-duration': `${WARMUP_DURATION_MS}ms`,
