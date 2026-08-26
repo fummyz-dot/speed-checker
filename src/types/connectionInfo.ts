@@ -6,6 +6,8 @@ export interface ConnectionInfo {
   city: string | null
   cloudflareColo: string | null
   protocol: string | null
+  edgeRttMs: number | null
+  edgeRttTransport: 'TCP' | 'QUIC' | null
 }
 
 export type ConnectionInfoState =

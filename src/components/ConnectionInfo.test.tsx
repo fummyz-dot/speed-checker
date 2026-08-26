@@ -24,6 +24,7 @@ describe('ConnectionInfo', () => {
         data: {
           provider: 'Example Network', asn: 12345, country: 'JP', region: 'Tokyo',
           city: 'Tokyo', cloudflareColo: 'NRT', protocol: 'HTTP/3',
+          edgeRttMs: 22.4, edgeRttTransport: 'QUIC',
         },
       },
       retry,
@@ -31,7 +32,27 @@ describe('ConnectionInfo', () => {
     const { container } = render(<ConnectionInfo />)
     expect(screen.getByText('Example Network')).toBeInTheDocument()
     expect(screen.getByText('AS12345')).toBeInTheDocument()
+    expect(screen.getByText('Cloudflare Edge RTT')).toBeInTheDocument()
+    expect(screen.getByText('22 ms · QUIC')).toBeInTheDocument()
+    expect(screen.getByText('Cloudflare観測値。速度測定のPingとは別です。')).toBeInTheDocument()
     expect(container).not.toHaveTextContent(/\b(?:\d{1,3}\.){3}\d{1,3}\b/)
+  })
+
+  it('Edge RTTがない場合はRTT項目だけを表示しない', () => {
+    mockedHook.mockReturnValue({
+      state: {
+        status: 'success',
+        data: {
+          provider: 'Example Network', asn: 12345, country: 'JP', region: 'Tokyo',
+          city: 'Tokyo', cloudflareColo: 'NRT', protocol: 'HTTP/3',
+          edgeRttMs: null, edgeRttTransport: null,
+        },
+      },
+      retry,
+    })
+    render(<ConnectionInfo />)
+    expect(screen.queryByText('Cloudflare Edge RTT')).not.toBeInTheDocument()
+    expect(screen.queryByText('速度測定のPingとは別です。')).not.toBeInTheDocument()
   })
 
   it('404相当のエラーを技術コードなしで案内して再取得できる', async () => {

@@ -232,6 +232,16 @@ a:focus-visible {
   font-variant-numeric: tabular-nums;
 }
 
+.connection-info__edge-rtt {
+  max-width: 220px;
+}
+
+.connection-info__edge-rtt small {
+  color: #7d8796;
+  font-size: 0.58rem;
+  line-height: 1.35;
+}
+
 .connection-info__note {
   display: none;
 }

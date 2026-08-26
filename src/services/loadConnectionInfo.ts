@@ -13,6 +13,12 @@ const fields = [
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value)
 
+const positiveFiniteNumberOrNull = (value: unknown): number | null =>
+  typeof value === 'number' && Number.isFinite(value) && value > 0 ? value : null
+
+const edgeRttTransportOrNull = (value: unknown): ConnectionInfo['edgeRttTransport'] =>
+  value === 'TCP' || value === 'QUIC' ? value : null
+
 export const parseConnectionInfo = (value: unknown): ConnectionInfo => {
   if (!isRecord(value)) throw new Error('接続情報の形式が正しくありません。')
 
@@ -30,6 +36,11 @@ export const parseConnectionInfo = (value: unknown): ConnectionInfo => {
     }
   }
 
+  const edgeRttMs = positiveFiniteNumberOrNull(value.edgeRttMs)
+  const edgeRttTransport = edgeRttMs === null
+    ? null
+    : edgeRttTransportOrNull(value.edgeRttTransport)
+
   return {
     provider: value.provider as string | null,
     asn: value.asn as number | null,
@@ -38,6 +49,8 @@ export const parseConnectionInfo = (value: unknown): ConnectionInfo => {
     city: value.city as string | null,
     cloudflareColo: value.cloudflareColo as string | null,
     protocol: value.protocol as string | null,
+    edgeRttMs,
+    edgeRttTransport,
   }
 }
 

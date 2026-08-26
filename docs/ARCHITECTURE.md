@@ -87,6 +87,8 @@ It must not expose the client's IP address to the application.
 
 The displayed network organization is ASN ownership information and can differ from a retail ISP/service brand, especially through VPNs, proxies, corporate networks, or upstream carriers.
 
+When available, the connection response also includes Cloudflare's smoothed transport RTT between the browser and Cloudflare Edge (`clientTcpRtt` for TCP or `clientQuicRtt` for QUIC). This is current connection metadata only: it is distinct from the speed-test Ping, is not persisted or shared, and does not drive measurement evaluation or diagnose a network cause.
+
 ## Browser storage
 
 Successful measurement history is stored in LocalStorage.

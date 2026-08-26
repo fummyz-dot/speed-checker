@@ -9,6 +9,8 @@ const validInfo = {
   city: 'Tokyo',
   cloudflareColo: 'NRT',
   protocol: 'HTTP/3',
+  edgeRttMs: 42,
+  edgeRttTransport: 'QUIC',
 }
 
 describe('parseConnectionInfo', () => {
@@ -19,6 +21,37 @@ describe('parseConnectionInfo', () => {
   it('全項目のnullを許容する', () => {
     const nullInfo = Object.fromEntries(Object.keys(validInfo).map((key) => [key, null]))
     expect(parseConnectionInfo(nullInfo)).toEqual(nullInfo)
+  })
+
+  it('旧WorkerレスポンスのRTT欠損をnullへ正規化する', () => {
+    const legacyInfo = Object.fromEntries(
+      Object.entries(validInfo).filter(([field]) => field !== 'edgeRttMs' && field !== 'edgeRttTransport'),
+    )
+
+    expect(parseConnectionInfo(legacyInfo)).toEqual({
+      ...legacyInfo,
+      edgeRttMs: null,
+      edgeRttTransport: null,
+    })
+  })
+
+  it.each([0, -1, Number.NaN, Number.POSITIVE_INFINITY, '22'])(
+    'RTTの不正値 %p だけをnullへ正規化し、既存の接続情報を維持する',
+    (invalidRtt) => {
+      expect(parseConnectionInfo({ ...validInfo, edgeRttMs: invalidRtt, edgeRttTransport: 'TCP' })).toEqual({
+        ...validInfo,
+        edgeRttMs: null,
+        edgeRttTransport: null,
+      })
+    },
+  )
+
+  it('RTT transportの不正値だけをnullへ正規化する', () => {
+    expect(parseConnectionInfo({ ...validInfo, edgeRttMs: 22, edgeRttTransport: 'UDP' })).toEqual({
+      ...validInfo,
+      edgeRttMs: 22,
+      edgeRttTransport: null,
+    })
   })
 
   it('不正なJSONを拒否する', () => {

@@ -51,6 +51,16 @@ export const ConnectionInfo = () => {
         {location && <div><dt>地域</dt><dd>{location}</dd></div>}
         {data.cloudflareColo && <div><dt>Cloudflare拠点</dt><dd>Cloudflare {data.cloudflareColo}</dd></div>}
         {data.protocol && <div><dt>プロトコル</dt><dd>{data.protocol}</dd></div>}
+        {data.edgeRttMs !== null && (
+          <div className="connection-info__edge-rtt">
+            <dt>Cloudflare Edge RTT</dt>
+            <dd>
+              {Math.round(data.edgeRttMs)} ms
+              {data.edgeRttTransport && ` · ${data.edgeRttTransport}`}
+            </dd>
+            <small>Cloudflare観測値。速度測定のPingとは別です。</small>
+          </div>
+        )}
       </dl>
       <p className="connection-info__note">
         Cloudflareが接続元のASN情報から判定しています。VPN・プロキシ・法人回線では実際の契約プロバイダと異なる場合があります。

@@ -21,7 +21,7 @@ describe('handleConnectionRequest', () => {
     expect(response.headers.get('X-Content-Type-Options')).toBe('nosniff')
     expect(await response.json()).toEqual({
       provider: 'Example Network', asn: 12345, country: 'JP', region: 'Tokyo', city: 'Tokyo',
-      cloudflareColo: 'NRT', protocol: 'HTTP/3',
+      cloudflareColo: 'NRT', protocol: 'HTTP/3', edgeRttMs: null, edgeRttTransport: null,
     })
   })
 
