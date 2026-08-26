@@ -3024,8 +3024,18 @@ a:focus-visible {
   }
 
   .horse-visualization--focused .result-panel__heading {
+    display: grid;
     align-items: flex-start;
-    gap: 10px;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      'title actions'
+      'upload upload';
+    gap: 9px 10px;
+  }
+
+  .horse-visualization--focused .horse-visualization__title {
+    min-width: 0;
+    grid-area: title;
   }
 
   .horse-visualization--focused .result-panel__heading h2 {
@@ -3033,12 +3043,30 @@ a:focus-visible {
   }
 
   .horse-visualization--focused .horse-visualization__actions {
+    margin-left: 0;
+    align-self: start;
+    grid-area: actions;
     gap: 6px;
   }
 
   .horse-visualization--focused .secondary-button {
-    padding: 8px 10px;
-    font-size: 0.68rem;
+    min-height: 40px;
+    padding: 9px 12px;
+    font-size: 0.7rem;
+  }
+
+  .horse-visualization--focused .race-upload-result {
+    position: static;
+    margin-top: 1px;
+    justify-self: center;
+    grid-area: upload;
+    transform: none;
+    animation-name: upload-result-pop-mobile;
+  }
+
+  @keyframes upload-result-pop-mobile {
+    0% { opacity: 0; transform: translateY(8px) scale(0.82); }
+    24%, 100% { opacity: 1; transform: translateY(0) scale(1); }
   }
 
   .horse-visualization--focused .horse-course {

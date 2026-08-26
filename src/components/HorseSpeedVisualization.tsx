@@ -23,6 +23,7 @@ interface HorseSpeedVisualizationProps {
   result: SpeedMeasurementResult | null
   focused?: boolean
   focusExiting?: boolean
+  showShrinkButton?: boolean
   onRequestFocus?: () => void
   onRequestExitFocus?: () => void
   onShowDetails?: () => void
@@ -60,6 +61,7 @@ export const HorseSpeedVisualization = ({
   result,
   focused = false,
   focusExiting = false,
+  showShrinkButton = true,
   onRequestFocus,
   onRequestExitFocus,
   onShowDetails,
@@ -127,7 +129,7 @@ export const HorseSpeedVisualization = ({
     const closeButton = container.querySelector<HTMLElement>('[data-race-focus-close]')
     const focusTarget = closeButton ?? getFocusableElements()[0] ?? container
     focusTarget.focus()
-  }, [focused])
+  }, [focused, showShrinkButton])
 
   const handleFocusedKeyDown = (event: KeyboardEvent<HTMLElement>) => {
     if (!focused) return
@@ -188,7 +190,7 @@ export const HorseSpeedVisualization = ({
       onKeyDown={handleFocusedKeyDown}
     >
       <div className="result-panel__heading">
-        <div>
+        <div className="horse-visualization__title">
           <span className="result-panel__eyebrow">SPEED RACE</span>
           <h2 id="horse-title">回線速度レース</h2>
         </div>
@@ -213,7 +215,7 @@ export const HorseSpeedVisualization = ({
           <button className="secondary-button" type="button" onClick={handleReplay} disabled={!canReplay}>
             もう一度見る
           </button>
-          {focused && (
+          {focused && showShrinkButton && (
             <button
               className="secondary-button horse-visualization__shrink"
               data-race-focus-close

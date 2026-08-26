@@ -125,6 +125,24 @@ describe('HorseSpeedVisualization runner presentation', () => {
     expect(onRequestExitFocus).toHaveBeenCalledTimes(2)
   })
 
+  it('mobile集中時は縮小buttonをrenderせず、操作不能ならdialogへfocusする', () => {
+    const { container } = render(
+      <HorseSpeedVisualization
+        downloadMbps={null}
+        uploadMbps={null}
+        phase="idle"
+        result={null}
+        focused
+        showShrinkButton={false}
+      />,
+    )
+
+    const dialog = screen.getByRole('dialog', { name: '回線速度レース' })
+    expect(container.querySelector('[data-race-focus-close]')).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: '縮小' })).not.toBeInTheDocument()
+    expect(dialog).toHaveFocus()
+  })
+
   it('通常表示の測定中には、状態を保ったままレースを拡大できる', () => {
     const onRequestFocus = vi.fn()
     render(
@@ -345,6 +363,7 @@ describe('HorseSpeedVisualization runner presentation', () => {
         phase="complete"
         result={result}
         focused
+        showShrinkButton={false}
         onRequestFocus={onRequestFocus}
         onShowDetails={onShowDetails}
         onRequestExitFocus={onRequestExitFocus}
@@ -361,6 +380,7 @@ describe('HorseSpeedVisualization runner presentation', () => {
 
     const detailsLink = screen.getByRole('link', { name: '詳しい測定結果を見る' })
     const replayButton = screen.getByRole('button', { name: 'もう一度見る' })
+    expect(screen.queryByRole('button', { name: '縮小' })).not.toBeInTheDocument()
     detailsLink.focus()
     fireEvent.keyDown(dialog, { key: 'Tab' })
     expect(replayButton).toHaveFocus()

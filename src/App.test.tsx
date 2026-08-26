@@ -136,7 +136,10 @@ describe('App', () => {
     await user.click(screen.getByRole('button', { name: '測定開始' }))
 
     expect(start).toHaveBeenCalledWith({ conditionLabel: '有線LAN' })
-    expect(screen.getByRole('dialog', { name: '回線速度レース' })).toBeVisible()
+    const dialog = screen.getByRole('dialog', { name: '回線速度レース' })
+    expect(dialog).toBeVisible()
+    expect(screen.queryByRole('button', { name: '縮小' })).not.toBeInTheDocument()
+    expect(dialog).toHaveFocus()
   })
 
   it('測定開始と同時にレースへ集中し、背景操作とbody scrollをロックする', async () => {

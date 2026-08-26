@@ -224,6 +224,7 @@ function App() {
               result={completedResult}
               focused={isRaceFocused}
               focusExiting={isRaceFocusExiting}
+              showShrinkButton={!isMobileLayout}
               onRequestFocus={requestRaceFocus}
               onRequestExitFocus={exitRaceFocus}
               onShowDetails={showMeasurementDetails}
