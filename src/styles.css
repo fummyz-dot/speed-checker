@@ -2836,6 +2836,11 @@ a:focus-visible {
   }
 
   .measurement-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    column-gap: 24px;
     text-align: center;
   }
 
@@ -2887,10 +2892,13 @@ a:focus-visible {
   }
 
   .measurement-status {
+    flex: 0 0 auto;
     margin-top: 12px;
+    white-space: nowrap;
   }
 
   .test-button {
+    flex: 0 0 auto;
     width: auto;
     min-width: 160px;
     min-height: 48px;
@@ -2905,6 +2913,7 @@ a:focus-visible {
   }
 
   .button-hint {
+    flex: 0 0 100%;
     margin-top: 10px;
   }
 
@@ -3021,6 +3030,15 @@ a:focus-visible {
 @media (max-width: 360px) {
   .hero h1 {
     white-space: normal;
+  }
+
+  .measurement-actions {
+    flex-direction: column;
+  }
+
+  .button-hint {
+    flex-basis: auto;
+    align-self: stretch;
   }
 }
 
