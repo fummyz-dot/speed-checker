@@ -137,6 +137,8 @@ Do not replace this with an opaque score or claim a specific root cause from the
 
 SEO metadata, Open Graph metadata, the sitemap, robots reference, and share destinations use `https://netspeedrace.com/`.
 
+`www.netspeedrace.com` and apex HTTP permanently redirect to the HTTPS apex hostname before API or Static Assets handling. The `workers.dev` hostname is disabled after the custom-domain migration.
+
 ---
 
 ## D-010 — AGENTS.md is a map, docs are the durable knowledge base

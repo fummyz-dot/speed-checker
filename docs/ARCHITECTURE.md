@@ -75,11 +75,16 @@ Keep evaluation rules deterministic and testable.
 `wrangler.jsonc` configures:
 
 - Worker entry: `worker/index.ts`;
+- canonical public hostname: `netspeedrace.com` over HTTPS;
+- permanent redirects from `www.netspeedrace.com` and apex HTTP to the canonical hostname, before API and Static Assets handling;
+- disabled `workers.dev` hostname after the custom-domain migration;
 - static asset directory: `dist/`;
 - SPA fallback;
 - Worker-first handling for `/api/*`.
 
 `public/_headers` supplies security headers for static asset responses. It is copied into `dist/` during the Vite build and interpreted by Workers Static Assets rather than served as a downloadable asset. Worker-generated API responses retain their own header policy.
+
+Canonical redirects preserve the request pathname and query string. Local development hostnames are not redirected to production.
 
 ## Connection metadata boundary
 

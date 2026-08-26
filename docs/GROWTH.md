@@ -30,6 +30,8 @@ The production custom domain is **`netspeedrace.com`**. Its canonical origin is 
 
 SEO and sharing must use this canonical origin. The repository, Worker, and other internal identifiers remain `speed-checker` for stability and compatibility.
 
+`www.netspeedrace.com` permanently redirects to the apex hostname. The apex hostname over HTTP permanently redirects to HTTPS, preserving the pathname and query string. The `workers.dev` hostname is disabled after the custom-domain migration, leaving `https://netspeedrace.com/` as the only public canonical URL.
+
 If the public domain changes in the future, update at least:
 
 - canonical URL;

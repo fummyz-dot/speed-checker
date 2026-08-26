@@ -1,5 +1,5 @@
-import { describe, expect, it } from 'vitest'
-import { handleConnectionRequest } from './index'
+import { describe, expect, it, vi } from 'vitest'
+import { handleConnectionRequest, handleRequest } from './index'
 
 const requestWithCf = (method = 'GET'): Request => {
   const request = new Request('https://example.com/api/connection', { method })
@@ -10,6 +10,11 @@ const requestWithCf = (method = 'GET'): Request => {
     },
   })
   return request
+}
+
+const createEnv = () => {
+  const fetch = vi.fn(() => new Response('asset'))
+  return { env: { ASSETS: { fetch } } as unknown as Env, fetch }
 }
 
 describe('handleConnectionRequest', () => {
@@ -32,5 +37,58 @@ describe('handleConnectionRequest', () => {
 
   it('GET以外には405を返す', () => {
     expect(handleConnectionRequest(requestWithCf('POST')).status).toBe(405)
+  })
+})
+
+describe('handleRequest canonical host routing', () => {
+  it('apex HTTPSはredirectせずStatic Assetsへ渡す', async () => {
+    const { env, fetch } = createEnv()
+    const request = new Request('https://netspeedrace.com/robots.txt')
+
+    const response = await handleRequest(request, env)
+
+    expect(response.status).toBe(200)
+    expect(fetch).toHaveBeenCalledWith(request)
+  })
+
+  it('apex HTTPをpathnameとquery stringを維持してHTTPSへ301 redirectする', async () => {
+    const { env, fetch } = createEnv()
+
+    const response = await handleRequest(new Request('http://netspeedrace.com/foo?a=1'), env)
+
+    expect(response.status).toBe(301)
+    expect(response.headers.get('Location')).toBe('https://netspeedrace.com/foo?a=1')
+    expect(fetch).not.toHaveBeenCalled()
+  })
+
+  it('www HTTPSをpathnameとquery stringを維持してapex HTTPSへ301 redirectする', async () => {
+    const { env, fetch } = createEnv()
+
+    const response = await handleRequest(new Request('https://www.netspeedrace.com/robots.txt?source=www'), env)
+
+    expect(response.status).toBe(301)
+    expect(response.headers.get('Location')).toBe('https://netspeedrace.com/robots.txt?source=www')
+    expect(fetch).not.toHaveBeenCalled()
+  })
+
+  it('www APIもAPI処理より前にapex HTTPSへ301 redirectする', async () => {
+    const { env, fetch } = createEnv()
+
+    const response = await handleRequest(new Request('https://www.netspeedrace.com/api/connection?probe=1'), env)
+
+    expect(response.status).toBe(301)
+    expect(response.headers.get('Location')).toBe('https://netspeedrace.com/api/connection?probe=1')
+    expect(fetch).not.toHaveBeenCalled()
+  })
+
+  it('localhost/dev相当のhostnameをproductionへredirectしない', async () => {
+    const { env, fetch } = createEnv()
+    const request = new Request('http://localhost:8787/preview?mode=dev')
+
+    const response = await handleRequest(request, env)
+
+    expect(response.status).toBe(200)
+    expect(response.headers.get('Location')).toBeNull()
+    expect(fetch).toHaveBeenCalledWith(request)
   })
 })
