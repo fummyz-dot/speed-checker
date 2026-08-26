@@ -2254,6 +2254,239 @@ a:focus-visible {
   color: var(--accent);
 }
 
+@media (min-width: 1200px) {
+  .site-shell {
+    width: min(1340px, calc(100% - clamp(48px, 4vw, 64px)));
+  }
+
+  .hero {
+    padding: clamp(32px, 5vh, 52px) 0 clamp(24px, 3vh, 36px);
+    align-content: start;
+    gap: clamp(18px, 1.6vw, 24px);
+  }
+
+  .hero__eyebrow {
+    font-size: 0.68rem;
+  }
+
+  .hero h1 {
+    font-size: clamp(1.6rem, 2.5vw, 2.3rem);
+  }
+
+  .hero__lead {
+    max-width: 600px;
+    font-size: clamp(0.8rem, 1.05vw, 0.92rem);
+  }
+
+  .hero__dashboard {
+    grid-template-columns: minmax(410px, 0.87fr) minmax(520px, 1.13fr);
+    gap: 22px;
+  }
+
+  .hero__controls {
+    gap: 12px;
+  }
+
+  .connection-info {
+    min-height: 104px;
+    padding: 14px 16px;
+  }
+
+  .hero__measurement {
+    min-height: 160px;
+    padding: 12px 16px;
+    grid-template-columns: minmax(170px, 0.9fr) minmax(195px, 1.1fr);
+    gap: 16px;
+  }
+
+  .speed-display {
+    min-height: 138px;
+  }
+
+  .speed-display::before {
+    width: 134px;
+    height: 134px;
+  }
+
+  .speed-display::after {
+    width: 98px;
+    height: 98px;
+  }
+
+  .speed-display__reading strong {
+    font-size: clamp(3.25rem, 5.7vw, 5.15rem);
+  }
+
+  .speed-display__reading span {
+    font-size: clamp(0.96rem, 2vw, 1.2rem);
+  }
+
+  .test-button {
+    min-height: 54px;
+    padding: 14px 20px;
+    font-size: 1rem;
+  }
+
+  .horse-visualization {
+    padding: 20px;
+  }
+
+  .horse-visualization .result-panel__eyebrow {
+    font-size: 0.68rem;
+  }
+
+  .horse-visualization .result-panel__heading h2 {
+    font-size: clamp(1.25rem, 2vw, 1.6rem);
+  }
+
+  .horse-course {
+    height: 220px;
+    margin-top: 12px;
+  }
+
+  .horse-course__start,
+  .horse-course__finish {
+    top: 16px;
+    font-size: 0.62rem;
+  }
+
+  .horse-course__finish::after {
+    height: 164px;
+  }
+
+  .horse-course__lane--standard,
+  .race-runner--standard {
+    bottom: 148px;
+  }
+
+  .horse-course__lane--user,
+  .race-runner--user {
+    bottom: 91px;
+  }
+
+  .horse-course__lane--fast,
+  .race-runner--fast {
+    bottom: 34px;
+  }
+
+  .horse-course__lane-label--standard {
+    bottom: 158px;
+  }
+
+  .horse-course__lane-label--user {
+    bottom: 101px;
+  }
+
+  .horse-course__lane-label--fast {
+    bottom: 44px;
+  }
+
+  .race-runner--standard,
+  .race-runner--fast {
+    --horse-width: 68px;
+  }
+
+  .race-runner--user {
+    --horse-width: 72px;
+  }
+
+  .horse-metrics {
+    margin-top: 12px;
+    gap: 24px;
+  }
+
+  .horse-metrics dd {
+    font-size: 0.86rem;
+  }
+}
+
+@media (min-width: 1440px) {
+  .site-shell {
+    width: min(1500px, calc(100% - clamp(64px, 5vw, 96px)));
+  }
+
+  .hero__dashboard {
+    grid-template-columns: minmax(450px, 0.41fr) minmax(620px, 0.59fr);
+    gap: 26px;
+  }
+
+  .horse-visualization {
+    padding: clamp(22px, 1.4vw, 24px);
+  }
+
+  .horse-visualization .result-panel__heading h2 {
+    font-size: clamp(1.32rem, 2vw, 1.72rem);
+  }
+
+  .horse-course {
+    height: clamp(260px, calc(3.125vw + 215px), 276px);
+    margin-top: 14px;
+  }
+
+  .horse-course__start,
+  .horse-course__finish {
+    font-size: 0.68rem;
+  }
+
+  .horse-course__finish::after {
+    height: calc(100% - 42px);
+  }
+
+  .horse-course__helper {
+    top: 20px;
+    font-size: 0.7rem;
+  }
+
+  .horse-course__lane--standard,
+  .race-runner--standard {
+    bottom: 185px;
+  }
+
+  .horse-course__lane--user,
+  .race-runner--user {
+    bottom: 110px;
+  }
+
+  .horse-course__lane--fast,
+  .race-runner--fast {
+    bottom: 35px;
+  }
+
+  .horse-course__lane-label--standard {
+    bottom: 195px;
+  }
+
+  .horse-course__lane-label--user {
+    bottom: 120px;
+  }
+
+  .horse-course__lane-label--fast {
+    bottom: 45px;
+  }
+
+  .race-runner--standard,
+  .race-runner--fast {
+    --horse-width: 74px;
+  }
+
+  .race-runner--user {
+    --horse-width: 79px;
+  }
+
+  .horse-metrics {
+    margin-top: 14px;
+    gap: 28px;
+  }
+
+  .horse-metrics dt {
+    font-size: 0.72rem;
+  }
+
+  .horse-metrics dd {
+    font-size: 0.94rem;
+  }
+}
+
 @media (max-width: 900px) {
   .hero {
     min-height: auto;
