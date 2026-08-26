@@ -27,6 +27,12 @@ html {
   scroll-behavior: smooth;
 }
 
+html.race-focus-lock,
+body.race-focus-lock {
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
 body {
   min-width: 320px;
   min-height: 100vh;
@@ -867,6 +873,199 @@ a:focus-visible {
   position: relative;
   min-width: 0;
   padding: 16px;
+}
+
+.horse-visualization__actions {
+  display: flex;
+  margin-left: auto;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.site-shell--race-focused [data-race-focus-background] {
+  pointer-events: none;
+  user-select: none;
+}
+
+.horse-visualization--focused {
+  position: fixed;
+  z-index: 100;
+  inset: 0;
+  width: 100vw;
+  max-width: none;
+  height: 100dvh;
+  min-height: 100dvh;
+  margin: 0;
+  padding:
+    max(24px, env(safe-area-inset-top))
+    max(24px, env(safe-area-inset-right))
+    max(24px, env(safe-area-inset-bottom))
+    max(24px, env(safe-area-inset-left));
+  overflow-y: auto;
+  border: 0;
+  border-radius: 0;
+  background:
+    radial-gradient(circle at 50% 28%, rgba(53, 185, 153, 0.12), transparent 38rem),
+    var(--background);
+  isolation: isolate;
+  overscroll-behavior: contain;
+  animation: race-focus-enter 200ms ease-out both;
+}
+
+@keyframes race-focus-enter {
+  from {
+    opacity: 0;
+    transform: scale(0.985);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.horse-visualization--focus-exiting {
+  pointer-events: none;
+  animation: race-focus-exit 200ms ease-in both;
+}
+
+@keyframes race-focus-exit {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  to {
+    opacity: 0;
+    transform: scale(0.985);
+  }
+}
+
+.horse-visualization--focused .result-panel__heading {
+  gap: 16px;
+}
+
+.horse-visualization--focused .result-panel__heading h2 {
+  font-size: clamp(1.45rem, 2.2vw, 1.9rem);
+}
+
+.horse-visualization--focused .horse-course {
+  height: clamp(390px, 58dvh, 620px);
+  margin-top: 14px;
+  --race-start: clamp(100px, 7vw, 126px);
+  --race-goal: calc(100% - clamp(100px, 7vw, 126px));
+}
+
+.horse-visualization--focused .horse-course__start,
+.horse-visualization--focused .horse-course__finish {
+  top: 20px;
+  font-size: clamp(0.7rem, 1vw, 0.82rem);
+}
+
+.horse-visualization--focused .horse-course__start {
+  left: 24px;
+}
+
+.horse-visualization--focused .horse-course__finish {
+  right: 24px;
+  height: calc(100% - 44px);
+}
+
+.horse-visualization--focused .horse-course__finish::after {
+  top: 22px;
+  height: calc(100% - 22px);
+}
+
+.horse-visualization--focused .horse-course__helper {
+  top: 24px;
+  font-size: clamp(0.72rem, 1vw, 0.88rem);
+}
+
+.horse-visualization--focused .horse-course__lane {
+  right: 20px;
+  left: calc(var(--race-start) - 10px);
+}
+
+.horse-visualization--focused .horse-course__lane--standard,
+.horse-visualization--focused .race-runner--standard {
+  bottom: 68%;
+}
+
+.horse-visualization--focused .horse-course__lane--user,
+.horse-visualization--focused .race-runner--user {
+  bottom: 44%;
+}
+
+.horse-visualization--focused .horse-course__lane--fast,
+.horse-visualization--focused .race-runner--fast {
+  bottom: 20%;
+}
+
+.horse-visualization--focused .horse-course__lane-label {
+  left: 18px;
+  width: calc(var(--race-start) - 28px);
+  font-size: clamp(0.52rem, 0.75vw, 0.66rem);
+}
+
+.horse-visualization--focused .horse-course__lane-label--standard {
+  bottom: calc(68% + 10px);
+}
+
+.horse-visualization--focused .horse-course__lane-label--user {
+  bottom: calc(44% + 10px);
+}
+
+.horse-visualization--focused .horse-course__lane-label--fast {
+  bottom: calc(20% + 10px);
+}
+
+.horse-visualization--focused .race-runner--standard,
+.horse-visualization--focused .race-runner--fast {
+  --horse-width: clamp(92px, 5.8vw, 110px);
+}
+
+.horse-visualization--focused .race-runner--user {
+  --horse-width: clamp(100px, 6.1vw, 118px);
+}
+
+.horse-visualization--focused .horse-metrics {
+  margin-top: 14px;
+  gap: 30px;
+}
+
+.horse-visualization--focused .horse-metrics dt {
+  font-size: clamp(0.72rem, 0.9vw, 0.82rem);
+}
+
+.horse-visualization--focused .horse-metrics dd {
+  font-size: clamp(0.92rem, 1.2vw, 1.08rem);
+}
+
+.horse-visualization--focused .race-results-cta {
+  min-height: 48px;
+  margin-top: 16px;
+}
+
+.horse-visualization--focused .goal-focus-front-view__lineup {
+  inset: 52px clamp(24px, 5vw, 72px) 0;
+}
+
+.horse-visualization--focused .front-unit .front-horse {
+  width: clamp(74px, 6vw, 96px);
+}
+
+.horse-visualization--focused .front-runner--user .front-horse {
+  width: clamp(80px, 6.4vw, 104px);
+}
+
+.horse-visualization--focused .front-jockey-jumper {
+  width: clamp(100px, 8vw, 134px);
+  --effective-front-jump-height: calc(var(--front-jump-height) * 1.55);
+}
+
+.horse-visualization--focused .front-runner--user .front-jockey-jumper {
+  width: clamp(106px, 8.4vw, 140px);
 }
 
 .horse-course {
@@ -2726,6 +2925,151 @@ a:focus-visible {
   }
 }
 
+@media (max-width: 760px) {
+  .horse-visualization--focused {
+    padding:
+      max(16px, env(safe-area-inset-top))
+      max(16px, env(safe-area-inset-right))
+      max(16px, env(safe-area-inset-bottom))
+      max(16px, env(safe-area-inset-left));
+  }
+
+  .horse-visualization--focused .result-panel__heading {
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .horse-visualization--focused .result-panel__heading h2 {
+    font-size: clamp(1.18rem, 5.5vw, 1.4rem);
+  }
+
+  .horse-visualization--focused .horse-visualization__actions {
+    gap: 6px;
+  }
+
+  .horse-visualization--focused .secondary-button {
+    padding: 8px 10px;
+    font-size: 0.68rem;
+  }
+
+  .horse-visualization--focused .horse-course {
+    height: clamp(240px, 44dvh, 420px);
+    margin-top: 12px;
+    --race-start: 78px;
+    --race-goal: calc(100% - 70px);
+  }
+
+  .horse-visualization--focused .horse-course__start,
+  .horse-visualization--focused .horse-course__finish {
+    top: 14px;
+    font-size: 0.6rem;
+  }
+
+  .horse-visualization--focused .horse-course__start {
+    left: 14px;
+  }
+
+  .horse-visualization--focused .horse-course__finish {
+    right: 14px;
+    height: calc(100% - 32px);
+  }
+
+  .horse-visualization--focused .horse-course__finish::after {
+    top: 18px;
+    height: calc(100% - 18px);
+  }
+
+  .horse-visualization--focused .horse-course__helper {
+    top: 17px;
+    max-width: calc(100% - 144px);
+    overflow: hidden;
+    font-size: 0.62rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .horse-visualization--focused .horse-course__lane {
+    right: 12px;
+    left: 68px;
+  }
+
+  .horse-visualization--focused .horse-course__lane-label {
+    left: 7px;
+    width: 54px;
+    font-size: 0.44rem;
+  }
+
+  .horse-visualization--focused .race-runner--standard,
+  .horse-visualization--focused .race-runner--fast {
+    --horse-width: clamp(58px, 16vw, 70px);
+  }
+
+  .horse-visualization--focused .race-runner--user {
+    --horse-width: clamp(62px, 17vw, 74px);
+  }
+
+  .horse-visualization--focused .horse-metrics {
+    margin-top: 12px;
+    align-items: baseline;
+    flex-direction: row;
+    gap: 18px;
+  }
+
+  .horse-visualization--focused .horse-metrics dt {
+    font-size: 0.68rem;
+  }
+
+  .horse-visualization--focused .horse-metrics dd {
+    font-size: 0.82rem;
+  }
+
+  .horse-visualization--focused .race-results-cta {
+    width: 100%;
+    min-height: 44px;
+    margin-top: 12px;
+  }
+
+  .horse-visualization--focused .goal-focus-front-view__lineup {
+    inset: 44px 12px 0;
+    gap: 4px;
+  }
+
+  .horse-visualization--focused .front-unit .front-horse {
+    width: clamp(54px, 15vw, 70px);
+  }
+
+  .horse-visualization--focused .front-runner--user .front-horse {
+    width: clamp(58px, 16vw, 74px);
+  }
+
+  .horse-visualization--focused .front-jockey-jumper {
+    width: clamp(68px, 20vw, 88px);
+    --effective-front-jump-height: calc(var(--front-jump-height) * 1.33);
+  }
+
+  .horse-visualization--focused .front-runner--user .front-jockey-jumper {
+    width: clamp(72px, 21vw, 92px);
+  }
+}
+
+@media (max-width: 760px) and (max-height: 620px) {
+  .horse-visualization--focused .horse-course {
+    height: clamp(250px, 52dvh, 300px);
+  }
+
+  .horse-visualization--focused .front-jockey-jumper {
+    --effective-front-jump-height: calc(var(--front-jump-height) * 1.15);
+  }
+
+  .horse-visualization--focused .result-panel__eyebrow {
+    font-size: 0.58rem;
+  }
+
+  .horse-visualization--focused .result-panel__heading h2 {
+    font-size: 1.08rem;
+  }
+}
+
 @media (max-width: 460px) {
   .hero__lead {
     max-width: 320px;
@@ -3009,6 +3353,14 @@ a:focus-visible {
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
+  }
+
+  .horse-visualization--focused {
+    animation: none;
+  }
+
+  .horse-visualization--focus-exiting {
+    animation: none;
   }
 
   *,

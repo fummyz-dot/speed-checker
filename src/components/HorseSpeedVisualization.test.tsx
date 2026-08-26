@@ -102,6 +102,46 @@ describe('HorseSpeedVisualization runner presentation', () => {
     expect(screen.queryByRole('link', { name: '詳しい測定結果を見る' })).not.toBeInTheDocument()
   })
 
+  it('集中時は同じレースcomponentをdialogとして表示し、縮小とEscapeを要求できる', () => {
+    const onRequestExitFocus = vi.fn()
+    const { container } = render(
+      <HorseSpeedVisualization
+        downloadMbps={null}
+        uploadMbps={null}
+        phase="idle"
+        result={null}
+        focused
+        onRequestExitFocus={onRequestExitFocus}
+      />,
+    )
+
+    const dialog = screen.getByRole('dialog', { name: '回線速度レース' })
+    expect(dialog).toHaveAttribute('aria-modal', 'true')
+    expect(container.querySelector('.horse-visualization')).toHaveClass('horse-visualization--focused')
+    expect(screen.getByRole('button', { name: '縮小' })).toHaveFocus()
+
+    fireEvent.keyDown(dialog, { key: 'Escape' })
+    fireEvent.click(screen.getByRole('button', { name: '縮小' }))
+    expect(onRequestExitFocus).toHaveBeenCalledTimes(2)
+  })
+
+  it('通常表示の測定中には、状態を保ったままレースを拡大できる', () => {
+    const onRequestFocus = vi.fn()
+    render(
+      <HorseSpeedVisualization
+        downloadMbps={120}
+        uploadMbps={null}
+        phase="download"
+        result={null}
+        onRequestFocus={onRequestFocus}
+      />,
+    )
+
+    fireEvent.click(screen.getByRole('button', { name: 'レースを拡大' }))
+    expect(onRequestFocus).toHaveBeenCalledTimes(1)
+    expect(screen.queryByRole('dialog', { name: '回線速度レース' })).not.toBeInTheDocument()
+  })
+
   it('横レースのレーン順を維持し、正面では承認済みの騎手・馬画像をオグリキャップ・あなた・地方馬の順にする', () => {
     const { container } = render(
       <HorseSpeedVisualization downloadMbps={120} uploadMbps={80} phase="complete" result={result} />,
@@ -292,5 +332,46 @@ describe('HorseSpeedVisualization runner presentation', () => {
     startRace()
     expect(course()).toHaveAttribute('data-animation-state', 'running')
     expect(container.querySelectorAll('.race-runner--racing')).toHaveLength(3)
+  })
+
+  it('集中画面ではreplay、詳細CTA、Tab循環を既存レースstateを保って扱う', () => {
+    const onRequestFocus = vi.fn()
+    const onShowDetails = vi.fn()
+    const onRequestExitFocus = vi.fn()
+    const { container } = render(
+      <HorseSpeedVisualization
+        downloadMbps={120}
+        uploadMbps={80}
+        phase="complete"
+        result={result}
+        focused
+        onRequestFocus={onRequestFocus}
+        onShowDetails={onShowDetails}
+        onRequestExitFocus={onRequestExitFocus}
+      />,
+    )
+    const course = () => container.querySelector('.horse-course')
+    const dialog = screen.getByRole('dialog', { name: '回線速度レース' })
+
+    startRace()
+    act(() => vi.advanceTimersByTime(13_500))
+    act(() => vi.advanceTimersByTime(FRONT_VIEW_TRANSITION_DURATION_MS))
+    act(() => vi.advanceTimersByTime(GROUP_JUMP_DURATION_MS))
+    expect(course()).toHaveAttribute('data-animation-state', 'finished')
+
+    const detailsLink = screen.getByRole('link', { name: '詳しい測定結果を見る' })
+    const replayButton = screen.getByRole('button', { name: 'もう一度見る' })
+    detailsLink.focus()
+    fireEvent.keyDown(dialog, { key: 'Tab' })
+    expect(replayButton).toHaveFocus()
+    fireEvent.keyDown(dialog, { key: 'Tab', shiftKey: true })
+    expect(detailsLink).toHaveFocus()
+
+    fireEvent.click(detailsLink)
+    expect(onShowDetails).toHaveBeenCalledTimes(1)
+    fireEvent.click(replayButton)
+    expect(onRequestFocus).toHaveBeenCalledTimes(1)
+    expect(course()).toHaveAttribute('data-animation-state', 'idle')
+    expect(onRequestExitFocus).not.toHaveBeenCalled()
   })
 })

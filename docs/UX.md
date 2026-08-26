@@ -94,6 +94,14 @@ Behavioral intent:
 
 A horse implementation should preserve this lifecycle unless the design task explicitly revises it.
 
+## Race focus mode
+
+When a user starts a measurement, the existing race component enters a viewport-sized focus mode immediately. This is a presentation mode only: it does not use the Fullscreen API and does not create a second race component, so the active measurement, race state, and timers continue unchanged.
+
+Focus mode is modal-like: the background cannot be scrolled or interacted with, keyboard focus stays within the race controls, and Escape or the always-visible 「縮小」 control returns to the normal layout without stopping measurement. After a manual shrink, later measurement phases must not reopen it automatically; the user may choose 「レースを拡大」 while a measurement or completed race is available.
+
+The mode remains open through the front-view goal sequence and finished state. Its explicit exits are replay, shrink, an error return to the normal error UI, or the user selecting 「詳しい測定結果を見る」. The details CTA releases focus mode and moves to the details heading; it must never auto-scroll otherwise. The focused layout is responsive from desktop to narrow mobile, accounts for safe-area insets, and remains available with reduced motion while its focus enter/exit transition is minimized.
+
 ## Preferred horse animation technique
 
 Primary recommendation:

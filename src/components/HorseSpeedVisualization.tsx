@@ -1,4 +1,4 @@
-import type { CSSProperties } from 'react'
+import { useEffect, useRef, type CSSProperties, type KeyboardEvent, type MouseEvent } from 'react'
 import {
   GROUP_JUMP_DURATION_MS,
   useHorseRaceAnimation,
@@ -21,6 +21,11 @@ interface HorseSpeedVisualizationProps {
   confirmedDownloadMbps?: number | null
   phase: TestPhase
   result: SpeedMeasurementResult | null
+  focused?: boolean
+  focusExiting?: boolean
+  onRequestFocus?: () => void
+  onRequestExitFocus?: () => void
+  onShowDetails?: () => void
 }
 
 type RaceStyle = CSSProperties & {
@@ -37,7 +42,7 @@ type RaceStyle = CSSProperties & {
 const getHelperText = (state: HorseRaceState, hasUploadResult: boolean): string => {
   switch (state) {
     case 'idle': return '測定開始を待っています'
-    case 'measuringDownload': return 'ダウンロード測定中…'
+    case 'measuringDownload': return 'レイテンシを測定中…'
     case 'warmingUp': return 'ダウンロード測定中・ウォームアップ走行中…'
     case 'running': return hasUploadResult ? 'レース進行中' : 'レース進行中・アップロード測定中…'
     case 'waitingForAllFinish': return '先着馬はゴールで待機中…'
@@ -53,7 +58,13 @@ export const HorseSpeedVisualization = ({
   confirmedDownloadMbps = null,
   phase,
   result,
+  focused = false,
+  focusExiting = false,
+  onRequestFocus,
+  onRequestExitFocus,
+  onShowDetails,
 }: HorseSpeedVisualizationProps) => {
+  const raceContainerRef = useRef<HTMLElement | null>(null)
   const {
     state,
     userRunDuration,
@@ -99,6 +110,66 @@ export const HorseSpeedVisualization = ({
     || state === 'finished'
   const showUploadResult = result !== null
     && (state === 'groupJumpFrontView' || state === 'finished')
+  const canRequestFocus = phase !== 'idle' && phase !== 'error'
+
+  const getFocusableElements = () => {
+    const container = raceContainerRef.current
+    if (!container) return []
+    return [...container.querySelectorAll<HTMLElement>(
+      'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+    )].filter((element) => element.getAttribute('aria-hidden') !== 'true')
+  }
+
+  useEffect(() => {
+    if (!focused) return
+    const container = raceContainerRef.current
+    if (!container) return
+    const closeButton = container.querySelector<HTMLElement>('[data-race-focus-close]')
+    const focusTarget = closeButton ?? getFocusableElements()[0] ?? container
+    focusTarget.focus()
+  }, [focused])
+
+  const handleFocusedKeyDown = (event: KeyboardEvent<HTMLElement>) => {
+    if (!focused) return
+
+    if (event.key === 'Escape') {
+      event.preventDefault()
+      onRequestExitFocus?.()
+      return
+    }
+
+    if (event.key !== 'Tab') return
+    const focusableElements = getFocusableElements()
+    const container = raceContainerRef.current
+    if (!container || focusableElements.length === 0) {
+      event.preventDefault()
+      container?.focus()
+      return
+    }
+
+    const first = focusableElements[0]
+    const last = focusableElements[focusableElements.length - 1]
+    const activeElement = document.activeElement
+    if (event.shiftKey && (activeElement === first || !container.contains(activeElement))) {
+      event.preventDefault()
+      last.focus()
+    } else if (!event.shiftKey && (activeElement === last || !container.contains(activeElement))) {
+      event.preventDefault()
+      first.focus()
+    }
+  }
+
+  const handleReplay = () => {
+    onRequestFocus?.()
+    replay()
+  }
+
+  const handleShowDetails = (event: MouseEvent<HTMLAnchorElement>) => {
+    if (!focused || !onShowDetails) return
+    event.preventDefault()
+    onShowDetails()
+  }
+
   const getRunnerStateClass = (horse: HorseId): string => {
     if (frontViewIsActive) return 'race-runner--finished'
     if (hasFinished[horse]) return 'race-runner--waiting'
@@ -107,7 +178,15 @@ export const HorseSpeedVisualization = ({
   }
 
   return (
-    <section className="result-panel horse-visualization" aria-labelledby="horse-title">
+    <section
+      ref={raceContainerRef}
+      className={`result-panel horse-visualization${focused ? ' horse-visualization--focused' : ''}${focusExiting ? ' horse-visualization--focus-exiting' : ''}`}
+      aria-labelledby="horse-title"
+      role={focused ? 'dialog' : undefined}
+      aria-modal={focused || undefined}
+      tabIndex={focused ? -1 : undefined}
+      onKeyDown={handleFocusedKeyDown}
+    >
       <div className="result-panel__heading">
         <div>
           <span className="result-panel__eyebrow">SPEED RACE</span>
@@ -120,9 +199,31 @@ export const HorseSpeedVisualization = ({
             <small>Mbps</small>
           </div>
         )}
-        <button className="secondary-button" type="button" onClick={replay} disabled={!canReplay}>
-          もう一度見る
-        </button>
+        <div className="horse-visualization__actions">
+          {!focused && canRequestFocus && (
+            <button
+              className="secondary-button horse-visualization__expand"
+              data-race-focus-expand
+              type="button"
+              onClick={onRequestFocus}
+            >
+              レースを拡大
+            </button>
+          )}
+          <button className="secondary-button" type="button" onClick={handleReplay} disabled={!canReplay}>
+            もう一度見る
+          </button>
+          {focused && (
+            <button
+              className="secondary-button horse-visualization__shrink"
+              data-race-focus-close
+              type="button"
+              onClick={onRequestExitFocus}
+            >
+              縮小
+            </button>
+          )}
+        </div>
       </div>
 
       <div
@@ -197,7 +298,7 @@ export const HorseSpeedVisualization = ({
         </div>
       </dl>
       {state === 'finished' && (
-        <a className="race-results-cta" href="#measurement-results">
+        <a className="race-results-cta" href="#measurement-results" onClick={handleShowDetails}>
           <span>詳しい測定結果を見る</span>
           <span className="race-results-cta__arrow" aria-hidden="true">↓</span>
         </a>

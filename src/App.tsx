@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { Brand } from './components/Brand'
 import { CompletedMeasurement } from './components/CompletedMeasurement'
 import { ConnectionInfo } from './components/ConnectionInfo'
@@ -18,6 +18,13 @@ import { normalizeConditionLabel } from './lib/measurementValidation'
 const getInitialConditionLabel = (): string | null =>
   normalizeConditionLabel(loadMeasurements()[0]?.conditionLabel)
 
+const RACE_FOCUS_TRANSITION_MS = 200
+
+interface RaceFocusExitRequest {
+  shouldRestoreFocus: boolean
+  afterExit?: () => void
+}
+
 function App() {
   const {
     metrics,
@@ -30,6 +37,11 @@ function App() {
   } = useSpeedTest()
   const [conditionLabel, setConditionLabel] = useState<string | null>(getInitialConditionLabel)
   const [isConditionEditing, setIsConditionEditing] = useState(false)
+  const [isRaceFocused, setIsRaceFocused] = useState(false)
+  const [isRaceFocusExiting, setIsRaceFocusExiting] = useState(false)
+  const focusReturnTargetRef = useRef<HTMLElement | null>(null)
+  const raceFocusExitTimerRef = useRef<number | null>(null)
+  const pendingRaceFocusExitRef = useRef<RaceFocusExitRequest | null>(null)
   const displayedDownload = formatFinalSpeedDisplay(confirmedDownloadMbps)
   const hasStarted = phase !== 'idle'
   const buttonLabel = isRunning
@@ -37,21 +49,100 @@ function App() {
     : phase === 'complete' || phase === 'error'
       ? 'もう一度測定'
       : '測定開始'
+
+  const requestRaceFocus = useCallback(() => {
+    if (!isRaceFocused) {
+      const activeElement = document.activeElement
+      focusReturnTargetRef.current = activeElement instanceof HTMLElement ? activeElement : null
+    }
+    setIsRaceFocused(true)
+  }, [isRaceFocused])
+
+  const exitRaceFocus = useCallback((shouldRestoreFocus = true, afterExit?: () => void) => {
+    if (!isRaceFocused) {
+      afterExit?.()
+      return
+    }
+    if (isRaceFocusExiting) return
+
+    setIsRaceFocusExiting(true)
+    raceFocusExitTimerRef.current = window.setTimeout(() => {
+      raceFocusExitTimerRef.current = null
+      pendingRaceFocusExitRef.current = { shouldRestoreFocus, afterExit }
+      setIsRaceFocused(false)
+      setIsRaceFocusExiting(false)
+    }, RACE_FOCUS_TRANSITION_MS)
+  }, [isRaceFocusExiting, isRaceFocused])
+
+  const showMeasurementDetails = useCallback(() => {
+    exitRaceFocus(false, () => {
+      document.getElementById('measurement-results')?.scrollIntoView({ block: 'start' })
+      document.getElementById('results-title')?.focus({ preventScroll: true })
+    })
+  }, [exitRaceFocus])
+
+  useEffect(() => {
+    if (!isRaceFocused) return
+    document.documentElement.classList.add('race-focus-lock')
+    document.body.classList.add('race-focus-lock')
+    return () => {
+      document.documentElement.classList.remove('race-focus-lock')
+      document.body.classList.remove('race-focus-lock')
+    }
+  }, [isRaceFocused])
+
+  useEffect(() => {
+    if (isRaceFocused) return
+    const exitRequest = pendingRaceFocusExitRef.current
+    if (!exitRequest) return
+    pendingRaceFocusExitRef.current = null
+
+    exitRequest.afterExit?.()
+    if (!exitRequest.shouldRestoreFocus) return
+    const target = focusReturnTargetRef.current
+    if (target?.isConnected && !target.matches(':disabled')) {
+      target.focus()
+      return
+    }
+    document.querySelector<HTMLElement>('[data-race-focus-expand]')?.focus()
+  }, [isRaceFocused])
+
+  useEffect(() => () => {
+    if (raceFocusExitTimerRef.current !== null) {
+      window.clearTimeout(raceFocusExitTimerRef.current)
+    }
+  }, [])
+
+  useEffect(() => {
+    if (phase === 'error') exitRaceFocus()
+  }, [exitRaceFocus, phase])
+
   const startMeasurement = () => {
     if (isConditionEditing) return
+    requestRaceFocus()
     start({ conditionLabel })
   }
 
   return (
-    <div className="site-shell">
-      <header className="site-header">
+    <div className={`site-shell${isRaceFocused ? ' site-shell--race-focused' : ''}`}>
+      <header
+        className="site-header"
+        data-race-focus-background
+        aria-hidden={isRaceFocused || undefined}
+        inert={isRaceFocused}
+      >
         <Brand />
         <span className="site-header__tag">Network performance test</span>
       </header>
 
       <main>
         <section className="hero" aria-labelledby="page-title">
-          <div className="hero__intro">
+          <div
+            className="hero__intro"
+            data-race-focus-background
+            aria-hidden={isRaceFocused || undefined}
+            inert={isRaceFocused}
+          >
             <div className="hero__eyebrow">YOUR CONNECTION</div>
             <h1 id="page-title">インターネット速度を、シンプルに。</h1>
             <p className="hero__lead">
@@ -60,7 +151,12 @@ function App() {
           </div>
 
           <div className="hero__dashboard">
-            <div className="hero__controls">
+            <div
+              className="hero__controls"
+              data-race-focus-background
+              aria-hidden={isRaceFocused || undefined}
+              inert={isRaceFocused}
+            >
               <ConnectionInfo />
 
               <MeasurementConditionSelector
@@ -116,15 +212,27 @@ function App() {
               confirmedDownloadMbps={confirmedDownloadMbps}
               phase={phase}
               result={completedResult}
+              focused={isRaceFocused}
+              focusExiting={isRaceFocusExiting}
+              onRequestFocus={requestRaceFocus}
+              onRequestExitFocus={exitRaceFocus}
+              onShowDetails={showMeasurementDetails}
             />
           </div>
         </section>
 
-        <section className="results" id="measurement-results" aria-labelledby="results-title">
+        <section
+          className="results"
+          id="measurement-results"
+          aria-labelledby="results-title"
+          data-race-focus-background
+          aria-hidden={isRaceFocused || undefined}
+          inert={isRaceFocused}
+        >
           <div className="section-heading">
             <div>
               <span>DETAILS</span>
-              <h2 id="results-title">回線品質の詳細</h2>
+              <h2 id="results-title" tabIndex={-1}>回線品質の詳細</h2>
             </div>
             <p>速度は高いほど、レイテンシとジッターは低いほど快適です。</p>
           </div>
@@ -134,10 +242,17 @@ function App() {
           )}
         </section>
 
-        <Notice />
+        <div data-race-focus-background aria-hidden={isRaceFocused || undefined} inert={isRaceFocused}>
+          <Notice />
+        </div>
       </main>
 
-      <footer className="site-footer">
+      <footer
+        className="site-footer"
+        data-race-focus-background
+        aria-hidden={isRaceFocused || undefined}
+        inert={isRaceFocused}
+      >
         <span>© {new Date().getFullYear()} Speed Checker</span>
         <div className="site-footer__links">
           <a href="https://github.com/fummyz-dot/speed-checker" target="_blank" rel="noreferrer noopener">
