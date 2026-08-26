@@ -145,6 +145,10 @@ a:focus-visible {
   line-height: 1.45;
 }
 
+.hero__lead-mobile-break {
+  display: none;
+}
+
 .hero__dashboard {
   display: grid;
   align-items: stretch;
@@ -2888,10 +2892,16 @@ a:focus-visible {
 
   .test-button {
     width: auto;
-    min-width: 188px;
-    min-height: 56px;
-    margin-top: 20px;
-    padding: 15px 24px;
+    min-width: 160px;
+    min-height: 48px;
+    margin-top: 14px;
+    padding: 11px 18px;
+    font-size: 0.94rem;
+    gap: 16px;
+  }
+
+  .hero__lead-mobile-break {
+    display: block;
   }
 
   .button-hint {
@@ -3004,7 +3014,7 @@ a:focus-visible {
   }
 
   .test-button {
-    margin-top: 16px;
+    margin-top: 12px;
   }
 }
 

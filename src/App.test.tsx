@@ -65,10 +65,11 @@ describe('App', () => {
   afterEach(() => vi.unstubAllGlobals())
 
   it('h1を1件だけ正しい文言で表示する', () => {
-    render(<App />)
+    const { container } = render(<App />)
     expect(screen.getAllByRole('heading', { level: 1 })).toHaveLength(1)
     expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('インターネット速度を、シンプルに。')
     expect(document.getElementById('measurement-results')).toHaveAttribute('aria-labelledby', 'results-title')
+    expect(container.querySelector('.hero__lead-mobile-break')).toBeInTheDocument()
   })
 
   it('測定前から開始ボタンとidle状態の馬コースを表示する', () => {

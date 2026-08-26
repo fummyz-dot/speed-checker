@@ -204,7 +204,9 @@ function App() {
             <div className="hero__eyebrow">YOUR CONNECTION</div>
             <h1 id="page-title">インターネット速度を、シンプルに。</h1>
             <p className="hero__lead">
-              現在の回線品質をCloudflareのエッジネットワークで測定します。
+              現在の回線品質をCloudflareの
+              <br className="hero__lead-mobile-break" />
+              エッジネットワークで測定します。
             </p>
           </div>
 
