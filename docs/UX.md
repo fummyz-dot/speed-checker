@@ -100,6 +100,12 @@ Behavioral intent:
 
 A horse implementation should preserve this lifecycle unless the design task explicitly revises it.
 
+## Measurement visibility and race recovery
+
+Users should keep this page open while a measurement is in progress. If the page is hidden during an active measurement, the measurement is stopped and shown as an error rather than presented as a comparable result. Where supported, Screen Wake Lock is requested as a best-effort aid while measuring; it is optional, can fail silently, and does not change the hidden-page interruption policy.
+
+After the measurement is complete, the race may continue as presentation while the result remains valid. Race progress is derived from wall-clock elapsed time, not from timer delivery alone. When the page becomes visible again, horses, the front-view transition, and the group jump catch up to the elapsed point; a long absence may therefore show the finished state immediately. 「もう一度見る」 starts a fresh race timeline so the completed presentation can be watched again.
+
 ## Race focus mode
 
 When a user starts a measurement, the existing race component enters a viewport-sized focus mode immediately. This is a presentation mode only: it does not use the Fullscreen API and does not create a second race component, so the active measurement, race state, and timers continue unchanged.

@@ -51,6 +51,18 @@ const toErrorMessage = (error: unknown): string => {
   return '速度を測定できませんでした。通信状況を確認して、もう一度お試しください。'
 }
 
+const VISIBILITY_INTERRUPTION_ERROR = '測定中に画面を離れたため、今回の測定を中断しました。正確に比較するため、画面を開いたままもう一度測定してください。'
+
+interface WakeLockSentinelLike {
+  release: () => Promise<void>
+}
+
+interface WakeLockNavigator {
+  wakeLock?: {
+    request: (type: 'screen') => Promise<WakeLockSentinelLike>
+  }
+}
+
 export interface UseSpeedTestResult {
   metrics: SpeedTestMetrics
   phase: TestPhase
@@ -68,7 +80,9 @@ export interface StartSpeedTestOptions {
 export const useSpeedTest = (): UseSpeedTestResult => {
   const engineRef = useRef<SpeedTest | null>(null)
   const runIdRef = useRef(0)
+  const activeRunIdRef = useRef<number | null>(null)
   const mountedRef = useRef(true)
+  const wakeLockRef = useRef<WakeLockSentinelLike | null>(null)
   const confirmedDownloadRef = useRef<number | null>(null)
   const runConditionLabelRef = useRef<string | null>(null)
   const [metrics, setMetrics] = useState<SpeedTestMetrics>(EMPTY_METRICS)
@@ -78,16 +92,64 @@ export const useSpeedTest = (): UseSpeedTestResult => {
   const [completedResult, setCompletedResult] = useState<SpeedMeasurementResult | null>(null)
   const [confirmedDownloadMbps, setConfirmedDownloadMbps] = useState<number | null>(null)
 
+  const releaseWakeLock = useCallback(() => {
+    const wakeLock = wakeLockRef.current
+    wakeLockRef.current = null
+    if (!wakeLock) return
+    void wakeLock.release().catch(() => undefined)
+  }, [])
+
+  const requestWakeLock = useCallback((runId: number) => {
+    if (typeof navigator === 'undefined') return
+    const wakeLock = (navigator as Navigator & WakeLockNavigator).wakeLock
+    if (!wakeLock) return
+
+    try {
+      void wakeLock.request('screen')
+        .then((sentinel) => {
+          if (mountedRef.current && activeRunIdRef.current === runId) {
+            wakeLockRef.current = sentinel
+            return
+          }
+          void sentinel.release().catch(() => undefined)
+        })
+        .catch(() => undefined)
+    } catch {
+      // Wake Lock is optional. Its failure must not affect measurement.
+    }
+  }, [])
+
   const stopCurrentTest = useCallback(() => {
     runIdRef.current += 1
+    activeRunIdRef.current = null
     engineRef.current?.pause()
     engineRef.current = null
-  }, [])
+    releaseWakeLock()
+  }, [releaseWakeLock])
+
+  const interruptForVisibility = useCallback(() => {
+    if (!mountedRef.current || activeRunIdRef.current === null) return
+
+    runIdRef.current += 1
+    activeRunIdRef.current = null
+    engineRef.current?.pause()
+    engineRef.current = null
+    releaseWakeLock()
+    confirmedDownloadRef.current = null
+    runConditionLabelRef.current = null
+    setMetrics(EMPTY_METRICS)
+    setCompletedResult(null)
+    setConfirmedDownloadMbps(null)
+    setError(VISIBILITY_INTERRUPTION_ERROR)
+    setPhase('error')
+    setIsRunning(false)
+  }, [releaseWakeLock])
 
   const start = useCallback((options?: StartSpeedTestOptions) => {
     stopCurrentTest()
 
     const runId = runIdRef.current
+    activeRunIdRef.current = runId
     runConditionLabelRef.current = normalizeConditionLabel(options?.conditionLabel)
     setMetrics(EMPTY_METRICS)
     setCompletedResult(null)
@@ -96,6 +158,7 @@ export const useSpeedTest = (): UseSpeedTestResult => {
     setError(null)
     setPhase('latency')
     setIsRunning(true)
+    requestWakeLock(runId)
 
     const isCurrentRun = () => mountedRef.current && runIdRef.current === runId
 
@@ -143,7 +206,9 @@ export const useSpeedTest = (): UseSpeedTestResult => {
         setPhase(measurement ? 'complete' : 'error')
         setError(measurement ? null : '速度の測定値を取得できませんでした。もう一度お試しください。')
         setIsRunning(false)
+        activeRunIdRef.current = null
         engineRef.current = null
+        releaseWakeLock()
       }
 
       engine.onError = (message) => {
@@ -152,7 +217,9 @@ export const useSpeedTest = (): UseSpeedTestResult => {
         setError(toErrorMessage(message))
         setPhase('error')
         setIsRunning(false)
+        activeRunIdRef.current = null
         engineRef.current = null
+        releaseWakeLock()
       }
 
       engine.play()
@@ -163,8 +230,23 @@ export const useSpeedTest = (): UseSpeedTestResult => {
       setError(toErrorMessage(caughtError))
       setPhase('error')
       setIsRunning(false)
+      activeRunIdRef.current = null
+      releaseWakeLock()
     }
-  }, [stopCurrentTest])
+  }, [releaseWakeLock, requestWakeLock, stopCurrentTest])
+
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'hidden') interruptForVisibility()
+    }
+
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    window.addEventListener('pagehide', interruptForVisibility)
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+      window.removeEventListener('pagehide', interruptForVisibility)
+    }
+  }, [interruptForVisibility])
 
   useEffect(() => {
     mountedRef.current = true

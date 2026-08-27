@@ -1291,6 +1291,7 @@ a:focus-visible {
   --saddle-color: #4c5967;
   --number-color: #e9edf0;
   --race-duration: var(--standard-duration);
+  --race-start-progress: var(--standard-start-progress);
   --stride-duration: 820ms;
 }
 
@@ -1308,6 +1309,7 @@ a:focus-visible {
   --saddle-color: #527fa9;
   --number-color: #f5f8fa;
   --race-duration: var(--fast-duration);
+  --race-start-progress: var(--fast-start-progress);
   --stride-duration: 720ms;
 }
 
@@ -1325,6 +1327,7 @@ a:focus-visible {
   --saddle-color: #4fc4ab;
   --number-color: #11231f;
   --race-duration: var(--user-duration);
+  --race-start-progress: var(--user-start-progress);
   --stride-duration: 780ms;
 }
 
@@ -1599,6 +1602,24 @@ a:focus-visible {
   transform: translateY(0) scale(1);
 }
 
+.horse-course--transitionToFrontView .goal-focus-front-view {
+  animation: front-view-enter var(--front-transition-duration) cubic-bezier(0.22, 0.7, 0.3, 1) both;
+  animation-delay: calc(-1 * var(--front-transition-elapsed));
+  transition: none;
+}
+
+@keyframes front-view-enter {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.985);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
 .goal-focus-front-view::before {
   position: absolute;
   inset: 0;
@@ -1749,6 +1770,7 @@ a:focus-visible {
 
 .horse-course--groupJumpFrontView .front-runner__shadow {
   animation: front-runner-shadow var(--group-jump-duration) linear both;
+  animation-delay: calc(-1 * var(--group-jump-elapsed));
 }
 
 @keyframes front-runner-shadow {
@@ -1798,6 +1820,7 @@ a:focus-visible {
 
 .horse-course--groupJumpFrontView .front-jockey-jumper {
   animation: front-jockey-jump var(--group-jump-duration) linear both;
+  animation-delay: calc(-1 * var(--group-jump-elapsed));
 }
 
 .front-jockey-image {

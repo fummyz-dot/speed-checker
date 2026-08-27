@@ -3,7 +3,12 @@ import {
   getReferenceHorseDurations,
   getUserHorseRunDuration,
 } from '../lib/horseVisualization'
-import type { HorseId } from '../lib/horseRaceLanes'
+import {
+  deriveRaceTimelineSnapshot,
+  type HorseRaceTimelineState,
+  type HorseTimelineFinishState,
+  type HorseTimelineValues,
+} from '../lib/raceTimeline'
 import type { SpeedMeasurementResult } from '../types/measurement'
 import type { TestPhase } from '../types/speedTest'
 
@@ -11,18 +16,27 @@ export type HorseRaceState =
   | 'idle'
   | 'measuringDownload'
   | 'warmingUp'
-  | 'running'
-  | 'waitingForAllFinish'
-  | 'transitionToFrontView'
-  | 'groupJumpFrontView'
-  | 'finished'
+  | HorseRaceTimelineState
 
-export type HorseFinishState = Record<HorseId, boolean>
+export type HorseFinishState = HorseTimelineFinishState
 
 interface UseHorseRaceAnimationOptions {
   phase: TestPhase
   downloadMbps: number | null
   result: SpeedMeasurementResult | null
+}
+
+interface RaceTimeline {
+  raceStartedAtMs: number
+  startProgress: number
+  horseDurationsMs: HorseTimelineValues
+  resultAvailableAtMs: number | null
+}
+
+interface PendingRaceStart {
+  raceStartedAtMs: number
+  measuredDownload: number
+  resultAvailableAtMs: number | null
 }
 
 const EMPTY_FINISH_STATE: HorseFinishState = {
@@ -31,13 +45,25 @@ const EMPTY_FINISH_STATE: HorseFinishState = {
   user: false,
 }
 
+const EMPTY_PROGRESS: HorseTimelineValues = {
+  standard: 0,
+  fast: 0,
+  user: 0,
+}
+
+const EMPTY_REMAINING_DURATION: HorseTimelineValues = {
+  standard: 0,
+  fast: 0,
+  user: 0,
+}
+
 export const FRONT_VIEW_TRANSITION_DURATION_MS = 520
 export const GROUP_JUMP_DURATION_MS = 1_800
 export const WARMUP_MAX_PROGRESS = 0.15
 export const WARMUP_DURATION_MS = 12_000
 
-const allHorsesFinished = (finishState: HorseFinishState): boolean =>
-  finishState.standard && finishState.fast && finishState.user
+const isDocumentHidden = (): boolean =>
+  typeof document !== 'undefined' && document.visibilityState === 'hidden'
 
 export const useHorseRaceAnimation = ({
   phase,
@@ -46,105 +72,168 @@ export const useHorseRaceAnimation = ({
 }: UseHorseRaceAnimationOptions) => {
   const [state, setState] = useState<HorseRaceState>('idle')
   const [hasFinished, setHasFinished] = useState<HorseFinishState>(EMPTY_FINISH_STATE)
-  const [userRunDuration, setUserRunDuration] = useState(() => getUserHorseRunDuration(0))
+  const [horseProgress, setHorseProgress] = useState<HorseTimelineValues>(EMPTY_PROGRESS)
+  const [remainingDurationsMs, setRemainingDurationsMs] = useState<HorseTimelineValues>(
+    EMPTY_REMAINING_DURATION,
+  )
   const [referenceDurations, setReferenceDurations] = useState(getReferenceHorseDurations)
-  const [raceStartProgress, setRaceStartProgress] = useState(0)
+  const [userRunDuration, setUserRunDuration] = useState(() => getUserHorseRunDuration(0))
+  const [frontTransitionElapsedMs, setFrontTransitionElapsedMs] = useState(0)
+  const [groupJumpElapsedMs, setGroupJumpElapsedMs] = useState(0)
   const [raceSequence, setRaceSequence] = useState(0)
-  const [raceTimersActive, setRaceTimersActive] = useState(false)
-  const animationFrameRef = useRef<number | null>(null)
-  const cameraResetTimerRef = useRef<number | null>(null)
   const previousPhaseRef = useRef<TestPhase>('idle')
-  const resultRef = useRef(result)
-  const raceStartedRef = useRef(false)
-  const finishStateRef = useRef<HorseFinishState>(EMPTY_FINISH_STATE)
   const warmupStartedAtRef = useRef<number | null>(null)
+  const timelineRef = useRef<RaceTimeline | null>(null)
+  const pendingRaceStartRef = useRef<PendingRaceStart | null>(null)
+  const timelineTimerRef = useRef<number | null>(null)
+  const synchronizeTimelineRef = useRef<() => void>(() => undefined)
+  const resultRef = useRef(result)
 
   resultRef.current = result
 
-  const cancelScheduledStart = useCallback(() => {
-    if (animationFrameRef.current !== null) {
-      window.cancelAnimationFrame(animationFrameRef.current)
-      animationFrameRef.current = null
-    }
-    if (cameraResetTimerRef.current !== null) {
-      window.clearTimeout(cameraResetTimerRef.current)
-      cameraResetTimerRef.current = null
+  const cancelScheduledUpdate = useCallback(() => {
+    if (timelineTimerRef.current !== null) {
+      window.clearTimeout(timelineTimerRef.current)
+      timelineTimerRef.current = null
     }
   }, [])
+
+  const resetRace = useCallback((nextState: Extract<HorseRaceState, 'idle' | 'measuringDownload' | 'warmingUp'>) => {
+    cancelScheduledUpdate()
+    timelineRef.current = null
+    pendingRaceStartRef.current = null
+    setHasFinished(EMPTY_FINISH_STATE)
+    setHorseProgress(EMPTY_PROGRESS)
+    setRemainingDurationsMs(EMPTY_REMAINING_DURATION)
+    setReferenceDurations(getReferenceHorseDurations())
+    setUserRunDuration(getUserHorseRunDuration(0))
+    setFrontTransitionElapsedMs(0)
+    setGroupJumpElapsedMs(0)
+    setState(nextState)
+    setRaceSequence((sequence) => sequence + 1)
+  }, [cancelScheduledUpdate])
+
+  const synchronizeTimeline = useCallback(() => {
+    cancelScheduledUpdate()
+    if (isDocumentHidden()) return
+
+    const nowMs = Date.now()
+    const pendingRaceStart = pendingRaceStartRef.current
+    if (pendingRaceStart) {
+      if (nowMs < pendingRaceStart.raceStartedAtMs) {
+        timelineTimerRef.current = window.setTimeout(
+          () => synchronizeTimelineRef.current(),
+          Math.max(0, Math.ceil(pendingRaceStart.raceStartedAtMs - nowMs)),
+        )
+        return
+      }
+
+      const reference = getReferenceHorseDurations()
+      timelineRef.current = {
+        raceStartedAtMs: pendingRaceStart.raceStartedAtMs,
+        startProgress: 0,
+        horseDurationsMs: {
+          standard: reference.standard * 1_000,
+          fast: reference.fast * 1_000,
+          user: getUserHorseRunDuration(pendingRaceStart.measuredDownload) * 1_000,
+        },
+        resultAvailableAtMs: pendingRaceStart.resultAvailableAtMs,
+      }
+      pendingRaceStartRef.current = null
+    }
+
+    const timeline = timelineRef.current
+    if (!timeline) return
+
+    const snapshot = deriveRaceTimelineSnapshot({
+      nowMs,
+      raceStartedAtMs: timeline.raceStartedAtMs,
+      startProgress: timeline.startProgress,
+      horseDurationsMs: timeline.horseDurationsMs,
+      resultAvailableAtMs: timeline.resultAvailableAtMs,
+      frontViewTransitionDurationMs: FRONT_VIEW_TRANSITION_DURATION_MS,
+      groupJumpDurationMs: GROUP_JUMP_DURATION_MS,
+    })
+
+    setState(snapshot.state)
+    setHasFinished(snapshot.finished)
+    setHorseProgress(snapshot.progress)
+    setRemainingDurationsMs(snapshot.remainingDurationsMs)
+    setReferenceDurations({
+      standard: snapshot.remainingDurationsMs.standard / 1_000,
+      fast: snapshot.remainingDurationsMs.fast / 1_000,
+    })
+    setUserRunDuration(snapshot.remainingDurationsMs.user / 1_000)
+    setFrontTransitionElapsedMs(snapshot.transitionProgress * FRONT_VIEW_TRANSITION_DURATION_MS)
+    setGroupJumpElapsedMs(snapshot.groupJumpProgress * GROUP_JUMP_DURATION_MS)
+    setRaceSequence((sequence) => sequence + 1)
+
+    if (snapshot.nextUpdateAtMs !== null) {
+      timelineTimerRef.current = window.setTimeout(
+        () => synchronizeTimelineRef.current(),
+        Math.max(0, Math.ceil(snapshot.nextUpdateAtMs - nowMs)),
+      )
+    }
+  }, [cancelScheduledUpdate])
+
+  synchronizeTimelineRef.current = synchronizeTimeline
 
   const startRace = useCallback((
     measuredDownload: number,
     initialProgress = 0,
     waitForCameraReset = false,
-    resetVisual = true,
   ) => {
-    cancelScheduledStart()
-    raceStartedRef.current = true
+    cancelScheduledUpdate()
     warmupStartedAtRef.current = null
-    finishStateRef.current = EMPTY_FINISH_STATE
-    setHasFinished(EMPTY_FINISH_STATE)
-    setRaceTimersActive(false)
-    const remainingCourse = 1 - initialProgress
-    const baseReferenceDurations = getReferenceHorseDurations()
-    setReferenceDurations({
-      standard: baseReferenceDurations.standard * remainingCourse,
-      fast: baseReferenceDurations.fast * remainingCourse,
-    })
-    setUserRunDuration(getUserHorseRunDuration(measuredDownload) * remainingCourse)
-    setRaceStartProgress(initialProgress)
-    if (resetVisual) setState('idle')
-
-    const scheduleRunningFrame = () => {
-      animationFrameRef.current = window.requestAnimationFrame(() => {
-        animationFrameRef.current = window.requestAnimationFrame(() => {
-          animationFrameRef.current = null
-          setState('running')
-          setRaceSequence((sequence) => sequence + 1)
-          setRaceTimersActive(true)
-        })
-      })
-    }
+    const raceStartedAtMs = Date.now() + (waitForCameraReset ? FRONT_VIEW_TRANSITION_DURATION_MS : 0)
+    const resultAvailableAtMs = resultRef.current ? raceStartedAtMs : null
 
     if (waitForCameraReset) {
-      cameraResetTimerRef.current = window.setTimeout(() => {
-        cameraResetTimerRef.current = null
-        scheduleRunningFrame()
-      }, FRONT_VIEW_TRANSITION_DURATION_MS)
-    } else {
-      scheduleRunningFrame()
+      timelineRef.current = null
+      pendingRaceStartRef.current = {
+        raceStartedAtMs,
+        measuredDownload,
+        resultAvailableAtMs,
+      }
+      setHasFinished(EMPTY_FINISH_STATE)
+      setHorseProgress(EMPTY_PROGRESS)
+      setRemainingDurationsMs(EMPTY_REMAINING_DURATION)
+      setFrontTransitionElapsedMs(0)
+      setGroupJumpElapsedMs(0)
+      setState('idle')
+      setRaceSequence((sequence) => sequence + 1)
+      synchronizeTimeline()
+      return
     }
-  }, [cancelScheduledStart])
+
+    const remainingCourse = 1 - initialProgress
+    const reference = getReferenceHorseDurations()
+    timelineRef.current = {
+      raceStartedAtMs,
+      startProgress: initialProgress,
+      horseDurationsMs: {
+        standard: reference.standard * remainingCourse * 1_000,
+        fast: reference.fast * remainingCourse * 1_000,
+        user: getUserHorseRunDuration(measuredDownload) * remainingCourse * 1_000,
+      },
+      resultAvailableAtMs,
+    }
+    pendingRaceStartRef.current = null
+    synchronizeTimeline()
+  }, [cancelScheduledUpdate, synchronizeTimeline])
 
   useEffect(() => {
     const previousPhase = previousPhaseRef.current
 
     if (phase === 'idle') {
-      cancelScheduledStart()
-      raceStartedRef.current = false
       warmupStartedAtRef.current = null
-      finishStateRef.current = EMPTY_FINISH_STATE
-      setHasFinished(EMPTY_FINISH_STATE)
-      setRaceTimersActive(false)
-      setRaceStartProgress(0)
-      setState('idle')
+      resetRace('idle')
     } else if (phase === 'latency' && previousPhase !== 'latency') {
-      cancelScheduledStart()
-      raceStartedRef.current = false
       warmupStartedAtRef.current = null
-      finishStateRef.current = EMPTY_FINISH_STATE
-      setHasFinished(EMPTY_FINISH_STATE)
-      setRaceTimersActive(false)
-      setRaceStartProgress(0)
-      setState('measuringDownload')
+      resetRace('measuringDownload')
     } else if (phase === 'download' && previousPhase !== 'download') {
-      cancelScheduledStart()
-      raceStartedRef.current = false
+      resetRace('warmingUp')
       warmupStartedAtRef.current = Date.now()
-      finishStateRef.current = EMPTY_FINISH_STATE
-      setHasFinished(EMPTY_FINISH_STATE)
-      setRaceTimersActive(false)
-      setRaceStartProgress(0)
-      setState('warmingUp')
     } else if (phase === 'upload' && previousPhase !== 'upload') {
       const warmupElapsed = warmupStartedAtRef.current === null
         ? 0
@@ -153,70 +242,32 @@ export const useHorseRaceAnimation = ({
         WARMUP_MAX_PROGRESS,
         (warmupElapsed / WARMUP_DURATION_MS) * WARMUP_MAX_PROGRESS,
       )
-      startRace(downloadMbps ?? 0, warmupProgress, false, false)
-    } else if (phase === 'complete' && result && !raceStartedRef.current) {
-      startRace(result.downloadMbps)
+      startRace(downloadMbps ?? 0, warmupProgress)
+    } else if (phase === 'complete' && result) {
+      if (!timelineRef.current && !pendingRaceStartRef.current) {
+        startRace(result.downloadMbps)
+      } else if (timelineRef.current && timelineRef.current.resultAvailableAtMs === null) {
+        timelineRef.current.resultAvailableAtMs = Date.now()
+        synchronizeTimeline()
+      }
     } else if (phase === 'error') {
-      cancelScheduledStart()
-      raceStartedRef.current = false
       warmupStartedAtRef.current = null
-      finishStateRef.current = EMPTY_FINISH_STATE
-      setHasFinished(EMPTY_FINISH_STATE)
-      setRaceTimersActive(false)
-      setRaceStartProgress(0)
-      setState('idle')
+      resetRace('idle')
     }
 
     previousPhaseRef.current = phase
-  }, [cancelScheduledStart, downloadMbps, phase, result, startRace])
-
-  useEffect(() => cancelScheduledStart, [cancelScheduledStart])
+  }, [downloadMbps, phase, resetRace, result, startRace, synchronizeTimeline])
 
   useEffect(() => {
-    if (raceSequence === 0 || !raceTimersActive) return
-
-    const finishHorse = (horse: HorseId) => {
-      const nextFinishState = { ...finishStateRef.current, [horse]: true }
-      finishStateRef.current = nextFinishState
-      setHasFinished(nextFinishState)
-
-      if (allHorsesFinished(nextFinishState)) {
-        setRaceTimersActive(false)
-        setState(resultRef.current ? 'transitionToFrontView' : 'waitingForAllFinish')
-      } else {
-        setState('waitingForAllFinish')
-      }
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') synchronizeTimeline()
     }
 
-    const timers = [
-      window.setTimeout(() => finishHorse('standard'), referenceDurations.standard * 1_000),
-      window.setTimeout(() => finishHorse('fast'), referenceDurations.fast * 1_000),
-      window.setTimeout(() => finishHorse('user'), userRunDuration * 1_000),
-    ]
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange)
+  }, [synchronizeTimeline])
 
-    return () => timers.forEach((timer) => window.clearTimeout(timer))
-  }, [raceSequence, raceTimersActive, referenceDurations.fast, referenceDurations.standard, userRunDuration])
-
-  useEffect(() => {
-    if (state === 'waitingForAllFinish' && allHorsesFinished(hasFinished) && result) {
-      setState('transitionToFrontView')
-    }
-  }, [hasFinished, result, state])
-
-  useEffect(() => {
-    if (state !== 'transitionToFrontView') return
-    const focusTimer = window.setTimeout(
-      () => setState('groupJumpFrontView'),
-      FRONT_VIEW_TRANSITION_DURATION_MS,
-    )
-    return () => window.clearTimeout(focusTimer)
-  }, [state])
-
-  useEffect(() => {
-    if (state !== 'groupJumpFrontView') return
-    const jumpTimer = window.setTimeout(() => setState('finished'), GROUP_JUMP_DURATION_MS)
-    return () => window.clearTimeout(jumpTimer)
-  }, [state])
+  useEffect(() => cancelScheduledUpdate, [cancelScheduledUpdate])
 
   const replay = () => {
     if (!result || phase !== 'complete') return
@@ -226,9 +277,14 @@ export const useHorseRaceAnimation = ({
   return {
     state,
     hasFinished,
+    horseProgress,
+    remainingDurationsMs,
     userRunDuration,
     referenceDurations,
-    raceStartProgress,
+    raceStartProgress: horseProgress.user,
+    frontTransitionElapsedMs,
+    groupJumpElapsedMs,
+    raceSequence,
     canReplay: Boolean(result) && phase === 'complete' && state === 'finished',
     replay,
   }

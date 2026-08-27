@@ -58,6 +58,12 @@ Any active phase may end in:
 
 The phase model is consumed by both measurement UI and the race experience. Changing phase transitions can therefore be a UX change as well as a measurement change.
 
+## Visibility interruption
+
+During an active `latency`, `download`, or `upload` phase, the run is invalidated when the page becomes hidden or receives `pagehide`. Background tabs, app switches, and screen locks can change browser network, timer, and CPU behavior, so the result is not comparable with a foreground measurement.
+
+The active engine is paused, partial metrics are discarded, and the run enters the normal error state. A late completion callback from that invalidated run is ignored. It never creates a completed result or browser-local history entry. A page becoming hidden after `complete` does not invalidate the already completed measurement.
+
 ## Confirmed download value
 
 At the transition to upload, the current download result is captured as the confirmed download speed for race timing.

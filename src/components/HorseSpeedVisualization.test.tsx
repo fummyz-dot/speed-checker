@@ -23,6 +23,15 @@ const result: SpeedMeasurementResult = {
   pingMs: 12,
 }
 
+const originalVisibilityState = Object.getOwnPropertyDescriptor(document, 'visibilityState')
+
+const setVisibilityState = (visibilityState: 'hidden' | 'visible') => {
+  Object.defineProperty(document, 'visibilityState', {
+    configurable: true,
+    value: visibilityState,
+  })
+}
+
 describe('HorseSpeedVisualization runner presentation', () => {
   let animationFrames: FrameRequestCallback[]
 
@@ -36,7 +45,14 @@ describe('HorseSpeedVisualization runner presentation', () => {
     vi.spyOn(window, 'cancelAnimationFrame').mockImplementation(() => undefined)
   })
 
-  afterEach(() => vi.useRealTimers())
+  afterEach(() => {
+    vi.useRealTimers()
+    if (originalVisibilityState) {
+      Object.defineProperty(document, 'visibilityState', originalVisibilityState)
+    } else {
+      Reflect.deleteProperty(document, 'visibilityState')
+    }
+  })
 
   const flushAnimationFrame = () => {
     const callbacks = animationFrames
@@ -261,7 +277,7 @@ describe('HorseSpeedVisualization runner presentation', () => {
     act(() => vi.advanceTimersByTime(WARMUP_DURATION_MS * 2))
 
     rerender(<HorseSpeedVisualization downloadMbps={120} uploadMbps={null} phase="upload" result={null} />)
-    expect(course()).toHaveAttribute('data-animation-state', 'warmingUp')
+    expect(course()).toHaveAttribute('data-animation-state', 'running')
     startRace()
     expect(course()).toHaveAttribute('data-animation-state', 'running')
     expect(screen.queryByRole('link', { name: '詳しい測定結果を見る' })).not.toBeInTheDocument()
@@ -330,7 +346,7 @@ describe('HorseSpeedVisualization runner presentation', () => {
 
     rerender(<HorseSpeedVisualization downloadMbps={1_000} uploadMbps={null} phase="upload" result={null} />)
     startRace()
-    act(() => vi.advanceTimersByTime(getUserHorseRunDuration(1_000) * 1_000))
+    act(() => vi.advanceTimersByTime((getUserHorseRunDuration(1_000) * 1_000) + 2))
     expect(course()).toHaveAttribute('data-animation-state', 'waitingForAllFinish')
     expect(container.querySelector('[data-runner="user"]')).toHaveClass('race-runner--waiting')
     expect(container.querySelector('[data-runner="user"] .horse-sprite')).toHaveClass('horse-sprite--static')
@@ -374,6 +390,31 @@ describe('HorseSpeedVisualization runner presentation', () => {
     startRace()
     expect(course()).toHaveAttribute('data-animation-state', 'running')
     expect(container.querySelectorAll('.race-runner--racing')).toHaveLength(3)
+  })
+
+  it('visible復帰時はtimer発火を待たずwall-clock時点の馬位置とfinished状態へ追いつく', () => {
+    const { container } = render(
+      <HorseSpeedVisualization downloadMbps={120} uploadMbps={80} phase="complete" result={result} />,
+    )
+    const course = () => container.querySelector('.horse-course') as HTMLElement
+    const startedAtMs = Date.now()
+
+    setVisibilityState('hidden')
+    act(() => document.dispatchEvent(new Event('visibilitychange')))
+    vi.setSystemTime(startedAtMs + 13_000)
+    setVisibilityState('visible')
+    act(() => document.dispatchEvent(new Event('visibilitychange')))
+
+    expect(course()).toHaveAttribute('data-animation-state', 'waitingForAllFinish')
+    expect(container.querySelector('[data-runner="fast"]')).toHaveAttribute('data-finished', 'true')
+    expect(container.querySelector('[data-runner="user"]')).toHaveAttribute('data-finished', 'true')
+    expect(course().style.getPropertyValue('--fast-start-progress')).toBe('100.000%')
+
+    vi.setSystemTime(startedAtMs + 60_000)
+    act(() => document.dispatchEvent(new Event('visibilitychange')))
+
+    expect(course()).toHaveAttribute('data-animation-state', 'finished')
+    expect(screen.getByRole('link', { name: '詳しい測定結果を見る' })).toBeVisible()
   })
 
   it('mobile通常完了時は拡大buttonをrenderせず、UPLOAD専用rowとReplayでfocusへ戻る', () => {

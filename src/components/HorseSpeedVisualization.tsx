@@ -1,5 +1,6 @@
 import { useEffect, useRef, type CSSProperties, type KeyboardEvent, type MouseEvent } from 'react'
 import {
+  FRONT_VIEW_TRANSITION_DURATION_MS,
   GROUP_JUMP_DURATION_MS,
   useHorseRaceAnimation,
   WARMUP_DURATION_MS,
@@ -40,9 +41,15 @@ type RaceStyle = CSSProperties & {
   '--fast-jump-height': string
   '--user-jump-height': string
   '--race-start-progress': string
+  '--standard-start-progress': string
+  '--fast-start-progress': string
+  '--user-start-progress': string
   '--warmup-duration': string
   '--warmup-max-progress': string
+  '--front-transition-duration': string
+  '--front-transition-elapsed': string
   '--group-jump-duration': string
+  '--group-jump-elapsed': string
 }
 
 const getHelperText = (state: HorseRaceState, hasUploadResult: boolean): string => {
@@ -79,7 +86,11 @@ export const HorseSpeedVisualization = ({
     referenceDurations,
     raceStartProgress,
     hasFinished,
+    horseProgress,
     canReplay,
+    frontTransitionElapsedMs,
+    groupJumpElapsedMs,
+    raceSequence,
     replay,
   } = useHorseRaceAnimation({ phase, downloadMbps, result })
   const displayedDownload = result?.downloadMbps ?? confirmedDownloadMbps ?? downloadMbps
@@ -109,9 +120,15 @@ export const HorseSpeedVisualization = ({
     '--fast-jump-height': `${getUserHorseJumpHeight(OGURI_REFERENCE_UPLOAD_MBPS).toFixed(0)}px`,
     '--user-jump-height': `${getUserHorseJumpHeight(result?.uploadMbps ?? 0).toFixed(0)}px`,
     '--race-start-progress': `${(raceStartProgress * 100).toFixed(3)}%`,
+    '--standard-start-progress': `${(horseProgress.standard * 100).toFixed(3)}%`,
+    '--fast-start-progress': `${(horseProgress.fast * 100).toFixed(3)}%`,
+    '--user-start-progress': `${(horseProgress.user * 100).toFixed(3)}%`,
     '--warmup-duration': `${WARMUP_DURATION_MS}ms`,
     '--warmup-max-progress': `${WARMUP_MAX_PROGRESS * 100}%`,
+    '--front-transition-duration': `${FRONT_VIEW_TRANSITION_DURATION_MS}ms`,
+    '--front-transition-elapsed': `${frontTransitionElapsedMs.toFixed(0)}ms`,
     '--group-jump-duration': `${GROUP_JUMP_DURATION_MS}ms`,
+    '--group-jump-elapsed': `${groupJumpElapsedMs.toFixed(0)}ms`,
   }
   const raceIsActive = state === 'running' || state === 'waitingForAllFinish'
   const frontViewIsActive = state === 'transitionToFrontView'
@@ -202,7 +219,12 @@ export const HorseSpeedVisualization = ({
           <h2 id="horse-title">回線速度レース</h2>
         </div>
         {showUploadResult && (
-          <div className="race-upload-result" data-final-upload-result>
+          <div
+            className="race-upload-result"
+            data-final-upload-result
+            key={`upload-${raceSequence}`}
+            style={{ animationDelay: `-${groupJumpElapsedMs.toFixed(0)}ms` }}
+          >
             <span>UPLOAD</span>
             <strong>{formatFinalSpeedDisplay(result.uploadMbps)}</strong>
             <small>Mbps</small>
@@ -272,7 +294,7 @@ export const HorseSpeedVisualization = ({
                 className={`race-runner race-runner--${lane.id} ${runnerStateClass}`}
                 data-runner={lane.id}
                 data-finished={hasFinished[lane.id]}
-                key={lane.id}
+                key={`${lane.id}-${raceSequence}`}
               >
                 <div className="runner-mover">
                   <HorseSprite id={lane.id} label={lane.sideViewLabel} isGalloping={isGalloping} />
@@ -281,7 +303,11 @@ export const HorseSpeedVisualization = ({
             )
           })}
         </div>
-        <GoalFocusFrontView state={state} userUploadMbps={result?.uploadMbps ?? uploadMbps} />
+        <GoalFocusFrontView
+          key={`front-${raceSequence}`}
+          state={state}
+          userUploadMbps={result?.uploadMbps ?? uploadMbps}
+        />
       </div>
 
       <dl className="horse-metrics">
