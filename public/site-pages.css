@@ -265,6 +265,84 @@ dd {
   line-height: 1.65;
 }
 
+.site-pages__step-list {
+  display: grid;
+  gap: 10px;
+  margin: 20px 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: site-pages-step;
+}
+
+.site-pages__step-list li {
+  position: relative;
+  min-height: 2.5rem;
+  padding: 9px 12px 9px 48px;
+  border: 1px solid rgba(151, 170, 190, 0.24);
+  border-radius: 8px;
+  background: rgba(17, 29, 36, 0.58);
+  counter-increment: site-pages-step;
+}
+
+.site-pages__step-list li::before {
+  position: absolute;
+  top: 9px;
+  left: 12px;
+  display: grid;
+  width: 25px;
+  height: 25px;
+  place-items: center;
+  border-radius: 999px;
+  background: rgba(117, 229, 194, 0.17);
+  color: #9bf0d6;
+  content: counter(site-pages-step);
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.site-pages__symptom-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin: 20px 0;
+}
+
+.site-pages__symptom-grid > div,
+.site-pages__reference-card {
+  padding: 18px;
+  border: 1px solid rgba(151, 170, 190, 0.28);
+  border-radius: 10px;
+  background: rgba(17, 29, 36, 0.72);
+}
+
+.site-pages__symptom-grid h3 {
+  margin-top: 0;
+}
+
+.site-pages__symptom-grid p,
+.site-pages__reference-card p {
+  margin: 8px 0 0;
+}
+
+.site-pages__reference-card {
+  border-color: rgba(117, 229, 194, 0.38);
+}
+
+.site-pages__reference-card .site-pages__table-wrap {
+  margin-top: 0;
+}
+
+.site-pages__checklist {
+  display: grid;
+  gap: 8px;
+  margin: 20px 0;
+  padding-left: 1.55em;
+}
+
+.site-pages__checklist li::marker {
+  color: #75e5c2;
+}
+
 .site-pages__related {
   margin-top: 44px;
   padding-top: 28px;
@@ -348,6 +426,7 @@ dd {
   }
 
   .site-pages__card-grid,
+  .site-pages__symptom-grid,
   .site-pages__related ul {
     grid-template-columns: 1fr;
   }

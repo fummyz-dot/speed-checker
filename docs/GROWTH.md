@@ -92,7 +92,7 @@ Candidate retention features:
 
 ## SEO architecture direction
 
-The current application is essentially a single main page.
+The main measurement page is supplemented by indexable static trust pages, metric guides, and problem-solving guides. These pages must remain useful on their own and lead naturally to measurement or comparison; they are not keyword landing pages.
 
 Future growth may require indexable routes/pages with useful standalone content.
 
@@ -105,7 +105,7 @@ Possible structure:
 ├── jitter/
 ├── bufferbloat/
 ├── gaming/
-├── meeting/
+├── video-call/
 ├── wifi-slow/
 └── internet-slow-at-night/
 ```

@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>夜だけインターネットが遅い？時間帯を変えて比較する方法 | Net Speed Race</title>
+    <meta name="description" content="夜になるとネットが遅いと感じるときに、朝・昼・夜の回線速度、Ping、混雑時の応答性を比較して状況を確認する方法を説明します。" />
+    <link rel="canonical" href="https://netspeedrace.com/internet-slow-at-night/" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Net Speed Race" />
+    <meta property="og:title" content="夜だけインターネットが遅い？時間帯を変えて比較する方法 | Net Speed Race" />
+    <meta property="og:description" content="夜になるとネットが遅いと感じるときに、朝・昼・夜の回線速度、Ping、混雑時の応答性を比較して状況を確認する方法を説明します。" />
+    <meta property="og:url" content="https://netspeedrace.com/internet-slow-at-night/" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="stylesheet" href="/site-pages.css" />
+  </head>
+  <body>
+    <a class="site-pages__skip-link" href="#main-content">本文へ移動</a>
+    <header class="site-pages__header"><div class="site-pages__header-inner">
+      <a class="site-pages__brand" href="/">Net Speed Race</a>
+      <nav class="site-pages__nav" aria-label="主要ナビゲーション"><ul>
+        <li><a href="/">速度を測定</a></li><li><a href="/guide/">回線品質ガイド</a></li><li><a href="/about/">このサイトについて</a></li><li><a href="/methodology/">測定方法</a></li><li><a href="/privacy/">プライバシー</a></li><li><a href="/contact/">お問い合わせ</a></li><li><a href="/terms/">利用規約</a></li>
+      </ul></nav>
+    </div></header>
+    <main class="site-pages__main" id="main-content"><article class="site-pages__article">
+      <p class="site-pages__eyebrow">TIME-OF-DAY COMPARISON</p>
+      <h1>夜だけネットが遅いと感じたら、時間帯で比較する</h1>
+      <p class="site-pages__lead">夜にネットが遅いと感じても、ブラウザでの1回の測定から理由を確定することはできません。場所・端末・接続方法をなるべくそろえ、時間だけを変えた結果を比べると、どの時間帯に変化を感じやすいかを確認できます。</p>
+      <p class="site-pages__article-meta"><span>運営・編集: Net Speed Race</span><span>最終更新: 2026年8月27日</span></p>
+      <p class="site-pages__note"><a href="/methodology/">測定方法について</a>と<a href="/about/">このサイトについて</a>で、測定の前提と限界を確認できます。</p>
+      <a class="site-pages__article-cta" href="/">今の回線品質を測定する</a>
+
+      <h2>条件をそろえ、時間だけを変えて測る</h2>
+      <p>まず、同じ部屋・同じ端末・同じ接続方法で、朝や昼にも測定します。次に、夜にも同じように測定します。比較する間に端末の利用状況や他端末の通信が変わることもあるため、可能なら各時間帯で複数回記録します。</p>
+      <p>「夜は必ず回線が混雑する」「回線事業者が混んでいる」といった判断は、ブラウザ測定だけではできません。結果の違いは、次に比較する条件を考える材料として扱います。</p>
+
+      <h2>時間帯で比較する指標</h2>
+      <dl>
+        <dt>Download</dt><dd>Web閲覧、動画、ファイル受信に関わる受信速度の変化を確認します。</dd>
+        <dt>Upload</dt><dd>ファイル送信、クラウド保存、映像送信に関わる送信速度の変化を確認します。</dd>
+        <dt>Ping</dt><dd>Cloudflare側との応答時間が時間帯でどう変わるかを確認します。</dd>
+        <dt>Loaded Latencyの増加量</dt><dd>通信中の応答時間が、idle latencyからどの程度増えたかを確認します。</dd>
+      </dl>
+      <p>Jitterは測定結果で確認できますが、現行の「時間帯別の傾向」では集計対象に含まれません。時間帯の履歴では、Download、Upload、Ping、混雑時の応答性の増加量を見ます。</p>
+
+      <h2>Net Speed Raceの時間帯別の傾向</h2>
+      <p>履歴は次のローカル時刻の区分で表示されます。</p>
+      <div class="site-pages__table-wrap"><table class="site-pages__table">
+        <thead><tr><th scope="col">表示</th><th scope="col">時刻</th></tr></thead>
+        <tbody><tr><th scope="row">朝</th><td>05:00–10:59</td></tr><tr><th scope="row">昼</th><td>11:00–16:59</td></tr><tr><th scope="row">夜</th><td>17:00–22:59</td></tr><tr><th scope="row">深夜</th><td>23:00–04:59</td></tr></tbody>
+      </table></div>
+      <p>各指標の代表値は中央値です。1〜2件の測定は参考値、3件以上で傾向として表示されます。これは自分のブラウザに保存された履歴であり、他の利用者や地域の統計ではありません。</p>
+
+      <h2>測定条件ラベルも同じにする</h2>
+      <p>時間帯の比較では、測定条件ラベルを「リビング 5GHz」のように同じにしておくと、場所や接続方法の違いを混ぜずに記録しやすくなります。ラベルは利用者が入力するメモで、自動判定ではありません。朝と夜で結果が異なっても、それだけから理由を一つに絞ることはできません。</p>
+
+      <section class="site-pages__related" aria-labelledby="night-related-title"><h2 id="night-related-title">関連ガイド</h2><ul>
+        <li><a href="/internet-speed/">回線速度の見方</a></li><li><a href="/ping/">Pingとは</a></li><li><a href="/loaded-latency/">混雑時の応答性とは</a></li><li><a href="/wifi-slow/">Wi-Fiが遅いときの確認方法</a></li>
+      </ul></section>
+      <a class="site-pages__article-cta" href="/">今の回線品質を測定する</a>
+    </article></main>
+    <footer class="site-pages__footer"><div class="site-pages__footer-inner"><nav class="site-pages__nav" aria-label="フッターナビゲーション"><ul>
+      <li><a href="/">速度を測定</a></li><li><a href="/guide/">回線品質ガイド</a></li><li><a href="/about/">このサイトについて</a></li><li><a href="/methodology/">測定方法</a></li><li><a href="/privacy/">プライバシー</a></li><li><a href="/contact/">お問い合わせ</a></li><li><a href="/terms/">利用規約</a></li>
+    </ul></nav><p class="site-pages__footer-note">© Net Speed Race</p></div></footer>
+  </body>
+</html>

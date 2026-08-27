@@ -16,6 +16,10 @@ const guidePages = [
   { path: 'ping', canonical: 'https://netspeedrace.com/ping/' },
   { path: 'jitter', canonical: 'https://netspeedrace.com/jitter/' },
   { path: 'loaded-latency', canonical: 'https://netspeedrace.com/loaded-latency/' },
+  { path: 'wifi-slow', canonical: 'https://netspeedrace.com/wifi-slow/' },
+  { path: 'gaming', canonical: 'https://netspeedrace.com/gaming/' },
+  { path: 'video-call', canonical: 'https://netspeedrace.com/video-call/' },
+  { path: 'internet-slow-at-night', canonical: 'https://netspeedrace.com/internet-slow-at-night/' },
 ] as const
 
 const staticPages = [...trustPages, ...guidePages]
@@ -60,11 +64,18 @@ describe('public static pages', () => {
     expect(page.querySelector('a[href="/about/"]')).not.toBeNull()
   })
 
-  it('ガイドハブから4つの詳細記事へ進める', () => {
+  it('ガイドハブで困りごと別と指標別の4記事ずつを分けて案内する', () => {
     const page = parsePage('guide')
-    const destinations = [...page.querySelectorAll('.site-pages__card')].map((link) => link.getAttribute('href'))
+    const cardGrids = page.querySelectorAll('.site-pages__card-grid')
+    const problemDestinations = [...cardGrids[0].querySelectorAll('.site-pages__card')]
+      .map((link) => link.getAttribute('href'))
+    const metricDestinations = [...cardGrids[1].querySelectorAll('.site-pages__card')]
+      .map((link) => link.getAttribute('href'))
 
-    expect(destinations).toEqual(['/internet-speed/', '/ping/', '/jitter/', '/loaded-latency/'])
+    expect(page.body.textContent).toContain('困りごとから探す')
+    expect(page.body.textContent).toContain('指標から探す')
+    expect(problemDestinations).toEqual(['/wifi-slow/', '/gaming/', '/video-call/', '/internet-slow-at-night/'])
+    expect(metricDestinations).toEqual(['/internet-speed/', '/ping/', '/jitter/', '/loaded-latency/'])
   })
 
   it.each(guidePages.filter(({ path }) => path !== 'guide'))('$path記事に関連ガイドリンクを含む', ({ path }) => {
@@ -83,6 +94,66 @@ describe('public static pages', () => {
   it('PingとJitterの各ページに区別の説明を含む', () => {
     expect(parsePage('ping').body.textContent).toContain('Cloudflare Edge RTT')
     expect(parsePage('jitter').body.textContent).toContain('Pingとの違い')
+  })
+
+  it('オンラインゲーム記事に現行の参考判定と適用範囲を明記する', () => {
+    const content = parsePage('gaming').body.textContent ?? ''
+
+    expect(content).toContain('5 Mbps以上')
+    expect(content).toContain('1 Mbps以上')
+    expect(content).toContain('50 ms以下')
+    expect(content).toContain('3 Mbps以上')
+    expect(content).toContain('100 ms以下')
+    expect(content).toContain('Net Speed Race内の参考判定')
+    expect(content).toContain('ゲーム業界の公式基準ではありません')
+    expect(content).toContain('Cloudflare側への測定')
+  })
+
+  it('Web会議記事に現行の参考判定と公式要件との差を明記する', () => {
+    const content = parsePage('video-call').body.textContent ?? ''
+
+    expect(content).toContain('10 Mbps以上')
+    expect(content).toContain('5 Mbps以上')
+    expect(content).toContain('80 ms以下')
+    expect(content).toContain('3 Mbps以上')
+    expect(content).toContain('150 ms以下')
+    expect(content).toContain('Net Speed Race内の参考判定')
+    expect(content).toContain('公式要件そのものではありません')
+  })
+
+  it('夜間記事に実装と一致する時間帯・中央値・ローカル履歴の説明を含む', () => {
+    const content = parsePage('internet-slow-at-night').body.textContent ?? ''
+
+    expect(content).toContain('05:00–10:59')
+    expect(content).toContain('11:00–16:59')
+    expect(content).toContain('17:00–22:59')
+    expect(content).toContain('23:00–04:59')
+    expect(content).toContain('中央値')
+    expect(content).toContain('ブラウザに保存された履歴')
+    expect(content).toContain('1〜2件の測定は参考値、3件以上で傾向')
+  })
+
+  it('Wi-Fi記事に利用者入力の測定条件ラベルと条件別中央値を説明する', () => {
+    const content = parsePage('wifi-slow').body.textContent ?? ''
+
+    expect(content).toContain('測定条件ラベル')
+    expect(content).toContain('利用者自身が入力するメモ')
+    expect(content).toContain('自動判定する機能ではありません')
+    expect(content).toContain('同じ条件のDownload、Upload、Ping、混雑時の応答性の中央値')
+  })
+
+  it.each([
+    'wifi-slow',
+    'gaming',
+    'video-call',
+    'internet-slow-at-night',
+  ] as const)('%s記事は原因を断定せず、絶対的な改善を約束しない', (path) => {
+    const content = parsePage(path).body.textContent ?? ''
+
+    expect(content).toMatch(/(原因|理由|問題).{0,32}(特定|確定|断定|決めつけ).{0,24}(できません|限りません)/)
+    if (content.includes('必ず') || content.includes('絶対')) {
+      expect(content).toMatch(/(必ず|絶対).{0,48}(とは限りません|できません)/)
+    }
   })
 
   it('お問い合わせページに公開問い合わせ先を含む', () => {
@@ -111,7 +182,7 @@ describe('public static pages', () => {
     expect(content).toContain('loaded latency')
   })
 
-  it('静的ページに外部scriptを含めず、sitemapに11個の重複しない公開URLを含む', () => {
+  it('静的ページに外部scriptを含めず、sitemapに15個の重複しない公開URLを含む', () => {
     staticPages.forEach(({ path }) => {
       expect(parsePage(path).querySelectorAll('script')).toHaveLength(0)
     })
@@ -122,6 +193,6 @@ describe('public static pages', () => {
       'https://netspeedrace.com/',
       ...staticPages.map(({ canonical }) => canonical),
     ])
-    expect(new Set(urls).size).toBe(11)
+    expect(new Set(urls).size).toBe(15)
   })
 })

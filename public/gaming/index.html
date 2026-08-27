@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>オンラインゲームの回線は何を見る？Ping・ジッター・回線速度を解説 | Net Speed Race</title>
+    <meta name="description" content="オンラインゲームで確認したいPing、ジッター、回線速度、混雑時の応答性を説明します。ラグを感じるときの測定・比較方法も紹介します。" />
+    <link rel="canonical" href="https://netspeedrace.com/gaming/" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Net Speed Race" />
+    <meta property="og:title" content="オンラインゲームの回線は何を見る？Ping・ジッター・回線速度を解説 | Net Speed Race" />
+    <meta property="og:description" content="オンラインゲームで確認したいPing、ジッター、回線速度、混雑時の応答性を説明します。ラグを感じるときの測定・比較方法も紹介します。" />
+    <meta property="og:url" content="https://netspeedrace.com/gaming/" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="stylesheet" href="/site-pages.css" />
+  </head>
+  <body>
+    <a class="site-pages__skip-link" href="#main-content">本文へ移動</a>
+    <header class="site-pages__header"><div class="site-pages__header-inner">
+      <a class="site-pages__brand" href="/">Net Speed Race</a>
+      <nav class="site-pages__nav" aria-label="主要ナビゲーション"><ul>
+        <li><a href="/">速度を測定</a></li><li><a href="/guide/">回線品質ガイド</a></li><li><a href="/about/">このサイトについて</a></li><li><a href="/methodology/">測定方法</a></li><li><a href="/privacy/">プライバシー</a></li><li><a href="/contact/">お問い合わせ</a></li><li><a href="/terms/">利用規約</a></li>
+      </ul></nav>
+    </div></header>
+    <main class="site-pages__main" id="main-content"><article class="site-pages__article">
+      <p class="site-pages__eyebrow">ONLINE GAMING</p>
+      <h1>オンラインゲームの回線はPingだけ見ればいい？</h1>
+      <p class="site-pages__lead">ゲームでラグを感じるとき、MbpsだけでもPingだけでも状況のすべては分かりません。回線速度、応答時間、その揺れ、通信中の応答の変化を分けて測ると、条件による違いを整理しやすくなります。</p>
+      <p class="site-pages__article-meta"><span>運営・編集: Net Speed Race</span><span>最終更新: 2026年8月27日</span></p>
+      <p class="site-pages__note"><a href="/methodology/">測定方法について</a>と<a href="/about/">このサイトについて</a>で、測定値の前提を確認できます。</p>
+      <a class="site-pages__article-cta" href="/">今の回線品質を測定する</a>
+
+      <h2>Mbpsだけではゲームの応答性は分からない</h2>
+      <dl>
+        <dt>Download</dt><dd>ゲーム本体の取得や更新、受信データを扱う速さを見る材料です。</dd>
+        <dt>Upload</dt><dd>自分の操作情報を送る通信や、配信などを行うときの送信側の材料です。</dd>
+        <dt>Ping</dt><dd>応答時間を見る材料です。数値が小さいほど、測定先との往復応答は短いことを示します。</dd>
+        <dt>Jitter</dt><dd>応答時間の揺れを見る補助指標です。連続する操作・音声の安定性を考えるときにPingと合わせて確認します。</dd>
+        <dt>Loaded Latency</dt><dd>DownloadやUploadの通信中に応答がどの程度変わるかを見る材料です。</dd>
+      </dl>
+      <p>ゲーム中に別端末がDownloadやUploadをしている場面では、速度だけでなく、通信中の応答性を見る意味があります。<a href="/loaded-latency/">混雑時の応答性</a>は、別の通信がある条件で応答が変化するかを比べる手掛かりです。</p>
+
+      <h2>Net Speed Raceのオンラインゲーム参考判定</h2>
+      <div class="site-pages__reference-card">
+        <div class="site-pages__table-wrap"><table class="site-pages__table">
+          <thead><tr><th scope="col">目安</th><th scope="col">Download</th><th scope="col">Upload</th><th scope="col">Ping</th></tr></thead>
+          <tbody><tr><th scope="row">快適</th><td>5 Mbps以上</td><td>1 Mbps以上</td><td>50 ms以下</td></tr><tr><th scope="row">利用可能</th><td>3 Mbps以上</td><td>1 Mbps以上</td><td>100 ms以下</td></tr></tbody>
+        </table></div>
+        <p>これはNet Speed Race内の参考判定です。ゲームタイトル、接続先サーバー、プレイ人数、通信方式等によって必要条件は異なり、ゲーム業界の公式基準ではありません。</p>
+      </div>
+
+      <h2>Net Speed RaceのPingとゲーム内Pingは一致しないことがある</h2>
+      <p>Net Speed Raceで測るPingはCloudflare側への測定です。実際のゲームサーバーへのPingは接続先が異なるため、同じ値になるとは限りません。ブラウザ測定は、ゲームのサーバーそのものを診断するものではなく、自分の接続条件を比較する一つの材料として使います。</p>
+
+      <h2>ラグが気になるときの比較方法</h2>
+      <ul class="site-pages__checklist">
+        <li>同じ時間・同じ端末で複数回測定する。</li>
+        <li>Wi-Fiと有線接続で、できる範囲で同じ条件を比べる。</li>
+        <li>background downloadなど、他の通信がある・ない条件で比べる。</li>
+        <li>別の時間帯でも測定する。</li>
+      </ul>
+      <p>「対戦中・他端末でダウンロードなし」「Wi-Fi・夜」のように測定条件ラベルを付けると、ブラウザ内に保存された履歴で同じ条件の中央値を確認できます。結果が異なっても、ブラウザ測定だけから特定の機器や回線を理由と確定することはできません。</p>
+
+      <section class="site-pages__related" aria-labelledby="gaming-related-title"><h2 id="gaming-related-title">関連ガイド</h2><ul>
+        <li><a href="/ping/">Pingとは</a></li><li><a href="/jitter/">ジッターとは</a></li><li><a href="/loaded-latency/">混雑時の応答性とは</a></li><li><a href="/internet-speed/">回線速度の見方</a></li>
+      </ul></section>
+      <a class="site-pages__article-cta" href="/">今の回線品質を測定する</a>
+    </article></main>
+    <footer class="site-pages__footer"><div class="site-pages__footer-inner"><nav class="site-pages__nav" aria-label="フッターナビゲーション"><ul>
+      <li><a href="/">速度を測定</a></li><li><a href="/guide/">回線品質ガイド</a></li><li><a href="/about/">このサイトについて</a></li><li><a href="/methodology/">測定方法</a></li><li><a href="/privacy/">プライバシー</a></li><li><a href="/contact/">お問い合わせ</a></li><li><a href="/terms/">利用規約</a></li>
+    </ul></nav><p class="site-pages__footer-note">© Net Speed Race</p></div></footer>
+  </body>
+</html>

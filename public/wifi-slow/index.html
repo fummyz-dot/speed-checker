@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Wi-Fiが遅いときの確認方法｜原因を決めつけずに切り分ける | Net Speed Race</title>
+    <meta name="description" content="Wi-Fiが遅いと感じたときに、回線速度、Ping、ジッター、混雑時の応答性を測り、場所や有線接続など条件を変えて比較する方法を説明します。" />
+    <link rel="canonical" href="https://netspeedrace.com/wifi-slow/" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Net Speed Race" />
+    <meta property="og:title" content="Wi-Fiが遅いときの確認方法｜原因を決めつけずに切り分ける | Net Speed Race" />
+    <meta property="og:description" content="Wi-Fiが遅いと感じたときに、回線速度、Ping、ジッター、混雑時の応答性を測り、場所や有線接続など条件を変えて比較する方法を説明します。" />
+    <meta property="og:url" content="https://netspeedrace.com/wifi-slow/" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="stylesheet" href="/site-pages.css" />
+  </head>
+  <body>
+    <a class="site-pages__skip-link" href="#main-content">本文へ移動</a>
+    <header class="site-pages__header"><div class="site-pages__header-inner">
+      <a class="site-pages__brand" href="/">Net Speed Race</a>
+      <nav class="site-pages__nav" aria-label="主要ナビゲーション"><ul>
+        <li><a href="/">速度を測定</a></li><li><a href="/guide/">回線品質ガイド</a></li><li><a href="/about/">このサイトについて</a></li><li><a href="/methodology/">測定方法</a></li><li><a href="/privacy/">プライバシー</a></li><li><a href="/contact/">お問い合わせ</a></li><li><a href="/terms/">利用規約</a></li>
+      </ul></nav>
+    </div></header>
+    <main class="site-pages__main" id="main-content"><article class="site-pages__article">
+      <p class="site-pages__eyebrow">WI-FI TROUBLESHOOTING</p>
+      <h1>Wi-Fiが遅いときは、条件を変えて比較する</h1>
+      <p class="site-pages__lead">Wi-Fiが遅いと感じたとき、1回の速度測定だけで原因を特定することはできません。Net Speed Raceで同じ条件と異なる条件の結果を比べると、どの場面で変化しやすいかを整理しやすくなります。</p>
+      <p class="site-pages__article-meta"><span>運営・編集: Net Speed Race</span><span>最終更新: 2026年8月27日</span></p>
+      <p class="site-pages__note"><a href="/methodology/">測定方法について</a>と<a href="/about/">このサイトについて</a>で、ブラウザ測定で分かる範囲を確認できます。</p>
+      <a class="site-pages__article-cta" href="/">今の回線品質を測定する</a>
+
+      <h2>まずは今いる場所の状態を測る</h2>
+      <p>体感が気になるときの状態を、できるだけ普段どおりの条件で測定します。その結果は、その場所・端末・時間・同時通信を含む一時点の記録です。数値だけからWi-Fi、ルーター、回線事業者、端末のどれかを原因と決めつけることはできません。</p>
+
+      <h2>Downloadだけを見ない</h2>
+      <dl>
+        <dt>Download（下り）</dt><dd>動画視聴やWebページ、ファイル受信など、端末がデータを受け取る速さを見る材料です。</dd>
+        <dt>Upload（上り）</dt><dd>写真・ファイルの送信、クラウド保存、映像送信など、端末からデータを送る速さを見る材料です。</dd>
+        <dt>Ping</dt><dd>Cloudflare側との応答時間です。Mbpsとは別の指標で、操作や会話の反応を考える手掛かりになります。</dd>
+        <dt>Jitter</dt><dd>応答時間の揺れを見る補助指標です。Pingと合わせて、その時点の安定性を確認します。</dd>
+        <dt>Loaded Latency</dt><dd>DownloadまたはUploadの通信中に、応答時間がどの程度変わるかを見る材料です。</dd>
+      </dl>
+      <p>たとえばDownloadだけが高くても、すべての用途で同じように感じるとは限りません。<a href="/internet-speed/">回線速度</a>、<a href="/ping/">Ping</a>、<a href="/jitter/">ジッター</a>、<a href="/loaded-latency/">混雑時の応答性</a>を分けて見ます。</p>
+
+      <h2>比較する順番</h2>
+      <ol class="site-pages__step-list">
+        <li>今いる場所で測定する。</li>
+        <li>ルーターに近い場所で測定する。</li>
+        <li>可能なら有線接続でも測定する。</li>
+        <li>別の端末でも測定する。</li>
+        <li>別の時間帯でも測定する。</li>
+      </ol>
+      <p>一度に複数の条件を変えるより、なるべく一つずつ変えると比較しやすくなります。ルーターに近づいたり有線接続にしたりしても、結果が必ず改善するとは限りません。違いが出た場合も、それだけで理由を確定せず、複数回の結果を見ます。</p>
+
+      <h2>測定条件ラベルを付けて履歴で比べる</h2>
+      <p>測定前に、Net Speed Raceの<strong>測定条件ラベル</strong>へ「リビング 5GHz」「寝室 Wi-Fi」「有線LAN」のように入力すると、履歴で条件ごとに整理できます。これは利用者自身が入力するメモであり、接続方法や場所を自動判定する機能ではありません。</p>
+      <p>ラベル付きの履歴があると、「測定条件ごとの傾向」で同じ条件のDownload、Upload、Ping、混雑時の応答性の中央値を確認できます。時間帯やその時点のネットワーク状況も変わるため、条件だけが差の理由とは限りません。</p>
+
+      <h2>Wi-Fiの遅さと回線全体の遅さは同じとは限らない</h2>
+      <p>ブラウザ測定では、Wi-Fiを含む端末からCloudflareまでの通信を観測します。この結果だけでは、Wi-Fi内の状態とインターネット回線側の状態を完全に分けることはできません。場所・有線接続・端末・時間帯を変えた比較は、次に確認したい条件を考えるための材料です。</p>
+
+      <section class="site-pages__related" aria-labelledby="wifi-related-title"><h2 id="wifi-related-title">関連ガイド</h2><ul>
+        <li><a href="/internet-speed/">回線速度の見方</a></li><li><a href="/ping/">Pingとは</a></li><li><a href="/jitter/">ジッターとは</a></li><li><a href="/loaded-latency/">混雑時の応答性とは</a></li>
+      </ul></section>
+      <a class="site-pages__article-cta" href="/">今の回線品質を測定する</a>
+    </article></main>
+    <footer class="site-pages__footer"><div class="site-pages__footer-inner"><nav class="site-pages__nav" aria-label="フッターナビゲーション"><ul>
+      <li><a href="/">速度を測定</a></li><li><a href="/guide/">回線品質ガイド</a></li><li><a href="/about/">このサイトについて</a></li><li><a href="/methodology/">測定方法</a></li><li><a href="/privacy/">プライバシー</a></li><li><a href="/contact/">お問い合わせ</a></li><li><a href="/terms/">利用規約</a></li>
+    </ul></nav><p class="site-pages__footer-note">© Net Speed Race</p></div></footer>
+  </body>
+</html>
