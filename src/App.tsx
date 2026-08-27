@@ -271,6 +271,11 @@ function App() {
       >
         <span>© {new Date().getFullYear()} Net Speed Race</span>
         <div className="site-footer__links">
+          <a href="/about/">このサイトについて</a>
+          <a href="/methodology/">測定方法</a>
+          <a href="/privacy/">プライバシー</a>
+          <a href="/contact/">お問い合わせ</a>
+          <a href="/terms/">利用規約</a>
           <span>Powered by Cloudflare Speedtest</span>
         </div>
       </footer>

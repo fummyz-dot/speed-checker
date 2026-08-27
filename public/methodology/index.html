@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>測定方法と指標について | Net Speed Race</title>
+    <meta name="description" content="Net Speed Raceで確認するDownload、Upload、Ping、Jitter、負荷時レイテンシと、その見方を説明します。" />
+    <link rel="canonical" href="https://netspeedrace.com/methodology/" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Net Speed Race" />
+    <meta property="og:title" content="測定方法と指標について | Net Speed Race" />
+    <meta property="og:description" content="Net Speed Raceで確認するDownload、Upload、Ping、Jitter、負荷時レイテンシと、その見方を説明します。" />
+    <meta property="og:url" content="https://netspeedrace.com/methodology/" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="stylesheet" href="/site-pages.css" />
+  </head>
+  <body>
+    <a class="site-pages__skip-link" href="#main-content">本文へ移動</a>
+    <header class="site-pages__header">
+      <div class="site-pages__header-inner">
+        <a class="site-pages__brand" href="/">Net Speed Race</a>
+        <nav class="site-pages__nav" aria-label="主要ナビゲーション">
+          <ul>
+            <li><a href="/">速度を測定</a></li>
+            <li><a href="/about/">このサイトについて</a></li>
+            <li><a href="/methodology/" aria-current="page">測定方法</a></li>
+            <li><a href="/privacy/">プライバシー</a></li>
+            <li><a href="/contact/">お問い合わせ</a></li>
+            <li><a href="/terms/">利用規約</a></li>
+          </ul>
+        </nav>
+      </div>
+    </header>
+    <main class="site-pages__main" id="main-content">
+      <article class="site-pages__article">
+        <p class="site-pages__eyebrow">METHODOLOGY</p>
+        <h1>測定方法と指標について</h1>
+        <p class="site-pages__lead">Net Speed RaceはCloudflareのnetwork measurement基盤を利用し、ブラウザから回線の速度と応答性を測定します。測定値は、その時点の端末、Wi-Fi、回線、通信経路などの状況によって変動します。</p>
+
+        <h2>主な指標</h2>
+        <dl>
+          <dt>Download（下り速度）</dt><dd>インターネットから端末へデータを受け取る速さです。動画視聴やダウンロードなどに関係します。</dd>
+          <dt>Upload（上り速度）</dt><dd>端末からインターネットへデータを送る速さです。ファイル送信や配信、会議での映像送信などに関係します。</dd>
+          <dt>Ping / idle latency</dt><dd>回線が空いている状態での応答時間です。低いほど、操作への反応が速く感じられやすくなります。</dd>
+          <dt>Jitter</dt><dd>応答時間のばらつきです。小さいほど、応答の安定性を確認しやすくなります。</dd>
+          <dt>Download loaded latency</dt><dd>ダウンロード通信の負荷があるときの応答時間です。</dd>
+          <dt>Upload loaded latency</dt><dd>アップロード通信の負荷があるときの応答時間です。</dd>
+        </dl>
+
+        <h2>混雑時の応答性</h2>
+        <p>「混雑時の応答性」は、通信を使っている最中に応答時間がどの程度増えるかを見るための表示です。ダウンロード時・アップロード時それぞれで、負荷時レイテンシからidle latencyを引いた増加量を確認します。</p>
+        <p>速度は高いほど多くのデータを送受信しやすい一方、latencyやJitterは低いほど応答性が良い傾向があります。Mbpsは1秒あたりに送受信できるデータ量の単位、msは応答までの時間の単位です。</p>
+
+        <h2>測定結果を比較するとき</h2>
+        <p>ブラウザ測定は、測定時の端末の負荷、Wi-Fiの電波状況、回線の利用状況、通信経路などで変動します。1回の測定だけで障害の原因を確定することはできません。時間帯、有線・Wi-Fi、利用場所などの条件を変えて複数回測定し、比較することが役立ちます。</p>
+        <p>測定中は一定量のデータ通信が発生します。モバイルデータ通信を利用している場合は、契約している通信量や料金への影響を確認してください。</p>
+
+        <h2>レース表現について</h2>
+        <p>レースの比較基準は、測定値を分かりやすくするための演出上の基準です。通信品質の公式規格・標準や、接続の合否判定ではありません。</p>
+      </article>
+    </main>
+    <footer class="site-pages__footer">
+      <div class="site-pages__footer-inner">
+        <nav class="site-pages__nav" aria-label="フッターナビゲーション"><ul>
+          <li><a href="/">速度を測定</a></li><li><a href="/about/">このサイトについて</a></li><li><a href="/methodology/">測定方法</a></li><li><a href="/privacy/">プライバシー</a></li><li><a href="/contact/">お問い合わせ</a></li><li><a href="/terms/">利用規約</a></li>
+        </ul></nav>
+        <p class="site-pages__footer-note">© Net Speed Race</p>
+      </div>
+    </footer>
+  </body>
+</html>

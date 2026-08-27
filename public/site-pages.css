@@ -1,0 +1,242 @@
+:root {
+  color-scheme: dark;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+  background: #080b12;
+  color: #f5f7fb;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  background: #080b12;
+}
+
+body {
+  min-width: 320px;
+  margin: 0;
+  background: radial-gradient(circle at top right, #132932 0, transparent 34rem), #080b12;
+  color: #e2e8f0;
+  font-size: 16px;
+  line-height: 1.8;
+}
+
+a {
+  color: #9bf0d6;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
+a:hover {
+  color: #d6fff1;
+}
+
+a:focus-visible {
+  outline: 3px solid #75e5c2;
+  outline-offset: 4px;
+}
+
+.site-pages__skip-link {
+  position: fixed;
+  z-index: 2;
+  top: 12px;
+  left: 12px;
+  padding: 8px 12px;
+  background: #f5f7fb;
+  color: #080b12;
+  transform: translateY(-160%);
+}
+
+.site-pages__skip-link:focus {
+  transform: translateY(0);
+}
+
+.site-pages__header,
+.site-pages__footer {
+  border-color: rgba(151, 170, 190, 0.22);
+  border-style: solid;
+  border-width: 0;
+}
+
+.site-pages__header {
+  border-bottom-width: 1px;
+}
+
+.site-pages__footer {
+  border-top-width: 1px;
+}
+
+.site-pages__header-inner,
+.site-pages__footer-inner,
+.site-pages__main {
+  width: min(960px, calc(100% - 32px));
+  margin: 0 auto;
+}
+
+.site-pages__header-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 18px 0;
+}
+
+.site-pages__brand {
+  flex: 0 0 auto;
+  color: #f5f7fb;
+  font-size: 1.05rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  text-decoration: none;
+}
+
+.site-pages__nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 6px 16px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.site-pages__nav a {
+  color: #c6d0dc;
+  font-size: 0.88rem;
+  font-weight: 650;
+  text-decoration: none;
+}
+
+.site-pages__nav a[aria-current="page"] {
+  color: #75e5c2;
+  text-decoration: underline;
+}
+
+.site-pages__main {
+  padding: clamp(40px, 7vw, 76px) 0;
+}
+
+.site-pages__article {
+  padding: clamp(24px, 5vw, 52px);
+  border: 1px solid rgba(151, 170, 190, 0.24);
+  border-radius: 14px;
+  background: rgba(13, 20, 30, 0.86);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.2);
+}
+
+.site-pages__eyebrow {
+  margin: 0 0 10px;
+  color: #75e5c2;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+}
+
+h1,
+h2 {
+  color: #f8fafc;
+  line-height: 1.35;
+}
+
+h1 {
+  margin: 0;
+  font-size: clamp(1.9rem, 5vw, 2.8rem);
+  letter-spacing: -0.035em;
+}
+
+h2 {
+  margin: 42px 0 12px;
+  font-size: clamp(1.2rem, 3vw, 1.48rem);
+}
+
+h3 {
+  margin: 28px 0 8px;
+  color: #dce3eb;
+  font-size: 1rem;
+}
+
+p,
+li,
+dd {
+  overflow-wrap: anywhere;
+}
+
+.site-pages__lead {
+  margin: 20px 0 0;
+  color: #c6d0dc;
+  font-size: 1.08rem;
+}
+
+.site-pages__article ul {
+  padding-left: 1.3em;
+}
+
+.site-pages__article li + li {
+  margin-top: 6px;
+}
+
+.site-pages__article dl {
+  display: grid;
+  grid-template-columns: minmax(0, 190px) minmax(0, 1fr);
+  gap: 8px 20px;
+  margin: 18px 0;
+}
+
+.site-pages__article dt {
+  color: #a7b4c4;
+  font-weight: 750;
+}
+
+.site-pages__article dd {
+  margin: 0;
+}
+
+.site-pages__note {
+  margin-top: 28px;
+  padding: 16px 18px;
+  border-left: 3px solid #75e5c2;
+  background: rgba(117, 229, 194, 0.09);
+}
+
+.site-pages__updated {
+  margin-top: 42px;
+  color: #9aa7b7;
+  font-size: 0.88rem;
+}
+
+.site-pages__footer-inner {
+  padding: 28px 0 36px;
+}
+
+.site-pages__footer .site-pages__nav ul {
+  justify-content: flex-start;
+}
+
+.site-pages__footer-note {
+  margin: 18px 0 0;
+  color: #8996a6;
+  font-size: 0.82rem;
+}
+
+@media (max-width: 720px) {
+  .site-pages__header-inner {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .site-pages__nav ul {
+    justify-content: flex-start;
+    gap: 7px 14px;
+  }
+
+  .site-pages__article dl {
+    grid-template-columns: 1fr;
+    gap: 2px;
+  }
+
+  .site-pages__article dd + dt {
+    margin-top: 14px;
+  }
+}

@@ -1,4 +1,4 @@
-import { act, render, screen, waitFor } from '@testing-library/react'
+import { act, render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import App from './App'
@@ -344,11 +344,24 @@ describe('App', () => {
     expect(screen.getByRole('button', { name: '設定' })).toBeDisabled()
   })
 
-  it('footerに公開ブランドを表示し、公開ソースコードリンクを表示しない', () => {
-    render(<App />)
+  it('footerに公開ページリンクを表示し、公開ソースコードリンクを表示しない', () => {
+    const { container } = render(<App />)
+    const footer = container.querySelector('footer')
 
     expect(screen.getByText(`© ${new Date().getFullYear()} Net Speed Race`)).toBeVisible()
     expect(screen.getByText('Powered by Cloudflare Speedtest')).toBeVisible()
+    expect(footer).not.toBeNull()
+    const footerLinks = within(footer as HTMLElement)
+    const publicPages = [
+      ['このサイトについて', '/about/'],
+      ['測定方法', '/methodology/'],
+      ['プライバシー', '/privacy/'],
+      ['お問い合わせ', '/contact/'],
+      ['利用規約', '/terms/'],
+    ] as const
+    publicPages.forEach(([name, href]) => {
+      expect(footerLinks.getByRole('link', { name })).toHaveAttribute('href', href)
+    })
     expect(screen.queryByRole('link', { name: 'GitHubでソースコードを見る' })).not.toBeInTheDocument()
   })
 
