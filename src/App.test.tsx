@@ -353,6 +353,7 @@ describe('App', () => {
     expect(footer).not.toBeNull()
     const footerLinks = within(footer as HTMLElement)
     const publicPages = [
+      ['回線品質ガイド', '/guide/'],
       ['このサイトについて', '/about/'],
       ['測定方法', '/methodology/'],
       ['プライバシー', '/privacy/'],

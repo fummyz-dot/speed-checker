@@ -271,6 +271,7 @@ function App() {
       >
         <span>© {new Date().getFullYear()} Net Speed Race</span>
         <div className="site-footer__links">
+          <a href="/guide/">回線品質ガイド</a>
           <a href="/about/">このサイトについて</a>
           <a href="/methodology/">測定方法</a>
           <a href="/privacy/">プライバシー</a>

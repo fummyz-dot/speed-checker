@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>混雑時の応答性とは？Loaded Latencyの見方 | Net Speed Race</title>
+    <meta name="description" content="通信中にPingがどれだけ増えるかを見るLoaded Latency（負荷時レイテンシ）と、Net Speed Raceの「混雑時の応答性」の見方を説明します。" />
+    <link rel="canonical" href="https://netspeedrace.com/loaded-latency/" />
+    <meta property="og:type" content="website" /><meta property="og:site_name" content="Net Speed Race" />
+    <meta property="og:title" content="混雑時の応答性とは？Loaded Latencyの見方 | Net Speed Race" />
+    <meta property="og:description" content="通信中にPingがどれだけ増えるかを見るLoaded Latency（負荷時レイテンシ）と、Net Speed Raceの「混雑時の応答性」の見方を説明します。" />
+    <meta property="og:url" content="https://netspeedrace.com/loaded-latency/" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" /><link rel="stylesheet" href="/site-pages.css" />
+  </head>
+  <body>
+    <a class="site-pages__skip-link" href="#main-content">本文へ移動</a>
+    <header class="site-pages__header"><div class="site-pages__header-inner"><a class="site-pages__brand" href="/">Net Speed Race</a><nav class="site-pages__nav" aria-label="主要ナビゲーション"><ul>
+      <li><a href="/">速度を測定</a></li><li><a href="/guide/">回線品質ガイド</a></li><li><a href="/about/">このサイトについて</a></li><li><a href="/methodology/">測定方法</a></li><li><a href="/privacy/">プライバシー</a></li><li><a href="/contact/">お問い合わせ</a></li><li><a href="/terms/">利用規約</a></li>
+    </ul></nav></div></header>
+    <main class="site-pages__main" id="main-content"><article class="site-pages__article">
+      <p class="site-pages__eyebrow">LOADED LATENCY</p><h1>混雑時の応答性とは？Loaded Latencyの見方</h1>
+      <p class="site-pages__lead">通信を使っている最中に応答時間がどの程度変わるかを見るのが、Loaded Latencyです。速度が速くても通信中に重く感じる場面を考えるための材料になります。</p>
+      <p class="site-pages__article-meta"><span>運営・編集: Net Speed Race</span><span>最終更新: 2026年8月27日</span></p>
+      <p class="site-pages__note"><a href="/methodology/">測定方法について</a>と<a href="/about/">このサイトについて</a>で、測定と表示の前提を確認できます。</p>
+      <a class="site-pages__article-cta" href="/">今の回線品質を測定する</a>
+
+      <h2>idle latencyとLoaded Latency</h2>
+      <p>idle latencyは、回線が空いている状態での応答時間です。download loaded latencyはダウンロード通信中、upload loaded latencyはアップロード通信中の応答時間を表します。Download側とUpload側を分けて見ることで、どちらの通信中に応答が変わるかを確認しやすくなります。</p>
+      <p>ブラウザ測定はその時点の通信状況を観測するものです。結果だけから、Wi-Fi、ルーター、ISP、端末などのどれが原因かを確定することはできません。</p>
+
+      <h2>Net Speed Raceでの増加量</h2>
+      <p>Net Speed Raceは、各方向で次のeffective increaseを使って混雑時の応答性を表示します。</p>
+      <p class="site-pages__note"><code>max(0, loaded latency - idle latency)</code></p>
+      <p>負荷時レイテンシがidle latencyより小さい場合でも、増加量は負の値にせず0msとして扱います。これは今回の測定で確認できる応答時間の増加を、分かりやすく見るための計算です。</p>
+
+      <h2>現在の表示基準</h2>
+      <div class="site-pages__table-wrap"><table class="site-pages__table">
+        <thead><tr><th scope="col">effective increase</th><th scope="col">Net Speed Raceの表示</th></tr></thead>
+        <tbody><tr><td>0〜20ms</td><td>良好</td></tr><tr><td>20ms超〜100ms</td><td>注意</td></tr><tr><td>100ms超</td><td>要注意</td></tr></tbody>
+      </table></div>
+      <p>これはNet Speed Race独自の表示基準であり、Cloudflareや通信業界の公式標準ではありません。測定が一部取得できない場合は、判定できない方向を除いて表示することがあります。</p>
+
+      <h2>比較するときの考え方</h2>
+      <p>同じ条件で複数回測定したり、時間帯、有線・Wi-Fi、端末の条件を変えたりして、Download・Upload・Pingとあわせて比較してください。通信中の応答の変化を知る手掛かりにはなりますが、障害原因を証明するものではありません。</p>
+      <section class="site-pages__related" aria-labelledby="loaded-related-title"><h2 id="loaded-related-title">関連ガイド</h2><ul>
+        <li><a href="/ping/">Pingとは</a></li><li><a href="/jitter/">ジッターとは</a></li><li><a href="/internet-speed/">回線速度の見方</a></li><li><a href="/guide/">回線品質ガイド</a></li>
+      </ul></section><a class="site-pages__article-cta" href="/">今の回線品質を測定する</a>
+    </article></main>
+    <footer class="site-pages__footer"><div class="site-pages__footer-inner"><nav class="site-pages__nav" aria-label="フッターナビゲーション"><ul>
+      <li><a href="/">速度を測定</a></li><li><a href="/guide/">回線品質ガイド</a></li><li><a href="/about/">このサイトについて</a></li><li><a href="/methodology/">測定方法</a></li><li><a href="/privacy/">プライバシー</a></li><li><a href="/contact/">お問い合わせ</a></li><li><a href="/terms/">利用規約</a></li>
+    </ul></nav><p class="site-pages__footer-note">© Net Speed Race</p></div></footer>
+  </body>
+</html>

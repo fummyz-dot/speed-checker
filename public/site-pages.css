@@ -199,6 +199,113 @@ dd {
   background: rgba(117, 229, 194, 0.09);
 }
 
+.site-pages__article-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 18px;
+  margin: 18px 0 0;
+  color: #a7b4c4;
+  font-size: 0.84rem;
+}
+
+.site-pages__article-cta {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  margin: 26px 0 4px;
+  padding: 10px 16px;
+  border: 1px solid #75e5c2;
+  border-radius: 8px;
+  background: rgba(117, 229, 194, 0.12);
+  color: #d6fff1;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.site-pages__article-cta:hover {
+  background: rgba(117, 229, 194, 0.22);
+}
+
+.site-pages__card-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin: 20px 0;
+}
+
+.site-pages__card {
+  display: block;
+  min-height: 100%;
+  padding: 18px;
+  border: 1px solid rgba(151, 170, 190, 0.28);
+  border-radius: 10px;
+  background: rgba(17, 29, 36, 0.72);
+  color: #e2e8f0;
+  text-decoration: none;
+}
+
+.site-pages__card:hover {
+  border-color: #75e5c2;
+  background: rgba(117, 229, 194, 0.1);
+}
+
+.site-pages__card strong,
+.site-pages__card span {
+  display: block;
+}
+
+.site-pages__card strong {
+  color: #9bf0d6;
+}
+
+.site-pages__card span {
+  margin-top: 6px;
+  color: #c6d0dc;
+  font-size: 0.91rem;
+  line-height: 1.65;
+}
+
+.site-pages__related {
+  margin-top: 44px;
+  padding-top: 28px;
+  border-top: 1px solid rgba(151, 170, 190, 0.24);
+}
+
+.site-pages__related h2 {
+  margin-top: 0;
+}
+
+.site-pages__related ul {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px 20px;
+  padding-left: 1.2em;
+}
+
+.site-pages__table-wrap {
+  overflow-x: auto;
+  margin: 20px 0;
+}
+
+.site-pages__table {
+  width: 100%;
+  min-width: 420px;
+  border-collapse: collapse;
+}
+
+.site-pages__table th,
+.site-pages__table td {
+  padding: 12px;
+  border-bottom: 1px solid rgba(151, 170, 190, 0.24);
+  text-align: left;
+  vertical-align: top;
+}
+
+.site-pages__table th {
+  color: #9bf0d6;
+  font-weight: 750;
+}
+
 .site-pages__updated {
   margin-top: 42px;
   color: #9aa7b7;
@@ -238,5 +345,10 @@ dd {
 
   .site-pages__article dd + dt {
     margin-top: 14px;
+  }
+
+  .site-pages__card-grid,
+  .site-pages__related ul {
+    grid-template-columns: 1fr;
   }
 }
