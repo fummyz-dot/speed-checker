@@ -2547,6 +2547,10 @@ a:focus-visible {
   content: '';
 }
 
+.notice__cloudflare-suffix {
+  white-space: nowrap;
+}
+
 .site-footer {
   display: flex;
   min-height: 86px;
