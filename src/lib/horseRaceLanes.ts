@@ -13,7 +13,7 @@ export const HORSE_RACE_LANES = [
   },
   {
     id: 'fast',
-    label: 'オグリキャップ',
+    label: '無敗の三冠馬',
     sideViewLabel: '横向きに走る高速の競走馬',
     frontViewLabel: '正面で喜ぶ高速の騎手と競走馬',
   },

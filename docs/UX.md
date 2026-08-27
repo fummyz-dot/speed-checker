@@ -69,7 +69,7 @@ The race should remain:
 - lightweight enough that it does not meaningfully burden a slow connection;
 - replayable after a completed measurement.
 
-オグリキャップは下り 700 Mbps・上り 250 Mbpsを基準とする高速ベンチマークである。レースは常にユーザーの実測値との比較として表示し、速度測定そのものの品質基準や診断とは扱わない。
+無敗の三冠馬は下り 700 Mbps・上り 250 Mbpsを基準とする高速ベンチマークである。レースは常にユーザーの実測値との比較として表示し、速度測定そのものの品質基準や診断とは扱わない。
 
 Race courseはCSSだけで表現するdark navyとcyan/emeraldの控えめなspeed-race stageとし、馬・レース情報の視認性を優先する。横向き・GOAL正面の表示順は既存の各レーン構造を維持し、あなたのlabelは既存accentを保った小さな強調に留める。
 

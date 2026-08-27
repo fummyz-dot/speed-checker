@@ -145,7 +145,7 @@ The current evaluation is intentionally conservative and should not be described
 Current reference run durations:
 
 - standard: 13.5 seconds;
-- fast (オグリキャップ): 700 Mbpsをユーザーと同じ走行時間マッピングへ通した値（約10.03秒）。
+- fast (無敗の三冠馬): 700 Mbpsをユーザーと同じ走行時間マッピングへ通した値（約10.03秒）。
 
 User run duration:
 
@@ -159,7 +159,7 @@ Upload speed controls user jump height:
 clamp(22 + log10(1 + uploadMbps) * 32, 22, 100)
 ```
 
-正面ゴール表示では、地方馬は既存の6 Mbps相当、オグリキャップは上り250 Mbps相当を比較基準にする。オグリキャップのjump高さも同じ250 Mbpsを上記式へ通して求める。これらは実測値との比較を分かりやすくするための演出上の基準であり、ネットワーク品質の標準ではない。
+正面ゴール表示では、地方馬は既存の6 Mbps相当、無敗の三冠馬は上り250 Mbps相当を比較基準にする。無敗の三冠馬のjump高さも同じ250 Mbpsを上記式へ通して求める。これらは実測値との比較を分かりやすくするための演出上の基準であり、ネットワーク品質の標準ではない。
 
 These mappings are presentation mappings. They are not network-quality standards.
 

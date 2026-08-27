@@ -74,11 +74,11 @@ describe('HorseSpeedVisualization runner presentation', () => {
     expect(container.querySelector('.horse-course__finish')).toHaveTextContent('GOAL')
     expect(screen.getAllByRole('img')).toHaveLength(3)
     expect(container.querySelector('.horse-course__lane-label--standard')).toHaveTextContent('地方馬')
-    expect(container.querySelector('.horse-course__lane-label--fast')).toHaveTextContent('オグリキャップ')
+    expect(container.querySelector('.horse-course__lane-label--fast')).toHaveTextContent('無敗の三冠馬')
     expect(container.querySelector('.horse-course__lane-label--user')).toHaveTextContent('あなた')
     expect(
       [...container.querySelectorAll('.horse-course__lane-label')].map((label) => label.textContent),
-    ).toEqual(['地方馬', 'あなた', 'オグリキャップ'])
+    ).toEqual(['地方馬', 'あなた', '無敗の三冠馬'])
     expect(
       [...container.querySelectorAll('[data-runner]')].map((runner) => runner.getAttribute('data-runner')),
     ).toEqual(['standard', 'user', 'fast'])
