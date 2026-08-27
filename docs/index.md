@@ -16,12 +16,6 @@ This directory is the durable knowledge base for the project. `AGENTS.md` should
 - [UX.md](./UX.md)  
   Visual/interaction principles, race behavior, intended horse animation, accessibility, responsiveness, and live speedometer behavior.
 
-- [GROWTH.md](./GROWTH.md)  
-  Custom-domain, SEO, traffic, analytics, sharing, retention, and monetization direction.
-
-- [ROADMAP.md](./ROADMAP.md)  
-  Sequenced future work. This is planning context, not permission to implement unrelated items.
-
 - [DECISIONS.md](./DECISIONS.md)  
   Lightweight decision log for choices that agents should not casually undo.
 
@@ -34,7 +28,7 @@ Examples:
 - race animation -> `UX.md`, `MEASUREMENT.md`, `DECISIONS.md`
 - new quality score -> `MEASUREMENT.md`, `PRODUCT.md`, `DECISIONS.md`
 - Worker API field -> `ARCHITECTURE.md`, `DECISIONS.md`
-- new SEO page/domain -> `GROWTH.md`, `PRODUCT.md`
+- public-domain implementation -> `ARCHITECTURE.md`, `DECISIONS.md`
 - LocalStorage/history -> `ARCHITECTURE.md`, `MEASUREMENT.md`
 
 If a durable decision changes, update the relevant document and add/modify an entry in `DECISIONS.md`.

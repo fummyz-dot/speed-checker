@@ -28,8 +28,6 @@ Read `docs/index.md` before any non-trivial change.
 - Product intent and deliberate UX decisions: `docs/PRODUCT.md`, `docs/UX.md`, and `docs/DECISIONS.md`.
 - Measurement semantics and units: `docs/MEASUREMENT.md`.
 - Technical boundaries and deployment: `docs/ARCHITECTURE.md`.
-- Growth/SEO/monetization direction: `docs/GROWTH.md`.
-- Future work: `docs/ROADMAP.md`.
 
 If code and docs conflict, do not silently guess which side is correct. Identify the mismatch and resolve it as part of the task or report it.
 
@@ -127,8 +125,6 @@ Update durable docs only when the change affects durable knowledge:
 - measurement behavior/units/threshold semantics -> `docs/MEASUREMENT.md`
 - product intent -> `docs/PRODUCT.md`
 - deliberate UI/animation behavior -> `docs/UX.md`
-- strategic/growth decisions -> `docs/GROWTH.md`
 - accepted decisions -> `docs/DECISIONS.md`
-- sequencing/future work -> `docs/ROADMAP.md`
 
 Do not rewrite documentation merely to mirror implementation line-by-line.

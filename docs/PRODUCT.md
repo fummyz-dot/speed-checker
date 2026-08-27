@@ -40,8 +40,6 @@ The race is part of the product identity.
 8. Compare with a previous measurement.
 9. Share or re-run under different conditions.
 
-Longer term, the loop should also support repeated measurements by time, location label, or connection condition.
-
 ## Current product capabilities
 
 - Download speed.
@@ -102,17 +100,3 @@ Do not collect more information than needed to provide the current feature.
 - Server-side user profiles.
 - Background collection of personal browsing/network history.
 - A heavy game engine or realistic 3D racing game.
-
-## Candidate future differentiators
-
-These are directions, not committed implementation requirements:
-
-- bufferbloat/congestion-resilience evaluation using loaded latency;
-- explainable connection health score;
-- time-of-day history/trend analysis;
-- user-labeled A/B comparisons (Wi-Fi vs wired, room A vs room B, etc.);
-- packet-loss measurement when the infrastructure and cost model are acceptable;
-- privacy-conscious anonymous aggregate benchmarks;
-- richer shareable race/results.
-
-See `ROADMAP.md` for sequencing.

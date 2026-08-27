@@ -39,7 +39,29 @@ describe('public static pages', () => {
     expect(page.title).not.toBe('')
     expect(page.querySelector('link[rel="canonical"]')?.getAttribute('href')).toBe(canonical)
     expect(page.querySelectorAll('header nav a')).toHaveLength(7)
-    expect(page.querySelectorAll('footer nav a')).toHaveLength(7)
+    expect(page.querySelectorAll('footer nav a')).toHaveLength(8)
+  })
+
+  it.each(staticPages)('$pathページのFooterに公開ソースコードリンクを含み、Private repo名を含まない', ({ path }) => {
+    const page = parsePage(path)
+    const sourceLink = [...page.querySelectorAll('footer a')]
+      .find((link) => link.textContent === 'GitHubでソースコードを見る')
+
+    expect(sourceLink?.getAttribute('href')).toBe('https://github.com/fummyz-dot/speed-checker')
+    expect(sourceLink?.getAttribute('target')).toBe('_blank')
+    expect(sourceLink?.getAttribute('rel')).toBe('noreferrer noopener')
+    expect(page.documentElement.outerHTML).not.toContain('netspeedrace-internal')
+  })
+
+  it('Aboutページに測定方法とプライバシー実装を確認できる透明性の説明を含む', () => {
+    const page = parsePage('about')
+    const content = page.body.textContent ?? ''
+
+    expect(content).toContain('測定方法やプライバシーに関する実装を確認できるよう、主要なソースコードをGitHubで公開しています。')
+    const sourceLink = [...page.querySelectorAll('article a')]
+      .find((link) => link.textContent === 'GitHubでソースコードを見る')
+
+    expect(sourceLink?.getAttribute('href')).toBe('https://github.com/fummyz-dot/speed-checker')
   })
 
   it('ガイドページごとに固有のtitle、description、OGPを持つ', () => {

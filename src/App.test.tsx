@@ -344,7 +344,7 @@ describe('App', () => {
     expect(screen.getByRole('button', { name: '設定' })).toBeDisabled()
   })
 
-  it('footerに公開ページリンクを表示し、公開ソースコードリンクを表示しない', () => {
+  it('footerに公開ページリンクと安全な公開ソースコードリンクを表示する', () => {
     const { container } = render(<App />)
     const footer = container.querySelector('footer')
 
@@ -363,7 +363,13 @@ describe('App', () => {
     publicPages.forEach(([name, href]) => {
       expect(footerLinks.getByRole('link', { name })).toHaveAttribute('href', href)
     })
-    expect(screen.queryByRole('link', { name: 'GitHubでソースコードを見る' })).not.toBeInTheDocument()
+    expect(footerLinks.getByRole('link', { name: 'GitHubでソースコードを見る' })).toHaveAttribute(
+      'href',
+      'https://github.com/fummyz-dot/speed-checker',
+    )
+    expect(footerLinks.getByRole('link', { name: 'GitHubでソースコードを見る' })).toHaveAttribute('target', '_blank')
+    expect(footerLinks.getByRole('link', { name: 'GitHubでソースコードを見る' })).toHaveAttribute('rel', 'noreferrer noopener')
+    expect(container.innerHTML).not.toContain('netspeedrace-internal')
   })
 
   it('測定エラーをalertで表示する', () => {

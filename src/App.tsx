@@ -277,6 +277,7 @@ function App() {
           <a href="/privacy/">プライバシー</a>
           <a href="/contact/">お問い合わせ</a>
           <a href="/terms/">利用規約</a>
+          <a href="https://github.com/fummyz-dot/speed-checker" target="_blank" rel="noreferrer noopener">GitHubでソースコードを見る</a>
           <span>Powered by Cloudflare Speedtest</span>
         </div>
       </footer>

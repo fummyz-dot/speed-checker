@@ -2,6 +2,12 @@
 
 [Net Speed Race](https://netspeedrace.com/) は、Cloudflare のエッジネットワークを使って現在のインターネット回線品質を測定する Web アプリです。ダークテーマのシンプルな画面で、速度測定と接続元ネットワーク情報を確認できます。
 
+## 公開ソースコード
+
+このリポジトリは Net Speed Race の公開ソースリポジトリです。公開ソースは [GitHub](https://github.com/fummyz-dot/speed-checker) で確認できます。production は [https://netspeedrace.com/](https://netspeedrace.com/) で公開しています。
+
+現時点ではオープンソースライセンスを宣言していません。
+
 ## 主な機能
 
 - ダウンロード／アップロード速度（Mbps）
