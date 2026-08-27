@@ -9,6 +9,9 @@ import { MetricsGrid } from './components/MetricsGrid'
 import { Notice } from './components/Notice'
 import { useMediaQuery } from './hooks/useMediaQuery'
 import { useSpeedTest } from './hooks/useSpeedTest'
+import { RankingCard } from './features/ranking/RankingCard'
+import { isRankingPreviewEnabled } from './features/ranking/rankingPreview'
+import { useRankingPreview } from './features/ranking/useRankingPreview'
 import {
   bandwidthBitsToMbps,
   formatFinalSpeedDisplay,
@@ -36,6 +39,14 @@ function App() {
     confirmedDownloadMbps,
     start,
   } = useSpeedTest()
+  const rankingPreviewEnabled = isRankingPreviewEnabled()
+  const {
+    context: rankingContext,
+    championReference,
+    isPreparingContext,
+    service: rankingService,
+    prepareMeasurement,
+  } = useRankingPreview(rankingPreviewEnabled)
   const isMobileLayout = useMediaQuery('(max-width: 760px)')
   const [conditionLabel, setConditionLabel] = useState<string | null>(getInitialConditionLabel)
   const [isConditionEditing, setIsConditionEditing] = useState(false)
@@ -46,7 +57,9 @@ function App() {
   const pendingRaceFocusExitRef = useRef<RaceFocusExitRequest | null>(null)
   const displayedDownload = formatFinalSpeedDisplay(confirmedDownloadMbps)
   const hasStarted = phase !== 'idle'
-  const buttonLabel = isRunning
+  const buttonLabel = isPreparingContext
+    ? '準備中…'
+    : isRunning
     ? '測定中…'
     : phase === 'complete' || phase === 'error'
       ? 'もう一度測定'
@@ -122,9 +135,15 @@ function App() {
   }, [exitRaceFocus, phase])
 
   const startMeasurement = () => {
-    if (isConditionEditing) return
+    if (isConditionEditing || isPreparingContext) return
     requestRaceFocus()
-    start({ conditionLabel })
+    if (!rankingPreviewEnabled) {
+      start({ conditionLabel })
+      return
+    }
+    void prepareMeasurement().then((shouldStart) => {
+      if (shouldStart) start({ conditionLabel })
+    })
   }
 
   const connectionInfo = <ConnectionInfo key="connection-info" />
@@ -161,7 +180,7 @@ function App() {
           className="test-button"
           type="button"
           onClick={startMeasurement}
-          disabled={isRunning || isConditionEditing}
+          disabled={isRunning || isPreparingContext || isConditionEditing}
           aria-describedby="test-button-hint"
         >
           <span>{buttonLabel}</span>
@@ -226,6 +245,8 @@ function App() {
               confirmedDownloadMbps={confirmedDownloadMbps}
               phase={phase}
               result={completedResult}
+              championReference={championReference}
+              showChampionReference={rankingPreviewEnabled}
               focused={isRaceFocused}
               focusExiting={isRaceFocusExiting}
               showExpandButton={!isMobileLayout}
@@ -254,7 +275,16 @@ function App() {
           </div>
           <MetricsGrid metrics={metrics} />
           {phase === 'complete' && completedResult && (
-            <CompletedMeasurement result={completedResult} />
+            <>
+              <CompletedMeasurement result={completedResult} />
+              {rankingPreviewEnabled && (
+                <RankingCard
+                  context={rankingContext}
+                  service={rankingService}
+                  measurement={completedResult}
+                />
+              )}
+            </>
           )}
         </section>
 

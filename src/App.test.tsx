@@ -62,7 +62,10 @@ describe('App', () => {
     })
   })
 
-  afterEach(() => vi.unstubAllGlobals())
+  afterEach(() => {
+    vi.unstubAllGlobals()
+    vi.unstubAllEnvs()
+  })
 
   it('h1を1件だけ正しい文言で表示する', () => {
     const { container } = render(<App />)
@@ -78,6 +81,41 @@ describe('App', () => {
     expect(screen.getByRole('button', { name: '測定開始' })).toBeVisible()
     expect(screen.getByRole('heading', { name: '回線速度レース' })).toBeVisible()
     expect(container.querySelector('.horse-course')).toHaveAttribute('data-animation-state', 'idle')
+    expect(screen.queryByRole('heading', { name: '本日の全国回線品質ランキング' })).not.toBeInTheDocument()
+    expect(screen.queryByLabelText('無敗の三冠馬の比較基準')).not.toBeInTheDocument()
+  })
+
+  it('previewではcontext後に動的championを固定し、ランキングcardは測定完了後だけ表示する', async () => {
+    const user = userEvent.setup()
+    vi.stubEnv('VITE_RANKING_PREVIEW', 'true')
+    const start = vi.fn()
+    const completedResult = {
+      id: 'ranking-preview-measurement', measuredAt: '2026-08-28T12:00:00.000Z',
+      downloadMbps: 300, uploadMbps: 100, pingMs: 20, jitterMs: 5,
+    }
+    let speedTest: ReturnType<typeof useSpeedTest> = {
+      metrics: EMPTY_METRICS, phase: 'idle', isRunning: false, error: null, completedResult: null,
+      confirmedDownloadMbps: null, start,
+    }
+    vi.mocked(useSpeedTest).mockImplementation(() => speedTest)
+
+    const { rerender } = render(<App />)
+    expect(screen.queryByRole('heading', { name: '本日の全国回線品質ランキング' })).not.toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: '測定開始' }))
+
+    await waitFor(() => expect(start).toHaveBeenCalledWith({ conditionLabel: null }))
+    expect(screen.getByLabelText('無敗の三冠馬の比較基準')).toHaveTextContent('昨日の全国1位')
+    expect(screen.getByLabelText('無敗の三冠馬の比較基準')).toHaveTextContent('535 Mbps')
+
+    speedTest = {
+      ...speedTest,
+      phase: 'complete',
+      completedResult,
+      confirmedDownloadMbps: completedResult.downloadMbps,
+    }
+    rerender(<App />)
+    expect(screen.getByRole('heading', { name: '本日の全国回線品質ランキング', hidden: true })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '匿名でランキングに参加してスコアを見る', hidden: true })).toBeEnabled()
   })
 
   it('desktopとmobileでhero controlsのDOM順を切り替え、viewport変更にも追従する', async () => {

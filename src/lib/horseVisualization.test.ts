@@ -48,6 +48,20 @@ describe('horseVisualization', () => {
     expect(getUserHorseRunDuration(701)).toBeLessThan(referenceDurations.fast)
   })
 
+  it('動的championでも既存の走行時間・jump高の式をそのまま使い、defaultは旧値と一致する', () => {
+    expect(getReferenceHorseDurations()).toEqual({
+      standard: 13.5,
+      fast: getUserHorseRunDuration(700),
+    })
+    expect(getReferenceHorseDurations(534.8)).toEqual({
+      standard: 13.5,
+      fast: getUserHorseRunDuration(534.8),
+    })
+    expect(getUserHorseJumpHeight(327.2)).toBeGreaterThan(getUserHorseJumpHeight(250))
+    expect(getFrontViewUploadRanks(300, 327.2).fast.rank).toBe(1)
+    expect(getFrontViewUploadRanks(300, 327.2).user.rank).toBe(2)
+  })
+
   it.each([0, 0.1, 1, 10, 100, 1_000, 10_000, -1, Number.NaN, Number.POSITIVE_INFINITY])(
     '上り %s Mbps を画面内のジャンプ高へ変換する',
     (speed) => {

@@ -10,6 +10,7 @@ import {
   type HorseTimelineValues,
 } from '../lib/raceTimeline'
 import type { SpeedMeasurementResult } from '../types/measurement'
+import { DEFAULT_RACE_CHAMPION_REFERENCE, type RaceChampionReference } from '../types/raceChampion'
 import type { TestPhase } from '../types/speedTest'
 
 export type HorseRaceState =
@@ -24,6 +25,7 @@ interface UseHorseRaceAnimationOptions {
   phase: TestPhase
   downloadMbps: number | null
   result: SpeedMeasurementResult | null
+  championReference?: RaceChampionReference
 }
 
 interface RaceTimeline {
@@ -69,6 +71,7 @@ export const useHorseRaceAnimation = ({
   phase,
   downloadMbps,
   result,
+  championReference = DEFAULT_RACE_CHAMPION_REFERENCE,
 }: UseHorseRaceAnimationOptions) => {
   const [state, setState] = useState<HorseRaceState>('idle')
   const [hasFinished, setHasFinished] = useState<HorseFinishState>(EMPTY_FINISH_STATE)
@@ -76,7 +79,9 @@ export const useHorseRaceAnimation = ({
   const [remainingDurationsMs, setRemainingDurationsMs] = useState<HorseTimelineValues>(
     EMPTY_REMAINING_DURATION,
   )
-  const [referenceDurations, setReferenceDurations] = useState(getReferenceHorseDurations)
+  const [referenceDurations, setReferenceDurations] = useState(() =>
+    getReferenceHorseDurations(championReference.downloadMbps),
+  )
   const [userRunDuration, setUserRunDuration] = useState(() => getUserHorseRunDuration(0))
   const [frontTransitionElapsedMs, setFrontTransitionElapsedMs] = useState(0)
   const [groupJumpElapsedMs, setGroupJumpElapsedMs] = useState(0)
@@ -105,13 +110,13 @@ export const useHorseRaceAnimation = ({
     setHasFinished(EMPTY_FINISH_STATE)
     setHorseProgress(EMPTY_PROGRESS)
     setRemainingDurationsMs(EMPTY_REMAINING_DURATION)
-    setReferenceDurations(getReferenceHorseDurations())
+    setReferenceDurations(getReferenceHorseDurations(championReference.downloadMbps))
     setUserRunDuration(getUserHorseRunDuration(0))
     setFrontTransitionElapsedMs(0)
     setGroupJumpElapsedMs(0)
     setState(nextState)
     setRaceSequence((sequence) => sequence + 1)
-  }, [cancelScheduledUpdate])
+  }, [cancelScheduledUpdate, championReference.downloadMbps])
 
   const synchronizeTimeline = useCallback(() => {
     cancelScheduledUpdate()
@@ -128,7 +133,7 @@ export const useHorseRaceAnimation = ({
         return
       }
 
-      const reference = getReferenceHorseDurations()
+      const reference = getReferenceHorseDurations(championReference.downloadMbps)
       timelineRef.current = {
         raceStartedAtMs: pendingRaceStart.raceStartedAtMs,
         startProgress: 0,
@@ -174,7 +179,7 @@ export const useHorseRaceAnimation = ({
         Math.max(0, Math.ceil(snapshot.nextUpdateAtMs - nowMs)),
       )
     }
-  }, [cancelScheduledUpdate])
+  }, [cancelScheduledUpdate, championReference.downloadMbps])
 
   synchronizeTimelineRef.current = synchronizeTimeline
 
@@ -207,7 +212,7 @@ export const useHorseRaceAnimation = ({
     }
 
     const remainingCourse = 1 - initialProgress
-    const reference = getReferenceHorseDurations()
+    const reference = getReferenceHorseDurations(championReference.downloadMbps)
     timelineRef.current = {
       raceStartedAtMs,
       startProgress: initialProgress,
@@ -220,7 +225,7 @@ export const useHorseRaceAnimation = ({
     }
     pendingRaceStartRef.current = null
     synchronizeTimeline()
-  }, [cancelScheduledUpdate, synchronizeTimeline])
+  }, [cancelScheduledUpdate, championReference.downloadMbps, synchronizeTimeline])
 
   useEffect(() => {
     const previousPhase = previousPhaseRef.current

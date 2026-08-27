@@ -940,6 +940,42 @@ a:focus-visible {
   gap: 8px;
 }
 
+.race-champion-reference {
+  display: flex;
+  min-width: 0;
+  margin: 12px 0 2px;
+  padding: 8px 10px;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 3px 9px;
+  border-left: 2px solid rgba(117, 229, 194, 0.45);
+  background: rgba(117, 229, 194, 0.035);
+  color: var(--muted);
+  font-size: 0.68rem;
+}
+
+.race-champion-reference > span {
+  color: #dce3eb;
+  font-weight: 700;
+}
+
+.race-champion-reference > strong {
+  color: var(--accent);
+  font-size: 0.64rem;
+}
+
+.race-champion-reference > b {
+  color: #e7edf5;
+  font-size: 0.78rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.race-champion-reference > small {
+  flex-basis: 100%;
+  color: #7f8a99;
+  font-size: 0.59rem;
+}
+
 .site-shell--race-focused [data-race-focus-background] {
   pointer-events: none;
   user-select: none;
@@ -3579,6 +3615,190 @@ a:focus-visible {
     align-items: flex-start;
     flex-direction: column;
     gap: 8px;
+  }
+}
+
+.ranking-card {
+  display: grid;
+  margin-top: 22px;
+  gap: 18px;
+}
+
+.ranking-card__heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.ranking-card__heading h3 {
+  margin-top: 6px;
+}
+
+.ranking-card__score-label {
+  flex: 0 0 auto;
+  color: var(--muted);
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.13em;
+}
+
+.ranking-card__intro,
+.ranking-card__error {
+  display: grid;
+  gap: 13px;
+}
+
+.ranking-card__intro p,
+.ranking-card__message,
+.ranking-card__error p {
+  max-width: 720px;
+  margin: 0;
+  color: #c2cad5;
+  font-size: 0.82rem;
+  line-height: 1.75;
+}
+
+.ranking-card__intro small {
+  color: var(--muted);
+  font-size: 0.68rem;
+  line-height: 1.6;
+}
+
+.ranking-card__submit {
+  width: fit-content;
+  max-width: 100%;
+  min-height: 42px;
+  color: #d9fff2;
+}
+
+.ranking-card__success {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(190px, 0.7fr);
+  gap: 18px;
+}
+
+.ranking-card__result {
+  min-width: 0;
+  padding: 18px;
+  border: 1px solid rgba(117, 229, 194, 0.2);
+  border-radius: 10px;
+  background: linear-gradient(135deg, rgba(117, 229, 194, 0.1), rgba(13, 18, 28, 0.45));
+}
+
+.ranking-card__result > span,
+.ranking-card__top3 > span {
+  color: var(--muted);
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+}
+
+.ranking-card__result > strong {
+  display: block;
+  margin-top: 7px;
+  color: #effff8;
+  font-size: clamp(2rem, 5vw, 3.25rem);
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  letter-spacing: -0.06em;
+  line-height: 1;
+}
+
+.ranking-card__result p {
+  display: flex;
+  margin: 14px 0 0;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+  color: var(--muted);
+  font-size: 0.76rem;
+}
+
+.ranking-card__result p + p {
+  margin-top: 5px;
+}
+
+.ranking-card__result b {
+  color: #e4ebf4;
+  font-size: 0.9rem;
+}
+
+.ranking-card__top3 {
+  min-width: 0;
+  padding: 16px 0;
+}
+
+.ranking-card__top3 h4 {
+  margin: 0 0 5px;
+  color: #d6dee8;
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+}
+
+.ranking-card__top3 ol {
+  display: grid;
+  margin: 13px 0 0;
+  padding: 0;
+  gap: 7px;
+  list-style: none;
+}
+
+.ranking-card__top3 li {
+  display: flex;
+  min-width: 0;
+  padding-bottom: 7px;
+  justify-content: space-between;
+  gap: 14px;
+  border-bottom: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+.ranking-card__top3 li span {
+  overflow: hidden;
+  color: #e6edf5;
+  font-variant-numeric: tabular-nums;
+  text-overflow: ellipsis;
+}
+
+.ranking-card__champion-comparison {
+  display: grid;
+  grid-column: 1 / -1;
+  padding-top: 14px;
+  gap: 4px;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 0.72rem;
+}
+
+.ranking-card__champion-comparison strong {
+  margin-top: 3px;
+  color: var(--accent);
+  font-size: 0.78rem;
+}
+
+@media (max-width: 460px) {
+  .ranking-card__heading {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 7px;
+  }
+
+  .ranking-card__success {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .ranking-card__result {
+    padding: 15px;
+  }
+
+  .ranking-card__submit {
+    width: 100%;
+    padding-right: 10px;
+    padding-left: 10px;
+    font-size: 0.68rem;
   }
 }
 

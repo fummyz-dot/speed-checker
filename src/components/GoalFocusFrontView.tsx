@@ -6,6 +6,7 @@ import { RunnerFrontView } from './RunnerFrontView'
 interface GoalFocusFrontViewProps {
   state: HorseRaceState
   userUploadMbps: number | null
+  championUploadMbps?: number
 }
 
 const frontViewStates: HorseRaceState[] = [
@@ -17,9 +18,13 @@ const frontViewStates: HorseRaceState[] = [
 const [standardLane, userLane, fastLane] = HORSE_RACE_LANES
 const FRONT_VIEW_LANES = [fastLane, userLane, standardLane]
 
-export const GoalFocusFrontView = ({ state, userUploadMbps }: GoalFocusFrontViewProps) => {
+export const GoalFocusFrontView = ({
+  state,
+  userUploadMbps,
+  championUploadMbps,
+}: GoalFocusFrontViewProps) => {
   const isActive = frontViewStates.includes(state)
-  const uploadRanks = getFrontViewUploadRanks(userUploadMbps)
+  const uploadRanks = getFrontViewUploadRanks(userUploadMbps, championUploadMbps)
 
   return (
     <div

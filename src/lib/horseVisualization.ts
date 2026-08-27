@@ -17,9 +17,11 @@ export const getUserHorseRunDuration = (downloadMbps: number): number => {
   return clamp(18 - 2.8 * Math.log10(Math.max(speed, 1)), 9.5, 18)
 }
 
-export const getReferenceHorseDurations = (): ReferenceHorseDurations => ({
+export const getReferenceHorseDurations = (
+  championDownloadMbps = OGURI_REFERENCE_DOWNLOAD_MBPS,
+): ReferenceHorseDurations => ({
   standard: 13.5,
-  fast: getUserHorseRunDuration(OGURI_REFERENCE_DOWNLOAD_MBPS),
+  fast: getUserHorseRunDuration(championDownloadMbps),
 })
 
 export const getUserHorseJumpHeight = (uploadMbps: number): number => {
@@ -50,11 +52,12 @@ const expressionForRank = (rank: FrontViewUploadRank['rank']): FrontViewJockeyEx
 
 export const getFrontViewUploadRanks = (
   userUploadMbps: number | null | undefined,
+  championUploadMbps = OGURI_REFERENCE_UPLOAD_MBPS,
 ): Record<HorseId, FrontViewUploadRank> => {
   const uploadValues: Array<{ id: HorseId; value: number }> = [
     { id: 'standard', value: FRONT_VIEW_REFERENCE_UPLOAD_MBPS.standard },
     { id: 'user', value: normalizeSpeedValue(userUploadMbps) ?? 0 },
-    { id: 'fast', value: FRONT_VIEW_REFERENCE_UPLOAD_MBPS.fast },
+    { id: 'fast', value: normalizeSpeedValue(championUploadMbps) ?? FRONT_VIEW_REFERENCE_UPLOAD_MBPS.fast },
   ]
 
   uploadValues.sort((left, right) => right.value - left.value || left.id.localeCompare(right.id))

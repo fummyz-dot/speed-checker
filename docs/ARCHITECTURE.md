@@ -57,6 +57,14 @@ The component tree should not directly duplicate the engine lifecycle.
 
 Race timing/value mappings belong in small deterministic helpers such as `src/lib/horseVisualization.ts`.
 
+### Ranking preview boundary
+
+`src/features/ranking/` contains a compile-time preview boundary for the future private ranking service. It is disabled unless `VITE_RANKING_PREVIEW=true` is supplied at build time; the normal production build has no ranking UI, request, Turnstile script, Service Binding configuration, or ranking persistence.
+
+When enabled locally, a fixed in-memory fixture is accessed through `RankingService`. The context is resolved before the speed-test engine starts, fixes the optional race champion reference for that run, and falls back to the existing 700 Mbps / 250 Mbps benchmark on failure. No ranking work occurs while the speed test runs, and no preview result enters LocalStorage.
+
+The browser does not calculate Net Speed Score. It only displays integer-tenths scores returned by the service boundary.
+
 ### Evaluation
 
 `src/lib/measurementEvaluation.ts` converts a completed measurement into:

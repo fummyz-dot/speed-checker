@@ -71,6 +71,8 @@ The race should remain:
 
 無敗の三冠馬は下り 700 Mbps・上り 250 Mbpsを基準とする高速ベンチマークである。レースは常にユーザーの実測値との比較として表示し、速度測定そのものの品質基準や診断とは扱わない。
 
+The optional ranking preview may replace that benchmark for one race with a champion reference resolved before measurement. Its download and upload values feed the existing race-duration and jump-height mappings without changing those mappings. If the context is unavailable, the 700 / 250 benchmark remains exactly as before. The preview-only compact champion note must stay secondary to the race.
+
 Race courseはCSSだけで表現するdark navyとcyan/emeraldの控えめなspeed-race stageとし、馬・レース情報の視認性を優先する。横向き・GOAL正面の表示順は既存の各レーン構造を維持し、あなたのlabelは既存accentを保った小さな強調に留める。
 
 ## Existing race lifecycle

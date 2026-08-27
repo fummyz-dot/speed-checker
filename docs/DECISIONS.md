@@ -162,3 +162,14 @@ Use nested `AGENTS.md` only where directory-specific constraints are genuinely u
 The public brand is **Net Speed Race** and its domain is `netspeedrace.com`.
 
 The repository, Cloudflare Worker, LocalStorage key, and other internal identifiers may remain `speed-checker` to preserve stability and compatibility.
+
+---
+
+## D-012 — Ranking preview is compile-time gated and score-blind in the browser
+
+**Status:** Accepted and implemented
+**Date:** 2026-08-28
+
+The public ranking preview is disabled by default and requires `VITE_RANKING_PREVIEW=true` at build time. It uses fixed local fixtures through a service abstraction only; it does not configure a Service Binding, Turnstile, database, or production API call.
+
+The browser must never calculate Net Speed Score or contain its coefficients. It may display score values supplied by the private ranking-service contract. Ranking context is resolved before a measurement, never during it, and is held in memory only. Context failure must preserve the existing 700 Mbps / 250 Mbps race benchmark and never fail the speed measurement.

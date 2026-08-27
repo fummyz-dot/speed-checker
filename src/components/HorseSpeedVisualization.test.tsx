@@ -112,6 +112,30 @@ describe('HorseSpeedVisualization runner presentation', () => {
       .not.toBeInTheDocument()
   })
 
+  it('preview時だけ動的な無敗の三冠馬の基準を補足表示とrace styleへ反映する', () => {
+    const { container } = render(
+      <HorseSpeedVisualization
+        downloadMbps={null}
+        uploadMbps={null}
+        phase="idle"
+        result={null}
+        showChampionReference
+        championReference={{
+          source: 'previous_day_winner', sourceDay: '2026-08-27', scoreTenths: 16834,
+          downloadMbps: 534.8, uploadMbps: 327.2, qualifyingRuns: 2847,
+        }}
+      />,
+    )
+
+    expect(screen.getByLabelText('無敗の三冠馬の比較基準')).toHaveTextContent('昨日の全国1位')
+    expect(screen.getByLabelText('無敗の三冠馬の比較基準')).toHaveTextContent('535 Mbps')
+    expect(screen.getByLabelText('無敗の三冠馬の比較基準')).toHaveTextContent('NET SPEED SCORE 1683.4')
+    expect(container.querySelector('.horse-course')).toHaveStyle({
+      '--fast-duration': `${getUserHorseRunDuration(534.8)}s`,
+      '--fast-jump-height': `${getUserHorseJumpHeight(327.2).toFixed(0)}px`,
+    })
+  })
+
   it.each([
     ['latency', 'measuringDownload'],
     ['download', 'warmingUp'],

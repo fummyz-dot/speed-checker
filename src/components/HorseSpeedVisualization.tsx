@@ -10,11 +10,11 @@ import {
 import { useLiveSpeedDisplay } from '../hooks/useLiveSpeedDisplay'
 import {
   getUserHorseJumpHeight,
-  OGURI_REFERENCE_UPLOAD_MBPS,
 } from '../lib/horseVisualization'
 import { HORSE_RACE_LANES, type HorseId } from '../lib/horseRaceLanes'
 import { formatFinalSpeedDisplay, formatLiveSpeedDisplay } from '../lib/speedValue'
 import type { SpeedMeasurementResult } from '../types/measurement'
+import { DEFAULT_RACE_CHAMPION_REFERENCE, type RaceChampionReference } from '../types/raceChampion'
 import type { TestPhase } from '../types/speedTest'
 import { GoalFocusFrontView } from './GoalFocusFrontView'
 import { HorseSprite } from './HorseSprite'
@@ -25,6 +25,8 @@ interface HorseSpeedVisualizationProps {
   confirmedDownloadMbps?: number | null
   phase: TestPhase
   result: SpeedMeasurementResult | null
+  championReference?: RaceChampionReference
+  showChampionReference?: boolean
   focused?: boolean
   focusExiting?: boolean
   showExpandButton?: boolean
@@ -71,6 +73,8 @@ export const HorseSpeedVisualization = ({
   confirmedDownloadMbps = null,
   phase,
   result,
+  championReference = DEFAULT_RACE_CHAMPION_REFERENCE,
+  showChampionReference = false,
   focused = false,
   focusExiting = false,
   showExpandButton = true,
@@ -92,7 +96,7 @@ export const HorseSpeedVisualization = ({
     groupJumpElapsedMs,
     raceSequence,
     replay,
-  } = useHorseRaceAnimation({ phase, downloadMbps, result })
+  } = useHorseRaceAnimation({ phase, downloadMbps, result, championReference })
   const displayedDownload = result?.downloadMbps ?? confirmedDownloadMbps ?? downloadMbps
   const displayedUpload = result?.uploadMbps ?? uploadMbps
   const isLiveDownload = phase === 'download' && result === null && downloadMbps !== null
@@ -117,7 +121,7 @@ export const HorseSpeedVisualization = ({
     '--standard-duration': `${referenceDurations.standard}s`,
     '--fast-duration': `${referenceDurations.fast}s`,
     '--user-duration': `${userRunDuration.toFixed(2)}s`,
-    '--fast-jump-height': `${getUserHorseJumpHeight(OGURI_REFERENCE_UPLOAD_MBPS).toFixed(0)}px`,
+    '--fast-jump-height': `${getUserHorseJumpHeight(championReference.uploadMbps).toFixed(0)}px`,
     '--user-jump-height': `${getUserHorseJumpHeight(result?.uploadMbps ?? 0).toFixed(0)}px`,
     '--race-start-progress': `${(raceStartProgress * 100).toFixed(3)}%`,
     '--standard-start-progress': `${(horseProgress.standard * 100).toFixed(3)}%`,
@@ -257,6 +261,17 @@ export const HorseSpeedVisualization = ({
         </div>
       </div>
 
+      {showChampionReference && (
+        <aside className="race-champion-reference" aria-label="無敗の三冠馬の比較基準">
+          <span>無敗の三冠馬</span>
+          <strong>{championReference.source === 'previous_day_winner' ? '昨日の全国1位' : '基準馬'}</strong>
+          <b>{formatFinalSpeedDisplay(championReference.downloadMbps)} Mbps</b>
+          {championReference.scoreTenths !== null && (
+            <small>NET SPEED SCORE {(championReference.scoreTenths / 10).toFixed(1)} · {championReference.qualifyingRuns.toLocaleString('ja-JP')}走から選出</small>
+          )}
+        </aside>
+      )}
+
       <div
         className={`horse-course horse-course--${state}`}
         style={raceStyle}
@@ -307,6 +322,7 @@ export const HorseSpeedVisualization = ({
           key={`front-${raceSequence}`}
           state={state}
           userUploadMbps={result?.uploadMbps ?? uploadMbps}
+          championUploadMbps={championReference.uploadMbps}
         />
       </div>
 
