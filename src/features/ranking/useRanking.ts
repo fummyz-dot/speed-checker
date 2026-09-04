@@ -3,7 +3,7 @@ import { DEFAULT_RACE_CHAMPION_REFERENCE, type RaceChampionReference } from '../
 import { createRankingApiService } from './rankingService'
 import type { RankingContext, RankingService } from './types'
 
-interface UseRankingPreviewResult {
+interface UseRankingResult {
   context: RankingContext | null
   championReference: RaceChampionReference
   isPreparingContext: boolean
@@ -11,7 +11,7 @@ interface UseRankingPreviewResult {
   prepareMeasurement: () => Promise<boolean>
 }
 
-export const useRankingPreview = (enabled: boolean): UseRankingPreviewResult => {
+export const useRanking = (enabled: boolean): UseRankingResult => {
   const serviceRef = useRef<RankingService | null>(null)
   const preparingRef = useRef(false)
   const [context, setContext] = useState<RankingContext | null>(null)

@@ -54,6 +54,7 @@ const getHeroControlOrder = (container: HTMLElement): string[] =>
 
 describe('App', () => {
   beforeEach(() => {
+    vi.clearAllMocks()
     window.localStorage.clear()
     document.documentElement.classList.remove('race-focus-lock')
     document.body.classList.remove('race-focus-lock')
@@ -87,9 +88,9 @@ describe('App', () => {
     expect(screen.queryByLabelText('無敗の三冠馬の比較基準')).not.toBeInTheDocument()
   })
 
-  it('previewではcontext後に動的championを固定し、ランキングcardは測定完了後だけ表示する', async () => {
+  it('ranking有効時はcontext後に動的championを固定し、ランキングcardは測定完了後だけ表示する', async () => {
     const user = userEvent.setup()
-    vi.stubEnv('VITE_RANKING_PREVIEW', 'true')
+    vi.stubEnv('VITE_RANKING_ENABLED', 'true')
     vi.mocked(createRankingApiService).mockReturnValue({
       getContext: vi.fn().mockResolvedValue({
         ok: true,
@@ -106,7 +107,7 @@ describe('App', () => {
     })
     const start = vi.fn()
     const completedResult = {
-      id: 'ranking-preview-measurement', measuredAt: '2026-08-28T12:00:00.000Z',
+      id: 'ranking-measurement', measuredAt: '2026-08-28T12:00:00.000Z',
       downloadMbps: 300, uploadMbps: 100, pingMs: 20, jitterMs: 5,
     }
     let speedTest: ReturnType<typeof useSpeedTest> = {
@@ -132,6 +133,37 @@ describe('App', () => {
     rerender(<App />)
     expect(screen.getByRole('heading', { name: '本日の全国回線品質ランキング', hidden: true })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: '匿名でランキングに参加してスコアを見る', hidden: true })).toBeEnabled()
+  })
+
+  it('rankingを明示的に無効化した場合はserviceを呼ばない', async () => {
+    const user = userEvent.setup()
+    vi.stubEnv('VITE_RANKING_ENABLED', 'false')
+    const start = vi.fn()
+    vi.mocked(useSpeedTest).mockReturnValue({
+      metrics: EMPTY_METRICS, phase: 'idle', isRunning: false, error: null, completedResult: null,
+      confirmedDownloadMbps: null, start,
+    })
+
+    render(<App />)
+    await user.click(screen.getByRole('button', { name: '測定開始' }))
+
+    expect(start).toHaveBeenCalledWith({ conditionLabel: null })
+    expect(createRankingApiService).not.toHaveBeenCalled()
+  })
+
+  it('development/testのdefaultではranking serviceを呼ばない', async () => {
+    const user = userEvent.setup()
+    const start = vi.fn()
+    vi.mocked(useSpeedTest).mockReturnValue({
+      metrics: EMPTY_METRICS, phase: 'idle', isRunning: false, error: null, completedResult: null,
+      confirmedDownloadMbps: null, start,
+    })
+
+    render(<App />)
+    await user.click(screen.getByRole('button', { name: '測定開始' }))
+
+    expect(start).toHaveBeenCalledWith({ conditionLabel: null })
+    expect(createRankingApiService).not.toHaveBeenCalled()
   })
 
   it('desktopとmobileでhero controlsのDOM順を切り替え、viewport変更にも追従する', async () => {

@@ -57,9 +57,9 @@ The component tree should not directly duplicate the engine lifecycle.
 
 Race timing/value mappings belong in small deterministic helpers such as `src/lib/horseVisualization.ts`.
 
-### Ranking preview boundary
+### Ranking boundary
 
-`src/features/ranking/` contains a compile-time ranking boundary. The frontend ranking UI is enabled only when `VITE_RANKING_PREVIEW=true` is supplied at build time; when the flag is off, it makes no ranking UI or requests. The browser never calculates Net Speed Score or contains its coefficients.
+`src/features/ranking/` contains a compile-time ranking boundary. Ranking is enabled by default in production builds and disabled by default in development and test builds. `VITE_RANKING_ENABLED=true` or `VITE_RANKING_ENABLED=false` explicitly overrides that default; when ranking is disabled, it makes no ranking UI or requests. The browser never calculates Net Speed Score or contains its coefficients.
 
 Before the speed-test engine starts, the ranking context is retrieved through `GET /api/ranking/context`, fixing the optional race champion reference for that run. Context failure falls back to the established 700 Mbps / 250 Mbps benchmark and never fails the speed measurement. No ranking network activity occurs after the measurement starts or while it runs.
 

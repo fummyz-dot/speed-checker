@@ -170,7 +170,7 @@ The repository, Cloudflare Worker, LocalStorage key, and other internal identifi
 **Status:** Superseded by D-013
 **Date:** 2026-08-28
 
-The public ranking preview is disabled by default and requires `VITE_RANKING_PREVIEW=true` at build time. It uses fixed local fixtures through a service abstraction only; it does not configure a Service Binding, Turnstile, database, or production API call.
+The public ranking preview was disabled by default and required an explicit build-time preview flag. It used fixed local fixtures through a service abstraction only; it did not configure a Service Binding, Turnstile, database, or production API call.
 
 The browser must never calculate Net Speed Score or contain its coefficients. It may display score values supplied by the private ranking-service contract. Ranking context is resolved before a measurement, never during it, and is held in memory only. Context failure must preserve the existing 700 Mbps / 250 Mbps race benchmark and never fail the speed measurement.
 
@@ -181,7 +181,7 @@ The browser must never calculate Net Speed Score or contain its coefficients. It
 **Status:** Accepted and implemented
 **Date:** 2026-09-04
 
-- Frontend ranking remains compile-time gated by `VITE_RANKING_PREVIEW`.
+- Frontend ranking remains compile-time gated.
 - The browser never calculates Net Speed Score or contains its coefficients.
 - The public Worker exposes `GET /api/ranking/context` and `POST /api/ranking/entries`.
 - The public Worker calls private `netspeedrace-ranking` through `RANKING_SERVICE`.
@@ -191,3 +191,18 @@ The browser must never calculate Net Speed Score or contain its coefficients. It
 - Turnstile loads and executes only after explicit ranking participation.
 - Ranking tickets and results remain memory-only and are not added to measurement LocalStorage.
 - The private ranking Worker owns persistence and D1.
+
+---
+
+## D-014 — Ranking is enabled by default in production builds
+
+**Status:** Accepted and implemented
+**Date:** 2026-09-04
+
+- Ranking is default ON in production builds and default OFF in development and test builds.
+- `VITE_RANKING_ENABLED=true` or `VITE_RANKING_ENABLED=false` explicitly overrides the default.
+- This prevents forgetting to enable ranking for production deployments.
+- It prevents unintended ranking network activity in local development and tests.
+- Turnstile remains deferred until explicit ranking participation.
+- The private service and deferred Turnstile design in D-013 remains in effect.
+- D-014 replaces only the preview gate in D-013.

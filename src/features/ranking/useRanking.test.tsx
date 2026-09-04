@@ -2,7 +2,7 @@ import { act, renderHook } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { DEFAULT_RACE_CHAMPION_REFERENCE } from '../../types/raceChampion'
 import { createRankingApiService } from './rankingService'
-import { useRankingPreview } from './useRankingPreview'
+import { useRanking } from './useRanking'
 
 vi.mock('./rankingService', () => ({ createRankingApiService: vi.fn() }))
 
@@ -14,9 +14,9 @@ const champion = {
 
 afterEach(() => vi.clearAllMocks())
 
-describe('useRankingPreview', () => {
+describe('useRanking', () => {
   it('does not construct or call the ranking service while disabled', async () => {
-    const { result } = renderHook(() => useRankingPreview(false))
+    const { result } = renderHook(() => useRanking(false))
     await act(async () => { await result.current.prepareMeasurement() })
 
     expect(createRankingApiService).not.toHaveBeenCalled()
@@ -29,7 +29,7 @@ describe('useRankingPreview', () => {
       ok: true, rankingAvailable: true, rankingDay: '2026-08-28', ticket: 'preview-ticket', ticketExpiresAtMs: 1, champion,
     })
     vi.mocked(createRankingApiService).mockReturnValue({ getContext, submitMeasurement: vi.fn() })
-    const { result } = renderHook(() => useRankingPreview(true))
+    const { result } = renderHook(() => useRanking(true))
 
     await act(async () => { await result.current.prepareMeasurement() })
     expect(getContext).toHaveBeenCalledTimes(1)
@@ -42,7 +42,7 @@ describe('useRankingPreview', () => {
       getContext: vi.fn().mockRejectedValue(new Error('unavailable')),
       submitMeasurement: vi.fn(),
     })
-    const { result } = renderHook(() => useRankingPreview(true))
+    const { result } = renderHook(() => useRanking(true))
 
     await act(async () => { await result.current.prepareMeasurement() })
     expect(result.current.context).toBeNull()
@@ -57,7 +57,7 @@ describe('useRankingPreview', () => {
       }),
       submitMeasurement: vi.fn(),
     })
-    const { result } = renderHook(() => useRankingPreview(true))
+    const { result } = renderHook(() => useRanking(true))
 
     await act(async () => { await result.current.prepareMeasurement() })
     expect(result.current.context?.rankingAvailable).toBe(false)

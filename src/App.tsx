@@ -10,8 +10,8 @@ import { Notice } from './components/Notice'
 import { useMediaQuery } from './hooks/useMediaQuery'
 import { useSpeedTest } from './hooks/useSpeedTest'
 import { RankingCard } from './features/ranking/RankingCard'
-import { isRankingPreviewEnabled } from './features/ranking/rankingPreview'
-import { useRankingPreview } from './features/ranking/useRankingPreview'
+import { isRankingEnabled } from './features/ranking/rankingFeature'
+import { useRanking } from './features/ranking/useRanking'
 import {
   bandwidthBitsToMbps,
   formatFinalSpeedDisplay,
@@ -39,14 +39,14 @@ function App() {
     confirmedDownloadMbps,
     start,
   } = useSpeedTest()
-  const rankingPreviewEnabled = isRankingPreviewEnabled()
+  const rankingEnabled = isRankingEnabled()
   const {
     context: rankingContext,
     championReference,
     isPreparingContext,
     service: rankingService,
     prepareMeasurement,
-  } = useRankingPreview(rankingPreviewEnabled)
+  } = useRanking(rankingEnabled)
   const isMobileLayout = useMediaQuery('(max-width: 760px)')
   const [conditionLabel, setConditionLabel] = useState<string | null>(getInitialConditionLabel)
   const [isConditionEditing, setIsConditionEditing] = useState(false)
@@ -137,7 +137,7 @@ function App() {
   const startMeasurement = () => {
     if (isConditionEditing || isPreparingContext) return
     requestRaceFocus()
-    if (!rankingPreviewEnabled) {
+    if (!rankingEnabled) {
       start({ conditionLabel })
       return
     }
@@ -246,7 +246,7 @@ function App() {
               phase={phase}
               result={completedResult}
               championReference={championReference}
-              showChampionReference={rankingPreviewEnabled}
+              showChampionReference={rankingEnabled}
               focused={isRaceFocused}
               focusExiting={isRaceFocusExiting}
               showExpandButton={!isMobileLayout}
@@ -277,7 +277,7 @@ function App() {
           {phase === 'complete' && completedResult && (
             <>
               <CompletedMeasurement result={completedResult} />
-              {rankingPreviewEnabled && (
+              {rankingEnabled && (
                 <RankingCard
                   context={rankingContext}
                   service={rankingService}
