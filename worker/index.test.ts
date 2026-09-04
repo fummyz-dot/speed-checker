@@ -14,7 +14,22 @@ const requestWithCf = (method = 'GET'): Request => {
 
 const createEnv = () => {
   const fetch = vi.fn(() => new Response('asset'))
-  return { env: { ASSETS: { fetch } } as unknown as Env, fetch }
+  const rankingFetch = vi.fn(() => new Response(JSON.stringify({ ok: true })))
+  return {
+    env: { ASSETS: { fetch }, RANKING_SERVICE: { fetch: rankingFetch } } as unknown as Env,
+    fetch,
+    rankingFetch,
+  }
+}
+
+const rankingRequest = (
+  pathname: '/api/ranking/context' | '/api/ranking/entries',
+  init: RequestInit = {},
+  country: unknown = 'JP',
+): Request => {
+  const request = new Request(`https://example.com${pathname}`, init)
+  Object.defineProperty(request, 'cf', { value: { country } })
+  return request
 }
 
 describe('handleConnectionRequest', () => {
@@ -90,5 +105,138 @@ describe('handleRequest canonical host routing', () => {
     expect(response.status).toBe(200)
     expect(response.headers.get('Location')).toBeNull()
     expect(fetch).toHaveBeenCalledWith(request)
+  })
+})
+
+describe('ranking service proxy', () => {
+  it('context requestを国コードだけでPrivate Workerへ中継する', async () => {
+    const { env, rankingFetch } = createEnv()
+    rankingFetch.mockReturnValue(new Response(JSON.stringify({ country: 'JP' }), {
+      status: 201,
+      headers: { 'X-Private-Header': 'hidden' },
+    }))
+    const request = rankingRequest('/api/ranking/context', {
+      headers: {
+        'CF-Connecting-IP': '203.0.113.1',
+        Cookie: 'session=secret',
+        'User-Agent': 'private-agent',
+        'X-Forwarded-For': '203.0.113.1',
+      },
+    })
+
+    const response = await handleRequest(request, env)
+    const privateRequest = rankingFetch.mock.calls[0][0] as Request
+
+    expect(rankingFetch).toHaveBeenCalledTimes(1)
+    expect(privateRequest.url).toBe('https://ranking.internal/internal/ranking/context')
+    expect(privateRequest.method).toBe('POST')
+    expect(await privateRequest.json()).toEqual({ country: 'JP' })
+    expect([...privateRequest.headers.entries()]).toEqual([['content-type', 'application/json']])
+    expect(response.status).toBe(201)
+    expect(await response.json()).toEqual({ country: 'JP' })
+    expect(response.headers.get('X-Private-Header')).toBeNull()
+    expect(response.headers.get('Content-Type')).toBe('application/json; charset=utf-8')
+    expect(response.headers.get('Cache-Control')).toBe('private, no-store')
+    expect(response.headers.get('X-Content-Type-Options')).toBe('nosniff')
+  })
+
+  it('context service failureは503にする', async () => {
+    const { env, rankingFetch } = createEnv()
+    rankingFetch.mockImplementation(() => { throw new Error('private failure') })
+
+    const response = await handleRequest(rankingRequest('/api/ranking/context'), env)
+
+    expect(response.status).toBe(503)
+    expect(await response.json()).toEqual({ ok: false, code: 'SERVICE_UNAVAILABLE' })
+  })
+
+  it('entries requestを国コード付きの許可済みpayloadだけでPrivate Workerへ中継する', async () => {
+    const { env, rankingFetch } = createEnv()
+    const response = await handleRequest(rankingRequest('/api/ranking/entries', {
+      method: 'POST',
+      body: JSON.stringify({
+        ticket: 'ticket',
+        turnstileToken: 'token',
+        measurement: { id: 'measurement', downloadMbps: 100, uploadMbps: 50, pingMs: 12, jitterMs: 3 },
+      }),
+    }), env)
+    const privateRequest = rankingFetch.mock.calls[0][0] as Request
+
+    expect(rankingFetch).toHaveBeenCalledTimes(1)
+    expect(privateRequest.url).toBe('https://ranking.internal/internal/ranking/submit')
+    expect(privateRequest.method).toBe('POST')
+    expect(await privateRequest.json()).toEqual({
+      country: 'JP',
+      ticket: 'ticket',
+      turnstileToken: 'token',
+      measurement: { id: 'measurement', downloadMbps: 100, uploadMbps: 50, pingMs: 12, jitterMs: 3 },
+    })
+    expect(response.status).toBe(200)
+  })
+
+  it.each([
+    ['client country', { ticket: 'ticket', turnstileToken: 'token', country: 'US', measurement: { id: 'id', downloadMbps: 1, uploadMbps: 1, pingMs: 1, jitterMs: 1 } }],
+    ['unknown top-level field', { ticket: 'ticket', turnstileToken: 'token', score: 1, measurement: { id: 'id', downloadMbps: 1, uploadMbps: 1, pingMs: 1, jitterMs: 1 } }],
+    ['unknown measurement field', { ticket: 'ticket', turnstileToken: 'token', measurement: { id: 'id', downloadMbps: 1, uploadMbps: 1, pingMs: 1, jitterMs: 1, score: 1 } }],
+  ])('entries rejects %s', async (_caseName, body) => {
+    const { env, rankingFetch } = createEnv()
+
+    const response = await handleRequest(rankingRequest('/api/ranking/entries', {
+      method: 'POST', body: JSON.stringify(body),
+    }), env)
+
+    expect(response.status).toBe(400)
+    expect(await response.json()).toEqual({ ok: false, code: 'INVALID_REQUEST' })
+    expect(rankingFetch).not.toHaveBeenCalled()
+  })
+
+  it('entries rejects invalid JSON and oversized bodies', async () => {
+    const { env, rankingFetch } = createEnv()
+    const invalidJson = await handleRequest(rankingRequest('/api/ranking/entries', {
+      method: 'POST', body: '{',
+    }), env)
+    const oversized = await handleRequest(rankingRequest('/api/ranking/entries', {
+      method: 'POST', body: 'x'.repeat(8193),
+    }), env)
+
+    expect(invalidJson.status).toBe(400)
+    expect(oversized.status).toBe(400)
+    expect(rankingFetch).not.toHaveBeenCalled()
+  })
+
+  it('entries GETは405にする', async () => {
+    const { env, rankingFetch } = createEnv()
+
+    const response = await handleRequest(rankingRequest('/api/ranking/entries'), env)
+
+    expect(response.status).toBe(405)
+    expect(response.headers.get('Allow')).toBe('POST')
+    expect(rankingFetch).not.toHaveBeenCalled()
+  })
+
+  it('entries service failureは503にする', async () => {
+    const { env, rankingFetch } = createEnv()
+    rankingFetch.mockImplementation(() => { throw new Error('private failure') })
+
+    const response = await handleRequest(rankingRequest('/api/ranking/entries', {
+      method: 'POST',
+      body: JSON.stringify({
+        ticket: 'ticket', turnstileToken: 'token',
+        measurement: { id: 'id', downloadMbps: 1, uploadMbps: 1, pingMs: 1, jitterMs: 1 },
+      }),
+    }), env)
+
+    expect(response.status).toBe(503)
+    expect(await response.json()).toEqual({ ok: false, code: 'SERVICE_UNAVAILABLE' })
+  })
+
+  it('unknown API routeは404を維持する', async () => {
+    const { env, fetch, rankingFetch } = createEnv()
+
+    const response = await handleRequest(new Request('https://example.com/api/foo'), env)
+
+    expect(response.status).toBe(404)
+    expect(fetch).not.toHaveBeenCalled()
+    expect(rankingFetch).not.toHaveBeenCalled()
   })
 })
