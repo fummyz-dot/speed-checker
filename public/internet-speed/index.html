@@ -3,12 +3,12 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>インターネット回線速度の見方｜Mbps・下り・上りを解説 | Net Speed Race</title>
-    <meta name="description" content="インターネット回線速度のMbps、Download（下り）、Upload（上り）の意味と、測定結果を見るときの注意点を分かりやすく説明します。" />
+    <title>インターネット回線速度の見方｜Mbps・下り・上り・実測値を解説 | Net Speed Race</title>
+    <meta name="description" content="インターネット回線速度のMbps、Download（下り）、Upload（上り）、MB/sとの違い、契約速度と実測値が異なる理由、測定結果を比較するときの見方をNet Speed Raceの実測・ランキングに沿って解説します。" />
     <link rel="canonical" href="https://netspeedrace.com/internet-speed/" />
     <meta property="og:type" content="website" /><meta property="og:site_name" content="Net Speed Race" />
-    <meta property="og:title" content="インターネット回線速度の見方｜Mbps・下り・上りを解説 | Net Speed Race" />
-    <meta property="og:description" content="インターネット回線速度のMbps、Download（下り）、Upload（上り）の意味と、測定結果を見るときの注意点を分かりやすく説明します。" />
+    <meta property="og:title" content="インターネット回線速度の見方｜Mbps・下り・上り・実測値を解説 | Net Speed Race" />
+    <meta property="og:description" content="インターネット回線速度のMbps、Download（下り）、Upload（上り）、MB/sとの違い、契約速度と実測値が異なる理由、測定結果を比較するときの見方をNet Speed Raceの実測・ランキングに沿って解説します。" />
     <meta property="og:url" content="https://netspeedrace.com/internet-speed/" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" /><link rel="stylesheet" href="/site-pages.css" />
   </head>
@@ -19,23 +19,80 @@
     </ul></nav></div></header>
     <main class="site-pages__main" id="main-content"><article class="site-pages__article">
       <p class="site-pages__eyebrow">INTERNET SPEED</p><h1>インターネット回線速度の見方</h1>
-      <p class="site-pages__lead">回線速度は、データをどれだけ速く送受信できるかを見る指標です。Net Speed Raceでは、下りと上りを分けて表示します。</p>
-      <p class="site-pages__article-meta"><span>運営・編集: Net Speed Race</span><span>最終更新: 2026年8月27日</span></p>
-      <p class="site-pages__note"><a href="/methodology/">測定方法について</a>と<a href="/about/">このサイトについて</a>では、測定の前提と扱い方を説明しています。</p>
+      <p class="site-pages__lead">「100 Mbpsあれば速いのか」「1 Gbps契約なのに実測値が低いのはなぜか」「DownloadとUploadのどちらを見ればよいのか」。回線速度の数値は、単独で見るよりも、単位・用途・測定条件・応答性と合わせて見ることで意味が分かりやすくなります。</p>
+      <p class="site-pages__article-meta"><span>運営・編集: Net Speed Race</span><span>最終更新: 2026年9月4日</span></p>
+      <p class="site-pages__note">現在の参加測定との比較は「<a href="/ranking/">全国回線品質ランキング</a>」で確認できます。「<a href="/methodology/">測定方法について</a>」と「<a href="/about/">このサイトについて</a>」では、Net Speed Raceの測定条件とデータの扱いを説明しています。</p>
       <a class="site-pages__article-cta" href="/">今の回線品質を測定する</a>
 
-      <h2>回線速度とMbpsとは</h2>
-      <p>Mbpsは、1秒あたりに送受信できるデータ量を表す単位です。数値が大きいほど多くのデータを短時間に扱いやすい目安になりますが、実際の利用感はコンテンツ、端末、通信先、同時利用の状況などにも左右されます。</p>
-      <h2>Download（下り）とUpload（上り）</h2>
-      <p>Downloadはインターネットから端末へ受け取る速さで、動画視聴やファイルのダウンロードに関係します。Uploadは端末から送る速さで、ファイル送信、クラウドへの保存、映像を送る場面などに関係します。用途によって、特に確認したい方向は異なります。</p>
-      <h2>契約上の最大速度と実測値は違います</h2>
-      <p>契約に記載された最大速度は特定条件での上限を示すことがあり、ブラウザでその時点に測った実測値とは同じ意味ではありません。測定する時間帯、利用場所、有線・Wi-Fi、端末の状態を記録して比較すると、変化を把握しやすくなります。</p>
-      <h2>速度だけで快適さは決まりません</h2>
-      <p>速度に加えて、Ping、Jitter、Loaded latencyを見ることで、応答時間や通信中の変化も確認できます。高速なDownloadが得られていても、別の指標が同じ傾向になるとは限りません。Net Speed Race内の用途別表示は、今回の測定値に基づく参考判定です。</p>
-      <h2>Net Speed Raceで測定する</h2>
-      <p>同じ条件で数回、さらに時間帯や有線・Wi-Fiなどの条件を変えて測定すると、単発の結果だけでは分からない違いを確認できます。数値から特定の機器や事業者が原因だと断定することはできません。</p>
+      <section aria-labelledby="speed-basics-title"><h2 id="speed-basics-title">インターネット回線速度とは</h2>
+        <p>インターネット回線速度は、一定時間にどれだけのデータを送受信できるかを表す値です。一般的にはMbps（メガビット毎秒）やGbps（ギガビット毎秒）で表します。数値が大きいほど、一度に多くのデータを扱える余地が大きくなります。</p>
+        <p>ただし、回線速度は「Webページが必ず速く開く」「ゲームの操作が必ず軽くなる」といった体感を単独で決める値ではありません。通信先、端末、接続方法、同時通信、PingやJitterなど、別の条件も体感に関係します。</p>
+      </section>
+
+      <section aria-labelledby="speed-units-title"><h2 id="speed-units-title">MbpsとMB/sは何が違う？</h2>
+        <p>Mbpsの「b」はbit（ビット）、MB/sの「B」はByte（バイト）を表します。1 Byteは8 bitなので、理論上の転送量をMB/sへ換算するときはMbpsを8で割ります。</p>
+        <div class="site-pages__table-wrap"><table class="site-pages__table"><thead><tr><th>回線速度</th><th>理論上の転送量</th></tr></thead>
+          <tbody><tr><td>10 Mbps</td><td>1.25 MB/s</td></tr><tr><td>100 Mbps</td><td>12.5 MB/s</td></tr><tr><td>500 Mbps</td><td>62.5 MB/s</td></tr><tr><td>1 Gbps（1000 Mbps）</td><td>125 MB/s</td></tr></tbody>
+        </table></div>
+        <p>これは単純換算した理論値です。実際のファイル転送では通信上の制御情報、通信先の性能、端末やストレージなどの影響を受けるため、この値がそのまま実効速度になるとは限りません。</p>
+      </section>
+
+      <section aria-labelledby="speed-directions-title"><h2 id="speed-directions-title">Download（下り）とUpload（上り）の違い</h2>
+        <p>Net Speed Raceでは、受信方向と送信方向を別々に測定します。用途によって重要になる方向が異なるためです。</p>
+        <div class="site-pages__table-wrap"><table class="site-pages__table"><thead><tr><th>用途</th><th>主に確認する指標</th><th>理由</th></tr></thead><tbody>
+          <tr><td>動画視聴・Web閲覧</td><td>Download</td><td>インターネットから端末へ受け取る通信が中心</td></tr>
+          <tr><td>大容量ファイルの取得</td><td>Download</td><td>受信するデータ量が大きい</td></tr>
+          <tr><td>クラウドへの保存・ファイル送信</td><td>Upload</td><td>端末からインターネットへ送信する</td></tr>
+          <tr><td>ライブ配信</td><td>Upload</td><td>映像や音声を継続して送信する</td></tr>
+          <tr><td><a href="/video-call/">Web会議</a></td><td>Download / Upload / Ping / Jitter</td><td>受信と送信を同時に行い、応答性や安定性も関係する</td></tr>
+          <tr><td><a href="/gaming/">オンラインゲーム</a></td><td>Ping / Jitterを中心に速度も確認</td><td>大量転送だけでなく応答時間と安定性が体感に関係する</td></tr>
+        </tbody></table></div>
+        <p>必要な速度は利用するサービス、画質、同時利用台数などによって異なります。特定サービスに必要なMbpsを確認する場合は、そのサービスが公開している最新の推奨環境も確認してください。</p>
+      </section>
+
+      <section aria-labelledby="speed-contract-title"><h2 id="speed-contract-title">「最大1 Gbps」と実測値は同じ意味ではない</h2>
+        <p>契約やサービス案内に「最大1 Gbps」などと表示されていても、その数値とブラウザで測定した実測値は同じ意味とは限りません。契約上の速度表記がどの条件を示すかは、利用している通信サービスの契約条件を確認する必要があります。</p>
+        <p>実測値には、たとえば次の条件が影響する可能性があります。</p>
+        <ul><li>有線LANかWi-Fiか</li><li>Wi-Fiの規格、電波状況、アクセスポイントとの距離</li><li>端末やネットワーク機器の性能</li><li>LANポートやLANケーブルなど接続経路の上限</li><li>家庭内での同時通信</li><li>測定する時間帯</li><li>測定先までの通信経路</li><li>測定時に端末で行われている別の通信</li></ul>
+        <p>そのため、「契約値より低かった」という1回の結果だけから、通信事業者、ルーター、Wi-Fiなど特定の原因を断定することはできません。</p>
+      </section>
+
+      <section aria-labelledby="speed-compare-title"><h2 id="speed-compare-title">回線速度は「1回の最高値」より条件をそろえて比べる</h2>
+        <p>回線状態を把握するときは、単発の最高値を探すより、条件をそろえた測定を複数回比べる方が変化を確認しやすくなります。</p>
+        <ol class="site-pages__step-list"><li>同じ端末・同じ場所で測る</li><li>大きなダウンロードやバックアップなど、明らかに帯域を使う通信がある場合は測定条件として意識する</li><li>同じ条件で複数回測る</li><li>朝・昼・夜など時間を変えて比べる</li><li>Wi-Fiと有線など条件を変えた場合は、別条件として比較する</li></ol>
+        <p>Net Speed Raceでは測定履歴をブラウザ内に最大30件保存し、時間帯や測定条件を比較できます。履歴はサーバー上のランキングデータとは別の機能です。</p>
+      </section>
+
+      <section aria-labelledby="speed-transfer-title"><h2 id="speed-transfer-title">Mbpsからファイルの転送時間を考える</h2>
+        <p>回線速度から、ファイル転送に必要な理論上の時間を概算できます。たとえば1 GBを10進表記で8 Gbとして単純計算すると、通信上のオーバーヘッドなどを無視した理論値は次のようになります。</p>
+        <div class="site-pages__table-wrap"><table class="site-pages__table"><thead><tr><th>回線速度</th><th>1 GBの理論転送時間</th><th>10 GBの理論転送時間</th></tr></thead><tbody><tr><td>100 Mbps</td><td>約80秒</td><td>約800秒（約13分20秒）</td></tr><tr><td>500 Mbps</td><td>約16秒</td><td>約160秒（約2分40秒）</td></tr><tr><td>1 Gbps</td><td>約8秒</td><td>約80秒（約1分20秒）</td></tr></tbody></table></div>
+        <p>この表は回線速度が一定で維持されると仮定した単純計算です。実際のダウンロード時間を保証するものではありません。通信先、プロトコル、端末、ストレージなどによって実時間は変わります。</p>
+      </section>
+
+      <section aria-labelledby="speed-responsiveness-title"><h2 id="speed-responsiveness-title">速さを見るときはPing・Jitterも一緒に確認する</h2>
+        <div class="site-pages__table-wrap"><table class="site-pages__table"><thead><tr><th>指標</th><th>主に確認できること</th></tr></thead><tbody><tr><td>Download</td><td>受信方向のデータ転送速度</td></tr><tr><td>Upload</td><td>送信方向のデータ転送速度</td></tr><tr><td><a href="/ping/">Ping</a></td><td>通信の応答時間</td></tr><tr><td><a href="/jitter/">Jitter</a></td><td>応答時間のばらつき</td></tr><tr><td><a href="/loaded-latency/">Loaded latency</a></td><td>大きな通信を行っている最中に応答時間がどの程度変化するか</td></tr></tbody></table></div>
+        <p>たとえばDownloadが非常に高くても、PingやJitterが同じように良好とは限りません。逆に、大容量ダウンロードをほとんど行わない用途では、速度の最高値より応答性の違いを感じる場合があります。</p>
+        <p>Net Speed Raceで表示するLoaded latencyの評価基準はNet Speed Race独自の参考基準であり、公式標準ではありません。</p>
+      </section>
+
+      <section aria-labelledby="speed-ranking-title"><h2 id="speed-ranking-title">自分の測定結果を全国ランキングと比べる</h2>
+        <p>Net Speed Raceでは、測定完了後に利用者が任意で参加した結果を「全国回線品質ランキング」として集計しています。ランキングでは1回の有効な参加を1出走として数えます。</p>
+        <p>ランキングで使用するNet Speed Scoreは、Download、Upload、Ping、Jitterを組み合わせたNet Speed Race独自の参考指標です。単純なDownload速度だけの順位ではありません。</p>
+        <p>ランキングは日本からの任意参加データであり、日本全体の利用者、契約回線、ISPシェアなどを統計的に代表するものではありません。個別のIPアドレスや地域をランキングとして公開しません。</p>
+        <a class="site-pages__article-cta" href="/ranking/">今日の全国回線品質ランキングを見る</a>
+      </section>
+
+      <section aria-labelledby="speed-faq-title"><h2 id="speed-faq-title">回線速度でよくある疑問</h2>
+        <h3>100 Mbpsと1 Gbpsでは10倍速くなる？</h3><p>単位上は1 Gbps＝1000 Mbpsなので、数値としては10倍です。ただし、Web表示や動画再生など実際の処理時間が必ず10分の1になるわけではありません。通信先や端末側がボトルネックになる場合があり、用途によって速度差の影響も異なります。</p>
+        <h3>1 Gbps契約なのに100 Mbps前後しか出ないのは異常？</h3><p>測定値だけでは異常かどうかを判断できません。契約条件、接続方式、端末、LAN・Wi-Fi環境、測定条件などを分けて確認する必要があります。まず同じ端末で条件をそろえて複数回測定し、有線接続が利用できる場合はWi-Fiとの違いを比較すると整理しやすくなります。</p>
+        <h3>Downloadが速ければUploadは見なくていい？</h3><p>用途によります。動画視聴や大容量ファイルの受信ではDownloadを中心に見ますが、クラウドへの保存、ファイル送信、ライブ配信、Web会議などではUploadも重要です。</p>
+        <h3>速度テストは何回測ればいい？</h3><p>1回の結果だけで固定的に判断するより、同じ条件で複数回測定し、さらに必要に応じて時間帯や接続方法を変えて比較する方が傾向を把握しやすくなります。</p>
+      </section>
+
+      <section aria-labelledby="speed-final-title"><h2 id="speed-final-title">Net Speed Raceで測定結果を確認する</h2><p>Net Speed Raceでは、Download、Upload、Ping、Jitter、通信中の応答性を1回の測定で確認できます。測定結果はその時点・その環境の値です。履歴や条件の違い、全国ランキングも使いながら、単発の数値だけでなく変化として確認してください。</p></section>
+
       <section class="site-pages__related" aria-labelledby="speed-related-title"><h2 id="speed-related-title">関連ガイド</h2><ul>
-        <li><a href="/ping/">Pingとは</a></li><li><a href="/jitter/">ジッターとは</a></li><li><a href="/loaded-latency/">混雑時の応答性とは</a></li><li><a href="/guide/">回線品質ガイド</a></li>
+        <li><a href="/ranking/">全国回線品質ランキング</a></li><li><a href="/ping/">Pingとは</a></li><li><a href="/jitter/">ジッターとは</a></li><li><a href="/loaded-latency/">混雑時の応答性とは</a></li>
       </ul></section>
       <a class="site-pages__article-cta" href="/">今の回線品質を測定する</a>
     </article></main>

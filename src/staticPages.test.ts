@@ -130,6 +130,26 @@ describe('public static pages', () => {
     expect(parsePage('jitter').body.textContent).toContain('Pingとの違い')
   })
 
+  it('回線速度ガイドに単位、実測比較、用途別の見方、ランキングへの導線を含む', () => {
+    const page = parsePage('internet-speed')
+    const content = page.body.textContent ?? ''
+
+    ;[
+      'Mbps', 'MB/s', '1 Byte', '8 bit', '12.5 MB/s', '125 MB/s', 'Download', 'Upload',
+      '最大1 Gbps', '同じ条件で複数回', '最大30件', '約80秒', 'Ping', 'Jitter',
+      'Loaded latency', '全国回線品質ランキング', '1出走', 'Net Speed Score',
+      '統計的に代表するものではありません',
+    ].forEach((text) => expect(content).toContain(text))
+    ;['/ranking/', '/ping/', '/jitter/', '/loaded-latency/', '/gaming/', '/video-call/', '/methodology/', '/about/'].forEach((href) => {
+      expect(page.querySelector(`a[href="${href}"]`)).not.toBeNull()
+    })
+    ;['D^0.7', 'U^0.3', 'Sref', 'Fs', 'Fp', 'Fj', 'netspeedrace-internal'].forEach((text) => {
+      expect(content).not.toContain(text)
+    })
+    expect(page.querySelectorAll('.site-pages__related a')).toHaveLength(4)
+    expect(page.querySelectorAll('script')).toHaveLength(0)
+  })
+
   it('オンラインゲーム記事に現行の参考判定と適用範囲を明記する', () => {
     const content = parsePage('gaming').body.textContent ?? ''
 
