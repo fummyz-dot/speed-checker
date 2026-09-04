@@ -4,12 +4,12 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>プライバシーポリシー | Net Speed Race</title>
-    <meta name="description" content="Net Speed Raceにおける回線測定、接続情報、ブラウザ内履歴、外部サービスの取扱いを説明します。" />
+    <meta name="description" content="Net Speed Raceにおける回線測定、ランキング参加、接続情報、ブラウザ内履歴、外部サービスの取扱いを説明します。" />
     <link rel="canonical" href="https://netspeedrace.com/privacy/" />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="Net Speed Race" />
     <meta property="og:title" content="プライバシーポリシー | Net Speed Race" />
-    <meta property="og:description" content="Net Speed Raceにおける回線測定、接続情報、ブラウザ内履歴、外部サービスの取扱いを説明します。" />
+    <meta property="og:description" content="Net Speed Raceにおける回線測定、ランキング参加、接続情報、ブラウザ内履歴、外部サービスの取扱いを説明します。" />
     <meta property="og:url" content="https://netspeedrace.com/privacy/" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="stylesheet" href="/site-pages.css" />
@@ -28,10 +28,10 @@
       <article class="site-pages__article">
         <p class="site-pages__eyebrow">PRIVACY</p>
         <h1>プライバシーポリシー</h1>
-        <p class="site-pages__lead">Net Speed Raceは、回線品質を確認するために必要な範囲で情報を扱い、測定履歴は現在ブラウザ内に保存する設計です。</p>
+        <p class="site-pages__lead">Net Speed Raceは、回線品質を確認するために必要な範囲で情報を扱います。通常の測定履歴はブラウザ内に保存され、全国回線品質ランキングへの参加は任意です。</p>
 
         <h2>1. 基本方針</h2>
-        <p>本ポリシーでは、Net Speed Raceにおける回線測定、接続情報、測定履歴、外部サービスの取扱いを説明します。サービスの機能を提供する目的に必要な範囲を超えて、利用者の測定履歴をアプリケーションのデータベースへ保存することはありません。</p>
+        <p>本ポリシーでは、Net Speed Raceにおける回線測定、接続情報、測定履歴、ランキング参加、外部サービスの取扱いを説明します。通常の測定履歴はブラウザのLocalStorageに保存されます。全国回線品質ランキングへの参加を選んだ測定だけ、ランキング運営に必要な情報をサーバー側へ送信・保存します。ランキング参加は任意であり、参加しなくても通常の回線測定を利用できます。</p>
 
         <h2>2. 回線測定について</h2>
         <p>回線測定ではCloudflareのnetwork measurement infrastructureへ通信します。通信過程では、Cloudflare側がIPアドレスやリクエスト情報を処理し得ます。Net Speed Raceアプリは、raw IPアドレスを画面に表示したり、測定履歴に保存したりしません。</p>
@@ -48,24 +48,43 @@
         <p>これらは接続情報を表示するためのもので、browser-local measurement historyや共有結果には保存しません。providerは接続元ASNの情報であり、契約中のサービス名と一致しない場合があります。</p>
 
         <h2>4. 測定履歴</h2>
-        <p>正常に完了した測定は、現在最大30件までブラウザのLocalStorageに保存されます。アカウントは不要で、サーバーのデータベースへ測定履歴を保存しません。</p>
-        <p>保存される項目には、測定日時、download、upload、Ping、Jitter、download/upload loaded latency、timezone offset、任意のmeasurement condition labelが含まれる場合があります。condition labelも端末内にのみ保存され、利用者がブラウザデータを削除すると履歴とともに削除されます。</p>
+        <p>正常に完了した通常の測定は、最大30件までブラウザのLocalStorageに保存されます。通常の測定履歴はbrowser-localであり、ランキングへ参加しない測定結果はランキングDBへ送信しません。</p>
+        <p>保存される項目には、測定日時、download、upload、Ping、Jitter、download/upload loaded latency、timezone offset、任意のmeasurement condition labelが含まれる場合があります。condition labelもLocalStorageにのみ保存され、利用者がブラウザデータを削除すると履歴とともに削除されます。</p>
 
-        <h2>5. 外部サービス</h2>
-        <p>Net Speed RaceはCloudflareを利用しています。Cloudflareによる情報の取扱いについては、<a href="https://www.cloudflare.com/privacypolicy/" rel="noreferrer noopener">Cloudflare Privacy Policy</a>をご確認ください。</p>
+        <h2>5. 全国回線品質ランキング</h2>
+        <p>ランキングへの参加は、測定完了後に利用者が明示的に選んだ場合だけ行われます。正常なランキング登録1件を1出走として扱い、Cloudflareが提供するcountry情報により日本国内と判定された測定だけが参加対象です。country以外のregionやcityなどを参加可否判定には利用しません。</p>
+        <p>Net Speed Scoreは、Download・Upload・Ping・Jitterを使うNet Speed Race独自の総合参考指標です。Cloudflareや通信事業者、業界団体の公式指標ではありません。</p>
+        <p>ランキング参加時には、measurement identifier、Download、Upload、Ping、Jitter、Net Speed Score、ランキング処理に必要な日時・ランキング管理情報を扱います。loaded latencyとmeasurement condition labelはランキングDBへ送信しません。</p>
+        <p>Net Speed RaceのランキングDBには、以下の情報を保存しません。</p>
+        <ul>
+          <li>IPアドレス</li>
+          <li>IPアドレスのハッシュ</li>
+          <li>User-Agent</li>
+          <li>Cookie ID</li>
+          <li>ASN / ISP</li>
+          <li>region</li>
+          <li>city</li>
+          <li>latitude / longitude</li>
+          <li>loaded latency</li>
+          <li>measurement condition label</li>
+        </ul>
+        <p>個別ランキングエントリーは31日、日次集計および無敗の三冠馬の履歴は400日保存します。</p>
 
-        <h2>6. Analytics</h2>
+        <h2>6. 外部サービス</h2>
+        <p>Net Speed RaceはCloudflareを利用しています。ランキングの不正利用防止にはCloudflare Turnstileを使用し、ランキング参加操作時にだけ利用します。通常の速度測定だけではランキング参加用Turnstileを実行しません。Turnstileによる情報処理にはCloudflareのサービスを利用します。Cloudflareによる情報の取扱いについては、<a href="https://www.cloudflare.com/privacypolicy/" rel="noreferrer noopener">Cloudflare Privacy Policy</a>をご確認ください。</p>
+
+        <h2>7. Analytics</h2>
         <p>現時点で、Net Speed Raceはアクセス解析サービスを導入していません。</p>
 
-        <h2>7. 広告</h2>
+        <h2>8. 広告</h2>
         <p>現時点で、Net Speed Raceは広告配信を導入していません。将来Google AdSenseなどを導入する場合は、Cookieその他の技術を使用する可能性があります。その際は本ポリシーを更新します。</p>
 
-        <h2>8. ポリシーの変更</h2>
+        <h2>9. ポリシーの変更</h2>
         <p>機能や外部サービスの変更に応じて、本ポリシーを更新することがあります。重要な変更がある場合は、このページで内容を確認できるようにします。</p>
 
-        <h2>9. お問い合わせ</h2>
+        <h2>10. お問い合わせ</h2>
         <p>本ポリシーに関するお問い合わせは、<a href="/contact/">お問い合わせページ</a>をご利用ください。</p>
-        <p class="site-pages__updated">更新日: 2026年8月27日</p>
+        <p class="site-pages__updated">更新日: 2026年9月4日</p>
       </article>
     </main>
     <footer class="site-pages__footer"><div class="site-pages__footer-inner">

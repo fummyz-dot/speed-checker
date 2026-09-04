@@ -197,10 +197,28 @@ describe('public static pages', () => {
     const page = parsePage('privacy')
     const content = page.body.textContent ?? ''
 
+    expect(content).toContain('ランキングへの参加は任意')
     expect(content).toContain('LocalStorage')
+    expect(content).toContain('31日')
+    expect(content).toContain('400日')
+    expect(content).toContain('Turnstile')
     expect(content).toContain('Cloudflare')
     expect(content).toContain('IPアドレス')
+    expect(content).toContain('IPアドレスのハッシュ')
+    expect(content).toContain('loaded latency')
+    expect(content).toContain('measurement condition label')
+    expect(content).toMatch(/ランキングDBには、以下の情報を保存しません。[\s\S]*IPアドレス/)
     expect(content).toContain('広告配信を導入していません')
+  })
+
+  it('利用規約ページに全国回線品質ランキングの参加条件と参考情報である旨を含む', () => {
+    const content = parsePage('terms').body.textContent ?? ''
+
+    expect(content).toContain('全国回線品質ランキング')
+    expect(content).toContain('1出走')
+    expect(content).toContain('Net Speed Race独自')
+    expect(content).toContain('公式')
+    expect(content).toContain('不正')
   })
 
   it('測定方法ページにCloudflare、Ping、Jitter、loaded latencyの説明を含む', () => {
