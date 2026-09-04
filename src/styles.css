@@ -3624,6 +3624,14 @@ a:focus-visible {
   gap: 18px;
 }
 
+.hero__ranking {
+  min-width: 0;
+}
+
+.hero__ranking .ranking-card {
+  margin-top: 0;
+}
+
 .ranking-card__heading {
   display: flex;
   align-items: flex-start;

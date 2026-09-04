@@ -91,10 +91,18 @@ function App() {
 
   const showMeasurementDetails = useCallback(() => {
     exitRaceFocus(false, () => {
+      const rankingResults = rankingEnabled
+        ? document.getElementById('ranking-results')
+        : null
+      if (rankingResults) {
+        rankingResults.scrollIntoView({ block: 'start' })
+        rankingResults.focus({ preventScroll: true })
+        return
+      }
       document.getElementById('measurement-results')?.scrollIntoView({ block: 'start' })
       document.getElementById('results-title')?.focus({ preventScroll: true })
     })
-  }, [exitRaceFocus])
+  }, [exitRaceFocus, rankingEnabled])
 
   useEffect(() => {
     if (!isRaceFocused) return
@@ -256,6 +264,22 @@ function App() {
               onShowDetails={showMeasurementDetails}
             />
           </div>
+          {phase === 'complete' && completedResult && rankingEnabled && (
+            <div
+              className="hero__ranking"
+              id="ranking-results"
+              tabIndex={-1}
+              data-race-focus-background
+              aria-hidden={isRaceFocused || undefined}
+              inert={isRaceFocused}
+            >
+              <RankingCard
+                context={rankingContext}
+                service={rankingService}
+                measurement={completedResult}
+              />
+            </div>
+          )}
         </section>
 
         <section
@@ -275,16 +299,7 @@ function App() {
           </div>
           <MetricsGrid metrics={metrics} />
           {phase === 'complete' && completedResult && (
-            <>
-              <CompletedMeasurement result={completedResult} />
-              {rankingEnabled && (
-                <RankingCard
-                  context={rankingContext}
-                  service={rankingService}
-                  measurement={completedResult}
-                />
-              )}
-            </>
+            <CompletedMeasurement result={completedResult} />
           )}
         </section>
 

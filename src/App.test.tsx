@@ -85,6 +85,7 @@ describe('App', () => {
     expect(screen.getByRole('heading', { name: '回線速度レース' })).toBeVisible()
     expect(container.querySelector('.horse-course')).toHaveAttribute('data-animation-state', 'idle')
     expect(screen.queryByRole('heading', { name: '本日の全国回線品質ランキング' })).not.toBeInTheDocument()
+    expect(document.getElementById('ranking-results')).toBeNull()
     expect(screen.queryByLabelText('無敗の三冠馬の比較基準')).not.toBeInTheDocument()
   })
 
@@ -131,24 +132,40 @@ describe('App', () => {
       confirmedDownloadMbps: completedResult.downloadMbps,
     }
     rerender(<App />)
-    expect(screen.getByRole('heading', { name: '本日の全国回線品質ランキング', hidden: true })).toBeInTheDocument()
+    const rankingResults = document.getElementById('ranking-results')
+    const measurementResults = document.getElementById('measurement-results')
+
+    expect(rankingResults).toBeInTheDocument()
+    expect(rankingResults?.closest('.hero')).not.toBeNull()
+    expect(within(rankingResults as HTMLElement).getByRole('heading', {
+      name: '本日の全国回線品質ランキング', hidden: true,
+    })).toBeInTheDocument()
+    expect(rankingResults?.compareDocumentPosition(measurementResults as Node))
+      .toBe(Node.DOCUMENT_POSITION_FOLLOWING)
+    expect(within(measurementResults as HTMLElement).queryByRole('heading', {
+      name: '本日の全国回線品質ランキング', hidden: true,
+    })).not.toBeInTheDocument()
+    expect(rankingResults).toHaveProperty('tabIndex', -1)
+    expect(rankingResults).toHaveAttribute('aria-hidden', 'true')
+    expect(rankingResults).toHaveAttribute('inert')
     expect(screen.getByRole('button', { name: '匿名でランキングに参加してスコアを見る', hidden: true })).toBeEnabled()
   })
 
-  it('rankingを明示的に無効化した場合はserviceを呼ばない', async () => {
-    const user = userEvent.setup()
+  it('rankingを明示的に無効化した場合は完了後もcardを表示せずserviceを呼ばない', () => {
     vi.stubEnv('VITE_RANKING_ENABLED', 'false')
-    const start = vi.fn()
+    const completedResult = {
+      id: 'ranking-disabled-measurement', measuredAt: '2026-08-28T12:00:00.000Z',
+      downloadMbps: 300, uploadMbps: 100, pingMs: 20, jitterMs: 5,
+    }
     vi.mocked(useSpeedTest).mockReturnValue({
-      metrics: EMPTY_METRICS, phase: 'idle', isRunning: false, error: null, completedResult: null,
-      confirmedDownloadMbps: null, start,
+      metrics: EMPTY_METRICS, phase: 'complete', isRunning: false, error: null, completedResult,
+      confirmedDownloadMbps: completedResult.downloadMbps, start: vi.fn(),
     })
 
     render(<App />)
-    await user.click(screen.getByRole('button', { name: '測定開始' }))
 
-    expect(start).toHaveBeenCalledWith({ conditionLabel: null })
     expect(createRankingApiService).not.toHaveBeenCalled()
+    expect(document.getElementById('ranking-results')).toBeNull()
   })
 
   it('development/testのdefaultではranking serviceを呼ばない', async () => {
