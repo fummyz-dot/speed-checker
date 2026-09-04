@@ -23,7 +23,7 @@ const createEnv = () => {
 }
 
 const rankingRequest = (
-  pathname: '/api/ranking/context' | '/api/ranking/entries',
+  pathname: '/api/ranking/context' | '/api/ranking/overview' | '/api/ranking/entries',
   init: RequestInit = {},
   country: unknown = 'JP',
 ): Request => {
@@ -145,6 +145,84 @@ describe('ranking service proxy', () => {
     rankingFetch.mockImplementation(() => { throw new Error('private failure') })
 
     const response = await handleRequest(rankingRequest('/api/ranking/context'), env)
+
+    expect(response.status).toBe(503)
+    expect(await response.json()).toEqual({ ok: false, code: 'SERVICE_UNAVAILABLE' })
+  })
+
+  it('overview requestをクライアント情報なしでPrivate Workerへ中継する', async () => {
+    const { env, rankingFetch } = createEnv()
+    const overview = {
+      ok: true,
+      rankingDay: '2026-09-04',
+      scoreVersion: 1,
+      totalRuns: 3,
+      medianScoreTenths: 4910,
+      top10ThresholdTenths: null,
+      top3: [],
+      champion: {
+        source: 'fallback',
+        sourceDay: null,
+        scoreTenths: null,
+        downloadTenths: 7000,
+        uploadTenths: 2500,
+        qualifyingRuns: 0,
+      },
+      recentDays: [],
+    }
+    rankingFetch.mockReturnValue(new Response(JSON.stringify(overview), {
+      status: 200,
+      headers: { 'X-Private-Header': 'hidden' },
+    }))
+    const request = new Request('https://example.com/api/ranking/overview?client=query', {
+      headers: {
+        'CF-Connecting-IP': '203.0.113.1',
+        Cookie: 'session=secret',
+        'User-Agent': 'private-agent',
+        'X-Forwarded-For': '203.0.113.1',
+        Authorization: 'Bearer secret',
+        Referer: 'https://example.net/',
+      },
+    })
+    Object.defineProperty(request, 'cf', { value: { country: 'JP' } })
+
+    const response = await handleRequest(request, env)
+    const privateRequest = rankingFetch.mock.calls[0][0] as Request
+
+    expect(rankingFetch).toHaveBeenCalledTimes(1)
+    expect(privateRequest.url).toBe('https://ranking.internal/internal/ranking/overview')
+    expect(privateRequest.method).toBe('GET')
+    expect(privateRequest.body).toBeNull()
+    expect([...privateRequest.headers.entries()]).toEqual([])
+    expect(privateRequest.headers.get('CF-Connecting-IP')).toBeNull()
+    expect(privateRequest.headers.get('Cookie')).toBeNull()
+    expect(privateRequest.headers.get('User-Agent')).toBeNull()
+    expect(privateRequest.headers.get('X-Forwarded-For')).toBeNull()
+    expect(privateRequest.headers.get('Authorization')).toBeNull()
+    expect(privateRequest.headers.get('Referer')).toBeNull()
+    expect(response.status).toBe(200)
+    expect(await response.json()).toEqual(overview)
+    expect(response.headers.get('X-Private-Header')).toBeNull()
+    expect(response.headers.get('Content-Type')).toBe('application/json; charset=utf-8')
+    expect(response.headers.get('Cache-Control')).toBe('private, no-store')
+    expect(response.headers.get('X-Content-Type-Options')).toBe('nosniff')
+  })
+
+  it('overview POSTは405にする', async () => {
+    const { env, rankingFetch } = createEnv()
+
+    const response = await handleRequest(rankingRequest('/api/ranking/overview', { method: 'POST' }), env)
+
+    expect(response.status).toBe(405)
+    expect(response.headers.get('Allow')).toBe('GET')
+    expect(rankingFetch).not.toHaveBeenCalled()
+  })
+
+  it('overview service failureは503にする', async () => {
+    const { env, rankingFetch } = createEnv()
+    rankingFetch.mockImplementation(() => { throw new Error('private failure') })
+
+    const response = await handleRequest(rankingRequest('/api/ranking/overview'), env)
 
     expect(response.status).toBe(503)
     expect(await response.json()).toEqual({ ok: false, code: 'SERVICE_UNAVAILABLE' })

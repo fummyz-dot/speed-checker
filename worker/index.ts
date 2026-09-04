@@ -4,6 +4,7 @@ const CANONICAL_HOSTNAME = 'netspeedrace.com'
 const WWW_HOSTNAME = 'www.netspeedrace.com'
 const RANKING_MAX_BODY_BYTES = 8192
 const RANKING_CONTEXT_URL = 'https://ranking.internal/internal/ranking/context'
+const RANKING_OVERVIEW_URL = 'https://ranking.internal/internal/ranking/overview'
 const RANKING_SUBMIT_URL = 'https://ranking.internal/internal/ranking/submit'
 
 type RankingServiceEnv = Env & { RANKING_SERVICE: Fetcher }
@@ -63,6 +64,26 @@ export const handleRankingContextRequest = (
   }
 
   return relayRankingRequest(env, RANKING_CONTEXT_URL, { country: getRequestCountry(request) })
+}
+
+export const handleRankingOverviewRequest = async (
+  request: Request,
+  env: RankingServiceEnv,
+): Promise<Response> => {
+  if (request.method !== 'GET') {
+    const response = jsonResponse({ error: 'Method Not Allowed' }, 405)
+    response.headers.set('Allow', 'GET')
+    return response
+  }
+
+  try {
+    const response = await env.RANKING_SERVICE.fetch(new Request(RANKING_OVERVIEW_URL, {
+      method: 'GET',
+    }))
+    return new Response(response.body, { status: response.status, headers: jsonHeaders })
+  } catch {
+    return serviceUnavailable()
+  }
 }
 
 export const handleRankingEntriesRequest = async (
@@ -142,6 +163,10 @@ export const handleRequest = (request: Request, env: Env): Response | Promise<Re
 
   if (pathname === '/api/ranking/context') {
     return handleRankingContextRequest(request, env as RankingServiceEnv)
+  }
+
+  if (pathname === '/api/ranking/overview') {
+    return handleRankingOverviewRequest(request, env as RankingServiceEnv)
   }
 
   if (pathname === '/api/ranking/entries') {
