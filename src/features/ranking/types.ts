@@ -43,5 +43,8 @@ export type RankingErrorCode =
 
 export interface RankingService {
   getContext(): Promise<RankingContext>
-  submitMeasurement(measurement: SpeedMeasurementResult): Promise<RankingSubmissionResult>
+  submitMeasurement(
+    measurement: SpeedMeasurementResult,
+    turnstileToken: string,
+  ): Promise<RankingSubmissionResult>
 }

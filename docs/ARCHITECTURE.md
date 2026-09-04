@@ -18,7 +18,7 @@ Browser
                                +-- request.cf -> safe connection metadata
 ```
 
-No application database is currently required.
+The public `speed-checker` Worker does not bind an application database. The optional ranking path delegates persistence to the private ranking Worker, which owns D1.
 
 ## Frontend
 
@@ -59,11 +59,13 @@ Race timing/value mappings belong in small deterministic helpers such as `src/li
 
 ### Ranking preview boundary
 
-`src/features/ranking/` contains a compile-time preview boundary for the future private ranking service. It is disabled unless `VITE_RANKING_PREVIEW=true` is supplied at build time; the normal production build has no ranking UI, request, Turnstile script, Service Binding configuration, or ranking persistence.
+`src/features/ranking/` contains a compile-time ranking boundary. The frontend ranking UI is enabled only when `VITE_RANKING_PREVIEW=true` is supplied at build time; when the flag is off, it makes no ranking UI or requests. The browser never calculates Net Speed Score or contains its coefficients.
 
-When enabled locally, a fixed in-memory fixture is accessed through `RankingService`. The context is resolved before the speed-test engine starts, fixes the optional race champion reference for that run, and falls back to the existing 700 Mbps / 250 Mbps benchmark on failure. No ranking work occurs while the speed test runs, and no preview result enters LocalStorage.
+Before the speed-test engine starts, the ranking context is retrieved through `GET /api/ranking/context`, fixing the optional race champion reference for that run. Context failure falls back to the established 700 Mbps / 250 Mbps benchmark and never fails the speed measurement. No ranking network activity occurs after the measurement starts or while it runs.
 
-The browser does not calculate Net Speed Score. It only displays integer-tenths scores returned by the service boundary.
+After measurement completion, Turnstile is loaded and executed only if the user explicitly selects ranking participation; it is never loaded at page load. A successful Turnstile challenge is followed by `POST /api/ranking/entries`. Ranking tickets and results remain memory-only and are not added to LocalStorage.
+
+The public Worker calls the private `netspeedrace-ranking` Worker through the `RANKING_SERVICE` Service Binding. It creates new requests containing only the country and allow-listed ranking payload rather than forwarding the original client request or headers. The private ranking Worker owns D1; the public `speed-checker` Worker does not bind D1 directly.
 
 ### Evaluation
 

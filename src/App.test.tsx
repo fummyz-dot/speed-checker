@@ -4,11 +4,13 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import App from './App'
 import { useConnectionInfo } from './hooks/useConnectionInfo'
 import { useSpeedTest } from './hooks/useSpeedTest'
+import { createRankingApiService } from './features/ranking/rankingService'
 import { EMPTY_METRICS } from './types/speedTest'
 import { MEASUREMENT_STORAGE_KEY } from './lib/measurementStorage'
 
 vi.mock('./hooks/useConnectionInfo')
 vi.mock('./hooks/useSpeedTest')
+vi.mock('./features/ranking/rankingService', () => ({ createRankingApiService: vi.fn() }))
 
 const installMatchMedia = (initialMatches: boolean) => {
   const listeners = new Set<(event: MediaQueryListEvent) => void>()
@@ -88,6 +90,20 @@ describe('App', () => {
   it('previewではcontext後に動的championを固定し、ランキングcardは測定完了後だけ表示する', async () => {
     const user = userEvent.setup()
     vi.stubEnv('VITE_RANKING_PREVIEW', 'true')
+    vi.mocked(createRankingApiService).mockReturnValue({
+      getContext: vi.fn().mockResolvedValue({
+        ok: true,
+        rankingAvailable: true,
+        rankingDay: '2026-08-28',
+        ticket: 'ticket',
+        ticketExpiresAtMs: 1,
+        champion: {
+          source: 'previous_day_winner', sourceDay: '2026-08-27', scoreTenths: 16834,
+          downloadMbps: 534.8, uploadMbps: 327.2, qualifyingRuns: 2847,
+        },
+      }),
+      submitMeasurement: vi.fn(),
+    })
     const start = vi.fn()
     const completedResult = {
       id: 'ranking-preview-measurement', measuredAt: '2026-08-28T12:00:00.000Z',

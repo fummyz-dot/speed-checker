@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { DEFAULT_RACE_CHAMPION_REFERENCE, type RaceChampionReference } from '../../types/raceChampion'
-import { createRankingPreviewService } from './rankingService'
+import { createRankingApiService } from './rankingService'
 import type { RankingContext, RankingService } from './types'
 
 interface UseRankingPreviewResult {
@@ -38,7 +38,7 @@ export const useRankingPreview = (enabled: boolean): UseRankingPreviewResult => 
     setContext(null)
     setChampionReference(DEFAULT_RACE_CHAMPION_REFERENCE)
 
-    const service = serviceRef.current ?? createRankingPreviewService()
+    const service = serviceRef.current ?? createRankingApiService()
     serviceRef.current = service
     try {
       const nextContext = await service.getContext()

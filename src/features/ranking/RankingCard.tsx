@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { SpeedMeasurementResult } from '../../types/measurement'
+import { requestRankingTurnstileToken } from './turnstile'
 import type { RankingContext, RankingService, RankingSubmissionResult } from './types'
 
-type RankingSubmitState = 'idle' | 'submitting' | 'success' | 'error' | 'notEligible'
+type RankingSubmitState = 'idle' | 'submitting' | 'success' | 'error' | 'notEligible' | 'missingMetrics'
 
 interface RankingCardProps {
   context: RankingContext | null
@@ -20,6 +21,7 @@ const initialState = (context: RankingContext | null): RankingSubmitState => {
 export const RankingCard = ({ context, service, measurement }: RankingCardProps) => {
   const [state, setState] = useState<RankingSubmitState>(() => initialState(context))
   const [submission, setSubmission] = useState<RankingSubmissionResult | null>(null)
+  const turnstileContainerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     setState(initialState(context))
@@ -28,9 +30,17 @@ export const RankingCard = ({ context, service, measurement }: RankingCardProps)
 
   const submit = async () => {
     if (!service || state === 'submitting') return
+    if (measurement.pingMs == null || measurement.jitterMs == null) {
+      setState('missingMetrics')
+      return
+    }
+
     setState('submitting')
     try {
-      const nextSubmission = await service.submitMeasurement(measurement)
+      const container = turnstileContainerRef.current
+      if (!container) throw new Error('Turnstile container is unavailable')
+      const turnstileToken = await requestRankingTurnstileToken(container)
+      const nextSubmission = await service.submitMeasurement(measurement, turnstileToken)
       setSubmission(nextSubmission)
       setState('success')
     } catch {
@@ -56,6 +66,12 @@ export const RankingCard = ({ context, service, measurement }: RankingCardProps)
       {state === 'notEligible' && (
         <p className="ranking-card__message">
           本日の全国回線品質ランキングは、現在Cloudflareにより日本国内と判定された測定のみ参加できます。
+        </p>
+      )}
+
+      {state === 'missingMetrics' && (
+        <p className="ranking-card__message" role="status">
+          今回の測定ではPingまたはJitterを取得できなかったため、ランキングには参加できません。
         </p>
       )}
 
@@ -86,6 +102,8 @@ export const RankingCard = ({ context, service, measurement }: RankingCardProps)
           )}
         </div>
       )}
+
+      <div className="ranking-card__turnstile" ref={turnstileContainerRef} />
 
       {state === 'success' && submission && (
         <div className="ranking-card__success">

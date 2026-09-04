@@ -31,6 +31,14 @@ const parsePage = (path: string): Document =>
   new DOMParser().parseFromString(readPublicFile(`${path}/index.html`), 'text/html')
 
 describe('public static pages', () => {
+  it('TurnstileのscriptとframeだけをCSPで許可する', () => {
+    const headers = readPublicFile('_headers')
+
+    expect(headers).toContain("script-src 'self' https://challenges.cloudflare.com")
+    expect(headers).toContain('frame-src https://challenges.cloudflare.com')
+    expect(headers).toContain("connect-src 'self' https://speed.cloudflare.com")
+  })
+
   it.each(staticPages)('$pathページに1件のh1、固有canonical、titleを含む', ({ path, canonical }) => {
     const page = parsePage(path)
 

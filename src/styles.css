@@ -3672,6 +3672,20 @@ a:focus-visible {
   color: #d9fff2;
 }
 
+.ranking-card__turnstile {
+  display: flex;
+  min-width: 0;
+  justify-content: center;
+}
+
+.ranking-card__turnstile:empty {
+  display: none;
+}
+
+.ranking-card__turnstile iframe {
+  max-width: 100%;
+}
+
 .ranking-card__success {
   display: grid;
   grid-template-columns: minmax(0, 0.9fr) minmax(190px, 0.7fr);

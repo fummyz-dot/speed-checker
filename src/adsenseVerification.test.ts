@@ -43,12 +43,12 @@ describe('AdSense site verification preparation', () => {
     expect(html).not.toContain(prohibitedAdsClient)
   })
 
-  it('既存CSPは広告配信の許可を追加せずに維持する', () => {
+  it('CSPはTurnstileのみ追加許可し、広告配信の許可は追加しない', () => {
     const headers = readProjectFile('public', '_headers')
     const csp = headers.split('\n')
       .find((line) => line.trimStart().startsWith('Content-Security-Policy:'))
       ?.trim()
 
-    expect(csp).toBe("Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' https://speed.cloudflare.com; object-src 'none'; base-uri 'self'; form-action 'none'; frame-ancestors 'none';")
+    expect(csp).toBe("Content-Security-Policy: default-src 'self'; script-src 'self' https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' https://speed.cloudflare.com; frame-src https://challenges.cloudflare.com; object-src 'none'; base-uri 'self'; form-action 'none'; frame-ancestors 'none';")
   })
 })

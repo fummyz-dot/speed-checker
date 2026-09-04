@@ -167,9 +167,27 @@ The repository, Cloudflare Worker, LocalStorage key, and other internal identifi
 
 ## D-012 — Ranking preview is compile-time gated and score-blind in the browser
 
-**Status:** Accepted and implemented
+**Status:** Superseded by D-013
 **Date:** 2026-08-28
 
 The public ranking preview is disabled by default and requires `VITE_RANKING_PREVIEW=true` at build time. It uses fixed local fixtures through a service abstraction only; it does not configure a Service Binding, Turnstile, database, or production API call.
 
 The browser must never calculate Net Speed Score or contain its coefficients. It may display score values supplied by the private ranking-service contract. Ranking context is resolved before a measurement, never during it, and is held in memory only. Context failure must preserve the existing 700 Mbps / 250 Mbps race benchmark and never fail the speed measurement.
+
+---
+
+## D-013 — Ranking preview uses the private ranking service and deferred Turnstile
+
+**Status:** Accepted and implemented
+**Date:** 2026-09-04
+
+- Frontend ranking remains compile-time gated by `VITE_RANKING_PREVIEW`.
+- The browser never calculates Net Speed Score or contains its coefficients.
+- The public Worker exposes `GET /api/ranking/context` and `POST /api/ranking/entries`.
+- The public Worker calls private `netspeedrace-ranking` through `RANKING_SERVICE`.
+- Only country and the allow-listed ranking payload are relayed; the original client request and headers are not forwarded.
+- Context resolves before measurement; failure falls back to 700 Mbps / 250 Mbps.
+- No ranking network activity occurs during SpeedTest measurement.
+- Turnstile loads and executes only after explicit ranking participation.
+- Ranking tickets and results remain memory-only and are not added to measurement LocalStorage.
+- The private ranking Worker owns persistence and D1.

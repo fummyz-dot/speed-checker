@@ -1,8 +1,11 @@
-import { fireEvent, render, screen } from '@testing-library/react'
-import { describe, expect, it, vi } from 'vitest'
+import { fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import type { SpeedMeasurementResult } from '../../types/measurement'
 import { RankingCard } from './RankingCard'
 import type { RankingContext, RankingService, RankingSubmissionResult } from './types'
+import { requestRankingTurnstileToken } from './turnstile'
+
+vi.mock('./turnstile', () => ({ requestRankingTurnstileToken: vi.fn() }))
 
 const measurement: SpeedMeasurementResult = {
   id: 'measurement-1', measuredAt: '2026-08-28T12:00:00.000Z',
@@ -37,6 +40,11 @@ const service = (submitMeasurement = vi.fn().mockResolvedValue(successfulSubmiss
 })
 
 describe('RankingCard', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    vi.mocked(requestRankingTurnstileToken).mockResolvedValue('turnstile-token')
+  })
+
   it('shows an opt-in explanation without a score formula before submission', () => {
     render(<RankingCard context={eligibleContext} service={service()} measurement={measurement} />)
 
@@ -68,6 +76,7 @@ describe('RankingCard', () => {
 
     fireEvent.click(screen.getByRole('button', { name: '匿名でランキングに参加してスコアを見る' }))
     expect(screen.getByRole('button', { name: 'ランキングに登録中…' })).toBeDisabled()
+    await waitFor(() => expect(submitMeasurement).toHaveBeenCalledTimes(1))
     completeSubmission?.(successfulSubmission)
     expect(await screen.findByText('1524.7')).toBeVisible()
   })
@@ -83,7 +92,8 @@ describe('RankingCard', () => {
     fireEvent.click(screen.getByRole('button', { name: 'もう一度試す' }))
     expect(await screen.findByText('1524.7')).toBeVisible()
     expect(submitMeasurement).toHaveBeenCalledTimes(2)
-    expect(submitMeasurement).toHaveBeenLastCalledWith(measurement)
+    expect(requestRankingTurnstileToken).toHaveBeenCalledTimes(2)
+    expect(submitMeasurement).toHaveBeenLastCalledWith(measurement, 'turnstile-token')
   })
 
   it('does not show a percentage below ten runs or a champion comparison without a champion score', async () => {
@@ -116,5 +126,16 @@ describe('RankingCard', () => {
     )
     expect(screen.getByText(/日本国内と判定された測定のみ参加できます/)).toBeVisible()
     expect(screen.queryByRole('button', { name: '匿名でランキングに参加してスコアを見る' })).not.toBeInTheDocument()
+  })
+
+  it('does not run Turnstile or submit when Ping or Jitter is unavailable', () => {
+    const submitMeasurement = vi.fn()
+    render(<RankingCard context={eligibleContext} service={service(submitMeasurement)} measurement={{ ...measurement, pingMs: null }} />)
+
+    fireEvent.click(screen.getByRole('button', { name: '匿名でランキングに参加してスコアを見る' }))
+
+    expect(screen.getByText('今回の測定ではPingまたはJitterを取得できなかったため、ランキングには参加できません。')).toBeVisible()
+    expect(requestRankingTurnstileToken).not.toHaveBeenCalled()
+    expect(submitMeasurement).not.toHaveBeenCalled()
   })
 })

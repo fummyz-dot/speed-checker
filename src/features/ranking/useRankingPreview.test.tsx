@@ -1,10 +1,10 @@
 import { act, renderHook } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { DEFAULT_RACE_CHAMPION_REFERENCE } from '../../types/raceChampion'
-import { createRankingPreviewService } from './rankingService'
+import { createRankingApiService } from './rankingService'
 import { useRankingPreview } from './useRankingPreview'
 
-vi.mock('./rankingService', () => ({ createRankingPreviewService: vi.fn() }))
+vi.mock('./rankingService', () => ({ createRankingApiService: vi.fn() }))
 
 const champion = {
   source: 'previous_day_winner' as const,
@@ -15,11 +15,11 @@ const champion = {
 afterEach(() => vi.clearAllMocks())
 
 describe('useRankingPreview', () => {
-  it('does not construct or call the preview service while disabled', async () => {
+  it('does not construct or call the ranking service while disabled', async () => {
     const { result } = renderHook(() => useRankingPreview(false))
     await act(async () => { await result.current.prepareMeasurement() })
 
-    expect(createRankingPreviewService).not.toHaveBeenCalled()
+    expect(createRankingApiService).not.toHaveBeenCalled()
     expect(result.current.context).toBeNull()
     expect(result.current.championReference).toEqual(DEFAULT_RACE_CHAMPION_REFERENCE)
   })
@@ -28,7 +28,7 @@ describe('useRankingPreview', () => {
     const getContext = vi.fn().mockResolvedValue({
       ok: true, rankingAvailable: true, rankingDay: '2026-08-28', ticket: 'preview-ticket', ticketExpiresAtMs: 1, champion,
     })
-    vi.mocked(createRankingPreviewService).mockReturnValue({ getContext, submitMeasurement: vi.fn() })
+    vi.mocked(createRankingApiService).mockReturnValue({ getContext, submitMeasurement: vi.fn() })
     const { result } = renderHook(() => useRankingPreview(true))
 
     await act(async () => { await result.current.prepareMeasurement() })
@@ -38,7 +38,7 @@ describe('useRankingPreview', () => {
   })
 
   it('falls back to the established 700 / 250 benchmark when context fails', async () => {
-    vi.mocked(createRankingPreviewService).mockReturnValue({
+    vi.mocked(createRankingApiService).mockReturnValue({
       getContext: vi.fn().mockRejectedValue(new Error('unavailable')),
       submitMeasurement: vi.fn(),
     })
@@ -50,7 +50,7 @@ describe('useRankingPreview', () => {
   })
 
   it('keeps a non-JP context out of ranking while still passing its champion to the race', async () => {
-    vi.mocked(createRankingPreviewService).mockReturnValue({
+    vi.mocked(createRankingApiService).mockReturnValue({
       getContext: vi.fn().mockResolvedValue({
         ok: true, rankingAvailable: false, rankingDay: '2026-08-28', ticket: null, ticketExpiresAtMs: null,
         unavailableReason: 'country_not_eligible', champion,
