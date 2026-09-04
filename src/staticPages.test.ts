@@ -22,7 +22,11 @@ const guidePages = [
   { path: 'internet-slow-at-night', canonical: 'https://netspeedrace.com/internet-slow-at-night/' },
 ] as const
 
-const staticPages = [...trustPages, ...guidePages]
+const rankingPages = [
+  { path: 'ranking', canonical: 'https://netspeedrace.com/ranking/' },
+] as const
+
+const staticPages = [...trustPages, ...guidePages, ...rankingPages]
 
 const readPublicFile = (path: string): string =>
   readFileSync(resolve('public', path), 'utf8')
@@ -230,10 +234,69 @@ describe('public static pages', () => {
     expect(content).toContain('loaded latency')
   })
 
-  it('静的ページに外部scriptを含めず、sitemapに15個の重複しない公開URLを含む', () => {
-    staticPages.forEach(({ path }) => {
+  it('ランキングページにSEO情報、静的本文、live targetを含む', () => {
+    const page = parsePage('ranking')
+    const content = page.body.textContent ?? ''
+
+    expect(page.title).toBe('全国回線品質ランキング・今日のNet Speed Score | Net Speed Race')
+    expect(page.querySelector('meta[name="description"]')?.getAttribute('content')).toBe('日本から任意参加されたNet Speed Raceの測定結果を集計。今日のNet Speed Score TOP3、中央値、上位10%ライン、直近7日の出走数を公開しています。')
+    expect(page.querySelector('meta[property="og:type"]')?.getAttribute('content')).toBe('website')
+    expect(page.querySelector('meta[property="og:site_name"]')?.getAttribute('content')).toBe('Net Speed Race')
+    expect(page.querySelector('meta[property="og:title"]')?.getAttribute('content')).toBe(page.title)
+    expect(page.querySelector('meta[property="og:description"]')?.getAttribute('content')).toBe('日本から任意参加されたNet Speed Raceの測定結果を集計。今日のNet Speed Score TOP3、中央値、上位10%ライン、直近7日の出走数を公開しています。')
+    expect(page.querySelector('meta[property="og:url"]')?.getAttribute('content')).toBe('https://netspeedrace.com/ranking/')
+    expect(page.querySelector('link[rel="icon"]')?.getAttribute('href')).toBe('/favicon.svg')
+    ;[
+      'Net Speed Score', '1出走', 'Download', 'Upload', 'Ping', 'Jitter', '10出走以上',
+      '1位・1位・3位', '100以上', '700 Mbps', '250 Mbps',
+      '統計的な日本全国の代表値ではありません', 'ISP・通信事業者別のランキングではありません', '日本時間（JST）',
+    ].forEach((text) => expect(content).toContain(text))
+    ;['/privacy/', '/methodology/', '/guide/', '/internet-speed/'].forEach((href) => {
+      expect(page.querySelector(`a[href="${href}"]`)).not.toBeNull()
+    })
+    expect(page.getElementById('ranking-live')?.getAttribute('aria-busy')).toBe('true')
+    expect(page.getElementById('ranking-status')?.textContent).toBe('集計データを読み込んでいます…')
+    expect(page.getElementById('ranking-retry')?.hasAttribute('hidden')).toBe(true)
+    ;[
+      'ranking-live', 'ranking-status', 'ranking-day', 'ranking-total-runs', 'ranking-median-score',
+      'ranking-top10-score', 'ranking-top3', 'ranking-champion-source', 'ranking-champion-score',
+      'ranking-champion-download', 'ranking-champion-upload', 'ranking-champion-runs', 'ranking-recent-days',
+      'ranking-retry',
+    ].forEach((id) => expect(page.getElementById(id)).not.toBeNull())
+  })
+
+  it('trust/guideページはscriptなしを維持し、rankingページは同一originのdefer scriptだけを含む', () => {
+    ;[...trustPages, ...guidePages].forEach(({ path }) => {
       expect(parsePage(path).querySelectorAll('script')).toHaveLength(0)
     })
+    const scripts = parsePage('ranking').querySelectorAll('script')
+
+    expect(scripts).toHaveLength(1)
+    expect(scripts[0].getAttribute('src')).toBe('/ranking/ranking.js')
+    expect(scripts[0].defer).toBe(true)
+    expect(scripts[0].textContent).toBe('')
+    expect(scripts[0].getAttribute('src')?.startsWith('http')).toBe(false)
+  })
+
+  it('ガイドから全国回線品質ランキングへ案内する', () => {
+    const page = parsePage('guide')
+    const note = page.querySelector('.site-pages__note')
+
+    expect(note?.textContent).toBe('現在の参加データは「全国回線品質ランキング」で確認できます。「測定方法について」と「このサイトについて」もあわせてご確認ください。')
+    expect(note?.querySelector('a[href="/ranking/"]')?.textContent).toBe('全国回線品質ランキング')
+  })
+
+  it('ranking scriptは同一origin overview APIだけを安全に利用する', () => {
+    const script = readPublicFile('ranking/ranking.js')
+
+    expect(script).toContain("fetch('/api/ranking/overview'")
+    ;[
+      'innerHTML', 'localStorage', 'document.cookie', 'CF-Connecting-IP', 'X-Forwarded-For',
+      'challenges.cloudflare.com', 'speed.cloudflare.com', 'D^0.7', 'U^0.3', 'Sref', 'Fs', 'Fp', 'Fj',
+    ].forEach((text) => expect(script).not.toContain(text))
+  })
+
+  it('sitemapに16個の重複しない公開URLを含む', () => {
     const sitemap = readPublicFile('sitemap.xml')
     const urls = [...sitemap.matchAll(/<loc>(.*?)<\/loc>/g)].map(([, url]) => url)
 
@@ -241,6 +304,6 @@ describe('public static pages', () => {
       'https://netspeedrace.com/',
       ...staticPages.map(({ canonical }) => canonical),
     ])
-    expect(new Set(urls).size).toBe(15)
+    expect(new Set(urls).size).toBe(16)
   })
 })

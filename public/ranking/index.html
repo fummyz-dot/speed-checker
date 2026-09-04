@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>全国回線品質ランキング・今日のNet Speed Score | Net Speed Race</title>
+    <meta name="description" content="日本から任意参加されたNet Speed Raceの測定結果を集計。今日のNet Speed Score TOP3、中央値、上位10%ライン、直近7日の出走数を公開しています。" />
+    <link rel="canonical" href="https://netspeedrace.com/ranking/" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Net Speed Race" />
+    <meta property="og:title" content="全国回線品質ランキング・今日のNet Speed Score | Net Speed Race" />
+    <meta property="og:description" content="日本から任意参加されたNet Speed Raceの測定結果を集計。今日のNet Speed Score TOP3、中央値、上位10%ライン、直近7日の出走数を公開しています。" />
+    <meta property="og:url" content="https://netspeedrace.com/ranking/" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="stylesheet" href="/site-pages.css" />
+    <link rel="stylesheet" href="/ranking/ranking.css" />
+    <script src="/ranking/ranking.js" defer></script>
+  </head>
+  <body>
+    <a class="site-pages__skip-link" href="#main-content">本文へ移動</a>
+    <header class="site-pages__header"><div class="site-pages__header-inner">
+      <a class="site-pages__brand" href="/">Net Speed Race</a>
+      <nav class="site-pages__nav" aria-label="主要ナビゲーション"><ul>
+        <li><a href="/">速度を測定</a></li><li><a href="/guide/">回線品質ガイド</a></li><li><a href="/about/">このサイトについて</a></li><li><a href="/methodology/">測定方法</a></li><li><a href="/privacy/">プライバシー</a></li><li><a href="/contact/">お問い合わせ</a></li><li><a href="/terms/">利用規約</a></li>
+      </ul></nav>
+    </div></header>
+    <main class="site-pages__main" id="main-content"><article class="site-pages__article">
+      <p class="site-pages__eyebrow">NET SPEED SCORE / RANKING</p>
+      <h1>全国回線品質ランキング</h1>
+      <p class="site-pages__lead">Net Speed Raceで測定後に任意参加された結果を、1回の参加＝1出走として集計しています。Download・Uploadだけでなく、PingとJitterも含むNet Speed Scoreで、その日の参加測定を比べます。</p>
+      <p class="site-pages__article-meta"><span>運営・集計: Net Speed Race</span><span>ページ内容更新: 2026年9月4日</span></p>
+      <p class="site-pages__note">ランキングは日本からの測定を対象にした任意参加データです。利用者数・契約回線数・ISP別シェアを表す統計ではありません。</p>
+      <a class="site-pages__article-cta" href="/">今の回線品質を測定する</a>
+
+      <section class="ranking-live" id="ranking-live" aria-labelledby="ranking-live-title" aria-busy="true">
+        <div class="ranking-live__heading">
+          <div><h2 id="ranking-live-title">本日の集計</h2><p id="ranking-status" role="status" aria-live="polite">集計データを読み込んでいます…</p></div>
+          <p class="ranking-live__meta">集計日: <time id="ranking-day">—</time><span id="ranking-score-version">Score version: —</span></p>
+        </div>
+        <div class="ranking-summary-grid">
+          <section class="ranking-summary-card"><h3>本日の出走数</h3><p id="ranking-total-runs">—</p></section>
+          <section class="ranking-summary-card"><h3>Net Speed Score 中央値</h3><p id="ranking-median-score">—</p></section>
+          <section class="ranking-summary-card"><h3>上位10%ライン</h3><p id="ranking-top10-score">—</p><small id="ranking-top10-note">10出走以上で表示します。</small></section>
+        </div>
+        <div class="ranking-data-grid">
+          <section class="ranking-top3" aria-labelledby="ranking-top3-title"><h3 id="ranking-top3-title">TODAY'S TOP 3</h3><ol id="ranking-top3"><li>読み込み中…</li></ol></section>
+          <section class="ranking-champion" aria-labelledby="ranking-champion-title">
+            <h3 id="ranking-champion-title">本日の「無敗の三冠馬」</h3>
+            <dl>
+              <dt>基準</dt><dd id="ranking-champion-source">—</dd>
+              <dt>Net Speed Score</dt><dd id="ranking-champion-score">—</dd>
+              <dt>Download</dt><dd id="ranking-champion-download">—</dd>
+              <dt>Upload</dt><dd id="ranking-champion-upload">—</dd>
+              <dt>有効出走</dt><dd id="ranking-champion-runs">—</dd>
+            </dl>
+            <p id="ranking-champion-description">—</p>
+          </section>
+        </div>
+        <section class="ranking-recent" aria-labelledby="ranking-recent-title"><h3 id="ranking-recent-title">直近7日の出走数</h3><div id="ranking-recent-days">読み込み中…</div></section>
+        <button class="ranking-retry" id="ranking-retry" type="button" hidden>再読み込み</button>
+      </section>
+      <noscript><p class="site-pages__note">現在のランキング数値を表示するにはJavaScriptが必要です。ランキングの考え方や集計方法の説明は、このページ上でそのまま確認できます。</p></noscript>
+
+      <section aria-labelledby="score-title">
+        <h2 id="score-title">Net Speed Scoreとは</h2>
+        <p>Net Speed Scoreは、Download、Upload、Ping、Jitterを組み合わせたNet Speed Race独自の参考指標です。単純な下り速度ランキングではなく、送受信速度と応答性・安定性をまとめて比較するために使用します。</p>
+        <p>Net Speed Scoreは、公的機関、通信事業者、Cloudflareなどが定める公式の回線評価指標ではありません。数値はNet Speed Race内で測定結果を比較するための参考値です。</p>
+      </section>
+
+      <section aria-labelledby="how-to-read-title">
+        <h2 id="how-to-read-title">ランキングの読み方</h2>
+        <dl>
+          <dt>本日の出走数</dt><dd>測定完了後にランキングへ任意参加し、有効に登録された1回を1出走として数えます。1出走は1人、1世帯、1契約回線を意味しません。</dd>
+          <dt>中央値</dt><dd>本日のNet Speed Scoreを高い順・低い順に並べた中央の値です。出走数が偶数の場合は中央2件の平均を表示します。</dd>
+          <dt>上位10%ライン</dt><dd>本日の出走数が10以上の場合に表示します。上位から10%に相当する順位のScoreを基準値として示します。同点があるため、このScore以上の出走が厳密に10%になるとは限りません。</dd>
+          <dt>TODAY'S TOP 3</dt><dd>Scoreの高い順に最大3出走を表示します。同じScoreは同順位とし、競技順位方式で1位・1位・3位のように表示する場合があります。</dd>
+          <dt>無敗の三冠馬</dt><dd>前日の有効出走が100以上の場合は、前日のScore 1位を翌日の「無敗の三冠馬」として回線速度レースの比較基準に使用します。100未満の場合は固定基準のDownload 700 Mbps / Upload 250 Mbpsを使用します。</dd>
+        </dl>
+      </section>
+
+      <section aria-labelledby="scope-title">
+        <h2 id="scope-title">集計対象と注意点</h2>
+        <ul>
+          <li>ランキング参加は日本からの測定が対象です。</li>
+          <li>参加は任意で、通常の速度測定だけを利用することもできます。</li>
+          <li>測定した端末、接続方法、Wi-Fi状態、時間帯、回線契約など条件の異なる出走が混在します。</li>
+          <li>このランキングは統計的な日本全国の代表値ではありません。</li>
+          <li>ISP・通信事業者別のランキングではありません。</li>
+          <li>Scoreだけから通信不調の原因や契約回線の品質を断定することはできません。</li>
+          <li>ランキングの日付は日本時間（JST）です。</li>
+          <li>個別のIPアドレスや地域をランキングとして公開しません。</li>
+          <li>データの取扱いは<a href="/privacy/">プライバシー</a>を参照する。</li>
+        </ul>
+        <p>集計の前提となる測定は<a href="/methodology/">測定方法</a>で確認できます。</p>
+      </section>
+
+      <section class="site-pages__related" aria-labelledby="ranking-related-title">
+        <h2 id="ranking-related-title">関連リンク</h2>
+        <ul>
+          <li><a href="/methodology/">測定方法</a></li><li><a href="/privacy/">プライバシー</a></li><li><a href="/guide/">回線品質ガイド</a></li><li><a href="/internet-speed/">回線速度の見方</a></li>
+        </ul>
+      </section>
+      <a class="site-pages__article-cta" href="/">今の回線品質を測定する</a>
+    </article></main>
+    <footer class="site-pages__footer"><div class="site-pages__footer-inner"><nav class="site-pages__nav" aria-label="フッターナビゲーション"><ul>
+      <li><a href="/">速度を測定</a></li><li><a href="/guide/">回線品質ガイド</a></li><li><a href="/about/">このサイトについて</a></li><li><a href="/methodology/">測定方法</a></li><li><a href="/privacy/">プライバシー</a></li><li><a href="/contact/">お問い合わせ</a></li><li><a href="/terms/">利用規約</a></li><li><a href="https://github.com/fummyz-dot/speed-checker" target="_blank" rel="noreferrer noopener">GitHubでソースコードを見る</a></li>
+    </ul></nav><p class="site-pages__footer-note">© Net Speed Race</p></div></footer>
+  </body>
+</html>
