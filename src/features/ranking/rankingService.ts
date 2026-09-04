@@ -68,8 +68,8 @@ const parseSubmissionChampion = (value: unknown): RaceChampionReference => {
     || (value.source !== 'previous_day_winner' && value.source !== 'fallback')
     || !isNullableString(value.sourceDay)
     || !isNullableFiniteNumber(value.scoreTenths)
-    || !isFiniteNumber(value.downloadMbps)
-    || !isFiniteNumber(value.uploadMbps)
+    || !isFiniteNumber(value.downloadTenths)
+    || !isFiniteNumber(value.uploadTenths)
     || !isFiniteNumber(value.qualifyingRuns)) {
     throw new Error('Invalid ranking submission response')
   }
@@ -78,8 +78,8 @@ const parseSubmissionChampion = (value: unknown): RaceChampionReference => {
     source: value.source,
     sourceDay: value.sourceDay,
     scoreTenths: value.scoreTenths,
-    downloadMbps: value.downloadMbps,
-    uploadMbps: value.uploadMbps,
+    downloadMbps: value.downloadTenths / 10,
+    uploadMbps: value.uploadTenths / 10,
     qualifyingRuns: value.qualifyingRuns,
   }
 }

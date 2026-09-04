@@ -43,8 +43,8 @@ const submissionResponse = {
     source: 'previous_day_winner',
     sourceDay: '2026-08-27',
     scoreTenths: 16834,
-    downloadMbps: 534.8,
-    uploadMbps: 327.2,
+    downloadTenths: 5348,
+    uploadTenths: 3272,
     qualifyingRuns: 2847,
   },
 }
@@ -138,7 +138,15 @@ describe('createRankingApiService', () => {
       turnstileToken: 'turnstile-token',
       measurement: { id: 'measurement-1', downloadMbps: 300, uploadMbps: 100, pingMs: 20, jitterMs: 5 },
     })
-    expect(submission).toEqual(submissionResponse)
+    expect(submission).toMatchObject({
+      ok: true,
+      entry: submissionResponse.entry,
+      top3: submissionResponse.top3,
+    })
+    expect(submission.champion).toEqual({
+      source: 'previous_day_winner', sourceDay: '2026-08-27', scoreTenths: 16834,
+      downloadMbps: 534.8, uploadMbps: 327.2, qualifyingRuns: 2847,
+    })
   })
 
   it('rejects before fetch when no eligible ticket has been obtained', async () => {
@@ -156,6 +164,23 @@ describe('createRankingApiService', () => {
     const fetch = vi.fn()
       .mockResolvedValueOnce(jsonResponse(contextResponse))
       .mockResolvedValueOnce(submission)
+    vi.stubGlobal('fetch', fetch)
+    const service = createRankingApiService()
+    await service.getContext()
+
+    await expect(service.submitMeasurement(measurement, 'turnstile-token')).rejects.toThrow()
+  })
+
+  it('rejects a submission champion with the obsolete Mbps fields', async () => {
+    const fetch = vi.fn()
+      .mockResolvedValueOnce(jsonResponse(contextResponse))
+      .mockResolvedValueOnce(jsonResponse({
+        ...submissionResponse,
+        champion: {
+          source: 'previous_day_winner', sourceDay: '2026-08-27', scoreTenths: 16834,
+          downloadMbps: 534.8, uploadMbps: 327.2, qualifyingRuns: 2847,
+        },
+      }))
     vi.stubGlobal('fetch', fetch)
     const service = createRankingApiService()
     await service.getContext()
