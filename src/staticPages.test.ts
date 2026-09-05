@@ -324,7 +324,9 @@ describe('public static pages', () => {
 
     expect(script).toContain('.filter((entry) => entry.rankingDay < rankingDay)')
     expect(script).toContain('previousDays[0]?.totalRuns ?? 0')
+    expect(script).toContain('previousDayRuns < 100')
     expect(script).toContain('前日は${formatRuns(previousDayRuns)}で100走未満のため、本日は固定基準を使用しています。')
+    expect(script).toContain('前日のランキングが本日の比較基準の条件を満たさないため、固定基準を使用しています。')
     expect(script).toContain('renderChampion(overview.champion, getPreviousDayRuns(overview.rankingDay, overview.recentDays))')
   })
 

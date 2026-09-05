@@ -133,7 +133,9 @@
     }
     championSource.textContent = '固定基準'
     championScore.textContent = '—'
-    championDescription.textContent = `前日は${formatRuns(previousDayRuns)}で100走未満のため、本日は固定基準を使用しています。`
+    championDescription.textContent = previousDayRuns < 100
+      ? `前日は${formatRuns(previousDayRuns)}で100走未満のため、本日は固定基準を使用しています。`
+      : '前日のランキングが本日の比較基準の条件を満たさないため、固定基準を使用しています。'
   }
   const render = (overview) => {
     day.dateTime = overview.rankingDay
