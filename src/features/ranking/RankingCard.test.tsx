@@ -45,18 +45,21 @@ describe('RankingCard', () => {
     vi.mocked(requestRankingTurnstileToken).mockResolvedValue('turnstile-token')
   })
 
-  it('shows an opt-in explanation without a score formula before submission', () => {
+  it('shows an opt-in invitation without a score formula before submission', () => {
     render(<RankingCard context={eligibleContext} service={service()} measurement={measurement} />)
 
     expect(screen.getByRole('heading', { name: '本日の全国回線品質ランキング' })).toBeVisible()
-    expect(screen.getByRole('button', { name: '匿名でランキングに参加してスコアを見る' })).toBeEnabled()
+    expect(screen.getByText('あなたの結果は全国で何位？')).toBeVisible()
+    expect(screen.getByText('匿名・任意参加。参加するとNet Speed Scoreと今日の順位を確認できます。')).toBeVisible()
+    expect(screen.getByRole('button', { name: '全国ランキングに参加して順位を見る' })).toHaveClass('ranking-card__submit--attention')
+    expect(screen.getByRole('button', { name: '全国ランキングに参加して順位を見る' })).toBeEnabled()
     expect(screen.getByText(/一つの指標だけが突出していても高得点になりにくい/)).toBeVisible()
     expect(document.body.textContent).not.toMatch(/log\(|係数|Sref|Ping\/Jitter補正式/)
   })
 
   it('renders the integer-tenths success contract, tie ranks, top percentage, and top three', async () => {
     render(<RankingCard context={eligibleContext} service={service()} measurement={measurement} />)
-    fireEvent.click(screen.getByRole('button', { name: '匿名でランキングに参加してスコアを見る' }))
+    fireEvent.click(screen.getByRole('button', { name: '全国ランキングに参加して順位を見る' }))
 
     expect(await screen.findByText('1524.7')).toBeVisible()
     expect(screen.getByText('128位')).toBeVisible()
@@ -74,7 +77,7 @@ describe('RankingCard', () => {
     }))
     render(<RankingCard context={eligibleContext} service={service(submitMeasurement)} measurement={measurement} />)
 
-    fireEvent.click(screen.getByRole('button', { name: '匿名でランキングに参加してスコアを見る' }))
+    fireEvent.click(screen.getByRole('button', { name: '全国ランキングに参加して順位を見る' }))
     expect(screen.getByRole('button', { name: 'ランキングに登録中…' })).toBeDisabled()
     await waitFor(() => expect(submitMeasurement).toHaveBeenCalledTimes(1))
     completeSubmission?.(successfulSubmission)
@@ -87,7 +90,7 @@ describe('RankingCard', () => {
       .mockResolvedValueOnce(successfulSubmission)
     render(<RankingCard context={eligibleContext} service={service(submitMeasurement)} measurement={measurement} />)
 
-    fireEvent.click(screen.getByRole('button', { name: '匿名でランキングに参加してスコアを見る' }))
+    fireEvent.click(screen.getByRole('button', { name: '全国ランキングに参加して順位を見る' }))
     expect(await screen.findByText('ランキングを利用できませんでした。測定結果には影響ありません。')).toBeVisible()
     fireEvent.click(screen.getByRole('button', { name: 'もう一度試す' }))
     expect(await screen.findByText('1524.7')).toBeVisible()
@@ -103,7 +106,7 @@ describe('RankingCard', () => {
       champion: { ...champion, source: 'fallback', sourceDay: null, scoreTenths: null },
     }
     render(<RankingCard context={eligibleContext} service={service(vi.fn().mockResolvedValue(fallbackSubmission))} measurement={measurement} />)
-    fireEvent.click(screen.getByRole('button', { name: '匿名でランキングに参加してスコアを見る' }))
+    fireEvent.click(screen.getByRole('button', { name: '全国ランキングに参加して順位を見る' }))
 
     expect(await screen.findByText('同率128位')).toBeVisible()
     expect(screen.queryByText(/上位[\d.]+%/)).not.toBeInTheDocument()
@@ -125,14 +128,14 @@ describe('RankingCard', () => {
       />,
     )
     expect(screen.getByText(/日本国内と判定された測定のみ参加できます/)).toBeVisible()
-    expect(screen.queryByRole('button', { name: '匿名でランキングに参加してスコアを見る' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: '全国ランキングに参加して順位を見る' })).not.toBeInTheDocument()
   })
 
   it('does not run Turnstile or submit when Ping or Jitter is unavailable', () => {
     const submitMeasurement = vi.fn()
     render(<RankingCard context={eligibleContext} service={service(submitMeasurement)} measurement={{ ...measurement, pingMs: null }} />)
 
-    fireEvent.click(screen.getByRole('button', { name: '匿名でランキングに参加してスコアを見る' }))
+    fireEvent.click(screen.getByRole('button', { name: '全国ランキングに参加して順位を見る' }))
 
     expect(screen.getByText('今回の測定ではPingまたはJitterを取得できなかったため、ランキングには参加できません。')).toBeVisible()
     expect(requestRankingTurnstileToken).not.toHaveBeenCalled()

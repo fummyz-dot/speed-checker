@@ -3673,11 +3673,62 @@ a:focus-visible {
   line-height: 1.6;
 }
 
+.ranking-card__invite {
+  display: grid;
+  padding-left: 12px;
+  gap: 5px;
+  border-left: 3px solid var(--accent);
+}
+
+.ranking-card__invite strong {
+  color: #effff8;
+  font-size: clamp(1rem, 1.8vw, 1.2rem);
+  font-weight: 800;
+  line-height: 1.4;
+}
+
+.ranking-card__invite span {
+  color: #aeb8c6;
+  font-size: 0.72rem;
+  line-height: 1.6;
+}
+
 .ranking-card__submit {
   width: fit-content;
   max-width: 100%;
   min-height: 42px;
   color: #d9fff2;
+}
+
+.ranking-card__submit.ranking-card__submit--attention {
+  width: min(100%, 460px);
+  min-height: 54px;
+  padding: 14px 18px;
+  border: 1px solid rgba(117, 229, 194, 0.88);
+  background: linear-gradient(135deg, #8cf0d2, #58d9b4);
+  color: #07110e;
+  font-size: 0.82rem;
+  font-weight: 800;
+  animation: ranking-submit-attention 2.8s ease-in-out infinite;
+}
+
+.ranking-card__submit--attention:hover {
+  background: linear-gradient(135deg, #8cf0d2, #58d9b4);
+  animation: none;
+  box-shadow: 0 8px 24px rgba(117, 229, 194, 0.3);
+  transform: translateY(-2px);
+}
+
+@keyframes ranking-submit-attention {
+  0%, 18%, 38%, 100% {
+    box-shadow: 0 0 0 rgba(117, 229, 194, 0);
+    transform: scale(1);
+  }
+
+  8%, 27% {
+    box-shadow: 0 0 0 7px rgba(117, 229, 194, 0.18), 0 0 24px rgba(117, 229, 194, 0.32);
+    transform: scale(1.015);
+  }
 }
 
 .ranking-card__turnstile {
@@ -3849,6 +3900,10 @@ a:focus-visible {
 
   .horse-visualization--focus-exiting {
     animation: none;
+  }
+
+  .ranking-card__submit--attention {
+    animation: none !important;
   }
 
   *,

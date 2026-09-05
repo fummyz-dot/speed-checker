@@ -77,12 +77,16 @@ export const RankingCard = ({ context, service, measurement }: RankingCardProps)
 
       {state === 'idle' && (
         <div className="ranking-card__intro">
+          <div className="ranking-card__invite">
+            <strong>あなたの結果は全国で何位？</strong>
+            <span>匿名・任意参加。参加するとNet Speed Scoreと今日の順位を確認できます。</span>
+          </div>
+          <button className="secondary-button ranking-card__submit ranking-card__submit--attention" type="button" onClick={() => void submit()}>
+            全国ランキングに参加して順位を見る
+          </button>
           <p>
             Net Speed Scoreは、Download・Upload・Ping・Jitterから、速度だけでなく応答性や安定性も含めて評価するNet Speed Race独自の総合指標です。一つの指標だけが突出していても高得点になりにくいよう設計しています。
           </p>
-          <button className="secondary-button ranking-card__submit" type="button" onClick={() => void submit()}>
-            匿名でランキングに参加してスコアを見る
-          </button>
           <small>ランキングへの参加は任意です。参加しない場合、測定結果はこれまでどおりブラウザ内だけで扱います。</small>
           <small>Net Speed ScoreはNet Speed Race独自の参考指標であり、Cloudflareその他の事業者が定める公式なネットワーク品質基準ではありません。</small>
         </div>

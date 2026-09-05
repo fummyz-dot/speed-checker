@@ -148,7 +148,7 @@ describe('App', () => {
     expect(rankingResults).toHaveProperty('tabIndex', -1)
     expect(rankingResults).toHaveAttribute('aria-hidden', 'true')
     expect(rankingResults).toHaveAttribute('inert')
-    expect(screen.getByRole('button', { name: '匿名でランキングに参加してスコアを見る', hidden: true })).toBeEnabled()
+    expect(screen.getByRole('button', { name: '全国ランキングに参加して順位を見る', hidden: true })).toBeEnabled()
   })
 
   it('rankingを明示的に無効化した場合は完了後もcardを表示せずserviceを呼ばない', () => {
