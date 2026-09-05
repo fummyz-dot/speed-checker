@@ -106,11 +106,16 @@ function App() {
 
   useEffect(() => {
     if (!isRaceFocused) return
+    const staticContent = document.getElementById('home-static-content')
     document.documentElement.classList.add('race-focus-lock')
     document.body.classList.add('race-focus-lock')
+    staticContent?.setAttribute('aria-hidden', 'true')
+    staticContent?.setAttribute('inert', '')
     return () => {
       document.documentElement.classList.remove('race-focus-lock')
       document.body.classList.remove('race-focus-lock')
+      staticContent?.removeAttribute('aria-hidden')
+      staticContent?.removeAttribute('inert')
     }
   }, [isRaceFocused])
 
@@ -318,26 +323,6 @@ function App() {
           <Notice />
         </div>
       </main>
-
-      <footer
-        className="site-footer"
-        data-race-focus-background
-        aria-hidden={isRaceFocused || undefined}
-        inert={isRaceFocused}
-      >
-        <span>© {new Date().getFullYear()} Net Speed Race</span>
-        <div className="site-footer__links">
-          <a href="/ranking/">全国ランキング</a>
-          <a href="/guide/">回線品質ガイド</a>
-          <a href="/about/">このサイトについて</a>
-          <a href="/methodology/">測定方法</a>
-          <a href="/privacy/">プライバシー</a>
-          <a href="/contact/">お問い合わせ</a>
-          <a href="/terms/">利用規約</a>
-          <a href="https://github.com/fummyz-dot/speed-checker" target="_blank" rel="noreferrer noopener">GitHubでソースコードを見る</a>
-          <span>Powered by Cloudflare Speedtest</span>
-        </div>
-      </footer>
     </div>
   )
 }

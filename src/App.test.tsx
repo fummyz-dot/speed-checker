@@ -267,6 +267,9 @@ describe('App', () => {
   it('測定開始と同時にレースへ集中し、背景操作とbody scrollをロックする', async () => {
     const user = userEvent.setup()
     const start = vi.fn()
+    const staticContent = document.createElement('div')
+    staticContent.id = 'home-static-content'
+    document.body.append(staticContent)
     vi.mocked(useSpeedTest).mockReturnValue({
       metrics: EMPTY_METRICS, phase: 'idle', isRunning: false, error: null, completedResult: null,
       confirmedDownloadMbps: null, start,
@@ -286,6 +289,8 @@ describe('App', () => {
     expect(document.documentElement).toHaveClass('race-focus-lock')
     expect(document.body).toHaveClass('race-focus-lock')
     expect(document.querySelector('.hero__controls')).toHaveAttribute('inert')
+    expect(staticContent).toHaveAttribute('aria-hidden', 'true')
+    expect(staticContent).toHaveAttribute('inert')
 
     await user.keyboard('{Escape}')
     await waitFor(() => {
@@ -293,6 +298,9 @@ describe('App', () => {
     })
     expect(start).toHaveBeenCalledTimes(1)
     expect(document.body).not.toHaveClass('race-focus-lock')
+    expect(staticContent).not.toHaveAttribute('aria-hidden')
+    expect(staticContent).not.toHaveAttribute('inert')
+    staticContent.remove()
   })
 
   it('最新の正常保存履歴だけを次回の測定条件初期値にする', () => {
@@ -463,35 +471,6 @@ describe('App', () => {
 
     render(<App />)
     expect(screen.getByRole('button', { name: '設定' })).toBeDisabled()
-  })
-
-  it('footerに公開ページリンクと安全な公開ソースコードリンクを表示する', () => {
-    const { container } = render(<App />)
-    const footer = container.querySelector('footer')
-
-    expect(screen.getByText(`© ${new Date().getFullYear()} Net Speed Race`)).toBeVisible()
-    expect(screen.getByText('Powered by Cloudflare Speedtest')).toBeVisible()
-    expect(footer).not.toBeNull()
-    const footerLinks = within(footer as HTMLElement)
-    const publicPages = [
-      ['全国ランキング', '/ranking/'],
-      ['回線品質ガイド', '/guide/'],
-      ['このサイトについて', '/about/'],
-      ['測定方法', '/methodology/'],
-      ['プライバシー', '/privacy/'],
-      ['お問い合わせ', '/contact/'],
-      ['利用規約', '/terms/'],
-    ] as const
-    publicPages.forEach(([name, href]) => {
-      expect(footerLinks.getByRole('link', { name })).toHaveAttribute('href', href)
-    })
-    expect(footerLinks.getByRole('link', { name: 'GitHubでソースコードを見る' })).toHaveAttribute(
-      'href',
-      'https://github.com/fummyz-dot/speed-checker',
-    )
-    expect(footerLinks.getByRole('link', { name: 'GitHubでソースコードを見る' })).toHaveAttribute('target', '_blank')
-    expect(footerLinks.getByRole('link', { name: 'GitHubでソースコードを見る' })).toHaveAttribute('rel', 'noreferrer noopener')
-    expect(container.innerHTML).not.toContain('netspeedrace-internal')
   })
 
   it('測定エラーをalertで表示する', () => {

@@ -24,6 +24,39 @@
   </head>
   <body>
     <div id="root"></div>
+    <div id="home-static-content" class="site-shell home-static-content">
+      <section class="home-service-info" aria-labelledby="home-service-info-title">
+        <p class="home-service-info__eyebrow">ABOUT THIS SERVICE</p>
+        <h2 id="home-service-info-title">Net Speed Raceとは</h2>
+        <div class="home-service-info__body">
+          <div class="home-service-info__copy">
+            <p>Net Speed Raceは、ブラウザから現在のインターネット回線品質を確認できる無料の測定サービスです。ダウンロード速度・アップロード速度に加えて、Ping、ジッター、ダウンロード・アップロード時の負荷レイテンシを測定し、回線の速さだけでなく応答性や安定性も確認できます。測定結果は「回線速度レース」として視覚化し、数値の違いを直感的に把握しやすくしています。</p>
+            <p>測定後は、希望する場合のみ匿名で本日の全国ランキングに参加できます。ランキングでは、ダウンロード・アップロード・Ping・ジッターを組み合わせたNet Speed Race独自の指標「Net Speed Score」を使って、その日の出走結果と比較できます。この指標は通信品質の公式規格ではなく、Net Speed Raceが比較のために定義した独自指標です。</p>
+            <p>測定にはCloudflareのエッジネットワークを利用します。ブラウザでの測定だけからWi-Fi、ルーター、ISPなど個別の原因を断定することはせず、測定値の意味と比較方法を分かりやすく示すことを重視しています。アカウント登録は不要で、通常の測定履歴は利用中のブラウザ内に保存されます。</p>
+          </div>
+          <nav class="home-service-info__links" aria-label="Net Speed Raceの詳しい情報">
+            <a href="/ranking/"><span>全国ランキングを見る</span><span aria-hidden="true">→</span></a>
+            <a href="/methodology/"><span>測定方法を詳しく見る</span><span aria-hidden="true">→</span></a>
+            <a href="/about/"><span>Net Speed Raceについて</span><span aria-hidden="true">→</span></a>
+          </nav>
+        </div>
+      </section>
+
+      <footer class="site-footer">
+        <span>© Net Speed Race</span>
+        <div class="site-footer__links">
+          <a href="/ranking/">全国ランキング</a>
+          <a href="/guide/">回線品質ガイド</a>
+          <a href="/about/">このサイトについて</a>
+          <a href="/methodology/">測定方法</a>
+          <a href="/privacy/">プライバシー</a>
+          <a href="/contact/">お問い合わせ</a>
+          <a href="/terms/">利用規約</a>
+          <a href="https://github.com/fummyz-dot/speed-checker" target="_blank" rel="noreferrer noopener">GitHubでソースコードを見る</a>
+          <span>Powered by Cloudflare Speedtest</span>
+        </div>
+      </footer>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
