@@ -123,6 +123,7 @@ a:focus-visible {
   border-radius: 14px;
   background: rgba(13, 20, 30, 0.86);
   box-shadow: 0 24px 70px rgba(0, 0, 0, 0.2);
+  text-wrap: pretty;
 }
 
 .site-pages__eyebrow {
@@ -137,6 +138,7 @@ h1,
 h2 {
   color: #f8fafc;
   line-height: 1.35;
+  text-wrap: balance;
 }
 
 h1 {
@@ -154,18 +156,26 @@ h3 {
   margin: 28px 0 8px;
   color: #dce3eb;
   font-size: 1rem;
+  text-wrap: balance;
 }
 
 p,
 li,
 dd {
   overflow-wrap: anywhere;
+  word-break: auto-phrase;
+  text-wrap: pretty;
+}
+
+.site-pages__article dt {
+  text-wrap: balance;
 }
 
 .site-pages__lead {
   margin: 20px 0 0;
   color: #c6d0dc;
   font-size: 1.08rem;
+  text-wrap: pretty;
 }
 
 .site-pages__article ul {
@@ -178,7 +188,8 @@ dd {
 
 .site-pages__article dl {
   display: grid;
-  grid-template-columns: minmax(0, 190px) minmax(0, 1fr);
+  /* grid-template-columns: minmax(0, 190px) minmax(0, 1fr);*/
+  grid-template-columns: minmax(0, 250px) minmax(0, 1fr);
   gap: 8px 20px;
   margin: 18px 0;
 }
@@ -186,6 +197,7 @@ dd {
 .site-pages__article dt {
   color: #a7b4c4;
   font-weight: 750;
+  white-space: nowrap;
 }
 
 .site-pages__article dd {
@@ -197,6 +209,7 @@ dd {
   padding: 16px 18px;
   border-left: 3px solid #75e5c2;
   background: rgba(117, 229, 194, 0.09);
+  text-wrap: pretty;
 }
 
 .site-pages__article-meta {
@@ -263,6 +276,12 @@ dd {
   color: #c6d0dc;
   font-size: 0.91rem;
   line-height: 1.65;
+  word-break: auto-phrase;
+  text-wrap: pretty;
+}
+
+.site-pages__keep-together {
+  white-space: nowrap;
 }
 
 .site-pages__step-list {
@@ -405,6 +424,10 @@ dd {
 }
 
 @media (max-width: 720px) {
+  .site-pages__keep-together {
+    white-space: normal;
+  }
+
   .site-pages__header-inner {
     align-items: flex-start;
     flex-direction: column;
@@ -423,6 +446,23 @@ dd {
 
   .site-pages__article dd + dt {
     margin-top: 14px;
+  }
+
+  /* 比較表は無理に画面幅へ縮めない */
+  .site-pages__table {
+    min-width: 520px;
+    table-layout: auto;
+  }
+
+  .site-pages__table th,
+  .site-pages__table td {
+    padding: 8px 10px;
+    overflow-wrap: normal;
+    word-break: normal;
+  }
+
+  .site-pages__table th {
+    white-space: nowrap;
   }
 
   .site-pages__card-grid,
