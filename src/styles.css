@@ -1390,8 +1390,12 @@ a:focus-visible {
   pointer-events: none;
 }
 
+/*
+ * Horizontal race progress must stay linear because wall-clock
+ * timeline synchronization resumes runners from linear progress.
+ */
 .race-runner--racing .runner-mover {
-  animation: runner-race-run var(--race-duration) cubic-bezier(0.22, 0.58, 0.38, 1) forwards;
+  animation: runner-race-run var(--race-duration) linear forwards;
 }
 
 .race-runner--waiting .runner-mover,

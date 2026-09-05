@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs'
 import { act, fireEvent, render, screen } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import {
@@ -64,6 +65,17 @@ describe('HorseSpeedVisualization runner presentation', () => {
     flushAnimationFrame()
     flushAnimationFrame()
   }
+
+  it('wall-clock再同期で未完走馬が後退しないよう横移動はlinear timingを維持する', () => {
+    const styles = readFileSync(
+      new URL('../styles.css', String(import.meta.url)),
+      'utf8',
+    )
+
+    expect(styles).toContain(`.race-runner--racing .runner-mover {
+  animation: runner-race-run var(--race-duration) linear forwards;
+}`)
+  })
 
   it('初期状態では3頭の競走馬をスタート地点で待機させる', () => {
     const { container } = render(
