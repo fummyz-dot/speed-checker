@@ -61,8 +61,10 @@ describe('ConnectionInfo', () => {
       retry,
     })
     render(<ConnectionInfo />)
-    expect(screen.getByRole('alert')).toHaveTextContent('速度測定は通常どおり利用できます')
-    expect(screen.getByRole('alert')).not.toHaveTextContent('404')
+    const alert = screen.getByRole('alert')
+    expect(alert).toHaveTextContent('速度測定は通常どおり利用できます')
+    expect(alert.querySelector('br')).toBeInTheDocument()
+    expect(alert).not.toHaveTextContent('404')
     await userEvent.click(screen.getByRole('button', { name: '再取得' }))
     expect(retry).toHaveBeenCalledOnce()
   })
