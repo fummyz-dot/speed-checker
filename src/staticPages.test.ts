@@ -277,6 +277,9 @@ describe('public static pages', () => {
     expect(page.getElementById('ranking-live')?.getAttribute('aria-busy')).toBe('true')
     expect(page.getElementById('ranking-status')?.textContent).toBe('集計データを読み込んでいます…')
     expect(page.getElementById('ranking-retry')?.hasAttribute('hidden')).toBe(true)
+    const championTerms = [...page.querySelectorAll('.ranking-champion dt')].map((term) => term.textContent)
+    expect(championTerms).toContain('前日の出走数')
+    expect(championTerms).not.toContain('有効出走')
     ;[
       'ranking-live', 'ranking-status', 'ranking-day', 'ranking-total-runs', 'ranking-median-score',
       'ranking-top10-score', 'ranking-top3', 'ranking-champion-source', 'ranking-champion-score',
@@ -314,6 +317,15 @@ describe('public static pages', () => {
       'innerHTML', 'localStorage', 'document.cookie', 'CF-Connecting-IP', 'X-Forwarded-For',
       'challenges.cloudflare.com', 'speed.cloudflare.com', 'D^0.7', 'U^0.3', 'Sref', 'Fs', 'Fp', 'Fj',
     ].forEach((text) => expect(script).not.toContain(text))
+  })
+
+  it('ranking scriptは直近の前日出走数を固定基準の説明に使用する', () => {
+    const script = readPublicFile('ranking/ranking.js')
+
+    expect(script).toContain('.filter((entry) => entry.rankingDay < rankingDay)')
+    expect(script).toContain('previousDays[0]?.totalRuns ?? 0')
+    expect(script).toContain('前日は${formatRuns(previousDayRuns)}で100走未満のため、本日は固定基準を使用しています。')
+    expect(script).toContain('renderChampion(overview.champion, getPreviousDayRuns(overview.rankingDay, overview.recentDays))')
   })
 
   it('sitemapに16個の重複しない公開URLを含む', () => {

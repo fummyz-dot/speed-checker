@@ -115,20 +115,25 @@
     })
     recentDays.replaceChildren(...rows)
   }
-  const renderChampion = (champion) => {
+  const getPreviousDayRuns = (rankingDay, entries) => {
+    const previousDays = entries
+      .filter((entry) => entry.rankingDay < rankingDay)
+      .sort((left, right) => right.rankingDay.localeCompare(left.rankingDay))
+    return previousDays[0]?.totalRuns ?? 0
+  }
+  const renderChampion = (champion, previousDayRuns) => {
     championDownload.textContent = formatMbps(champion.downloadTenths)
     championUpload.textContent = formatMbps(champion.uploadTenths)
+    championRuns.textContent = formatRuns(previousDayRuns)
     if (champion.source === 'previous_day_winner') {
       championSource.textContent = '昨日の全国1位'
       championScore.textContent = formatScore(champion.scoreTenths)
-      championRuns.textContent = formatRuns(champion.qualifyingRuns)
       championDescription.textContent = '昨日の全国1位を、本日の回線速度レースの比較基準として使用しています。'
       return
     }
     championSource.textContent = '固定基準'
     championScore.textContent = '—'
-    championRuns.textContent = '—'
-    championDescription.textContent = '前日の有効出走が基準に満たない場合は、固定基準を回線速度レースの比較対象として使用します。'
+    championDescription.textContent = `前日は${formatRuns(previousDayRuns)}で100走未満のため、本日は固定基準を使用しています。`
   }
   const render = (overview) => {
     day.dateTime = overview.rankingDay
@@ -138,7 +143,7 @@
     medianScore.textContent = overview.medianScoreTenths === null ? '—' : formatScore(overview.medianScoreTenths)
     top10Score.textContent = overview.top10ThresholdTenths === null ? '—' : formatScore(overview.top10ThresholdTenths)
     renderTop3(overview.top3)
-    renderChampion(overview.champion)
+    renderChampion(overview.champion, getPreviousDayRuns(overview.rankingDay, overview.recentDays))
     renderRecentDays(overview.recentDays)
     live.setAttribute('aria-busy', 'false')
     status.textContent = `${formatRankingDay(overview.rankingDay)}の集計を表示しています。`
