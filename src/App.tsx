@@ -235,6 +235,15 @@ function App() {
               <br className="hero__lead-mobile-break" />
               エッジネットワークで測定します。
             </p>
+            {rankingEnabled && (
+              <div className="hero-ranking-promo">
+                <span className="hero-ranking-promo__eyebrow">RANKING</span>
+                <div className="hero-ranking-promo__copy">
+                  <strong>全国ランキング開催中！</strong>
+                  <span>あなたの回線は今日何位？ 測って確かめよう。</span>
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="hero__dashboard">
