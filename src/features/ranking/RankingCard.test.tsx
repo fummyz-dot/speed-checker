@@ -78,7 +78,9 @@ describe('RankingCard', () => {
     render(<RankingCard context={eligibleContext} service={service(submitMeasurement)} measurement={measurement} />)
 
     fireEvent.click(screen.getByRole('button', { name: '全国ランキングに参加して順位を見る' }))
-    expect(screen.getByRole('button', { name: 'ランキングに登録中…' })).toBeDisabled()
+    const pendingButton = screen.getByRole('button', { name: 'ランキングに登録中…' })
+    expect(pendingButton).toBeDisabled()
+    expect(pendingButton).not.toHaveClass('ranking-card__submit--attention')
     await waitFor(() => expect(submitMeasurement).toHaveBeenCalledTimes(1))
     completeSubmission?.(successfulSubmission)
     expect(await screen.findByText('1524.7')).toBeVisible()
