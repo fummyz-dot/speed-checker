@@ -49,6 +49,18 @@ const submissionResponse = {
   },
 }
 
+const overviewResponse = {
+  ok: true,
+  rankingDay: '2026-08-28',
+  totalRuns: 12,
+  top3: [
+    { rank: 1, scoreTenths: 8503 },
+    { rank: 2, scoreTenths: 7594 },
+    { rank: 3, scoreTenths: 7110 },
+  ],
+  medianScoreTenths: 5800,
+}
+
 const jsonResponse = (body: unknown, status = 200): Response =>
   new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } })
 
@@ -112,6 +124,56 @@ describe('createRankingApiService', () => {
     const context = createRankingApiService().getContext()
     const expectation = expect(context).rejects.toThrow('Aborted')
     await vi.advanceTimersByTimeAsync(1000)
+
+    await expectation
+  })
+
+  it('gets and parses the overview without credentials, cache, or private fields', async () => {
+    const fetch = vi.fn().mockResolvedValue(jsonResponse(overviewResponse))
+    vi.stubGlobal('fetch', fetch)
+
+    const overview = await createRankingApiService().getOverview()
+
+    expect(fetch).toHaveBeenCalledTimes(1)
+    expect(fetch).toHaveBeenCalledWith('/api/ranking/overview', expect.objectContaining({
+      method: 'GET',
+      headers: { Accept: 'application/json' },
+      credentials: 'omit',
+      cache: 'no-store',
+    }))
+    expect(overview).toEqual({
+      ok: true,
+      rankingDay: '2026-08-28',
+      totalRuns: 12,
+      top3: overviewResponse.top3,
+    })
+    expect((fetch.mock.calls[0][1] as RequestInit).body).toBeUndefined()
+  })
+
+  it.each([
+    ['negative totalRuns', { ...overviewResponse, totalRuns: -1 }],
+    ['fractional totalRuns', { ...overviewResponse, totalRuns: 1.5 }],
+    ['too many top3 entries', { ...overviewResponse, top3: [...overviewResponse.top3, { rank: 4, scoreTenths: 7000 }] }],
+    ['invalid top3 rank', { ...overviewResponse, top3: [{ rank: 0, scoreTenths: 8503 }] }],
+    ['invalid top3 score', { ...overviewResponse, top3: [{ rank: 1, scoreTenths: -1 }] }],
+  ])('rejects an overview with %s', async (_caseName, response) => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(jsonResponse(response)))
+
+    await expect(createRankingApiService().getOverview()).rejects.toThrow('Invalid ranking overview response')
+  })
+
+  it('aborts an overview request after 1.5 seconds', async () => {
+    vi.useFakeTimers()
+    const fetch = vi.fn((_url: string, init: RequestInit) => new Promise((_resolve, reject) => {
+      init.signal?.addEventListener('abort', () => reject(new DOMException('Aborted', 'AbortError')))
+    }))
+    vi.stubGlobal('fetch', fetch)
+
+    const overview = createRankingApiService().getOverview()
+    const expectation = expect(overview).rejects.toThrow('Aborted')
+    await vi.advanceTimersByTimeAsync(1499)
+    expect(fetch.mock.calls[0]?.[1].signal?.aborted).toBe(false)
+    await vi.advanceTimersByTimeAsync(1)
 
     await expectation
   })

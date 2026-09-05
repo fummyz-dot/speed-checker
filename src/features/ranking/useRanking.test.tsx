@@ -28,7 +28,11 @@ describe('useRanking', () => {
     const getContext = vi.fn().mockResolvedValue({
       ok: true, rankingAvailable: true, rankingDay: '2026-08-28', ticket: 'preview-ticket', ticketExpiresAtMs: 1, champion,
     })
-    vi.mocked(createRankingApiService).mockReturnValue({ getContext, submitMeasurement: vi.fn() })
+    vi.mocked(createRankingApiService).mockReturnValue({
+      getContext,
+      getOverview: vi.fn(),
+      submitMeasurement: vi.fn(),
+    })
     const { result } = renderHook(() => useRanking(true))
 
     await act(async () => { await result.current.prepareMeasurement() })
@@ -40,6 +44,7 @@ describe('useRanking', () => {
   it('falls back to the established 700 / 250 benchmark when context fails', async () => {
     vi.mocked(createRankingApiService).mockReturnValue({
       getContext: vi.fn().mockRejectedValue(new Error('unavailable')),
+      getOverview: vi.fn(),
       submitMeasurement: vi.fn(),
     })
     const { result } = renderHook(() => useRanking(true))
@@ -55,6 +60,7 @@ describe('useRanking', () => {
         ok: true, rankingAvailable: false, rankingDay: '2026-08-28', ticket: null, ticketExpiresAtMs: null,
         unavailableReason: 'country_not_eligible', champion,
       }),
+      getOverview: vi.fn(),
       submitMeasurement: vi.fn(),
     })
     const { result } = renderHook(() => useRanking(true))

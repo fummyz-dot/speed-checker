@@ -3697,6 +3697,43 @@ a:focus-visible {
   line-height: 1.6;
 }
 
+.ranking-card__leader-target {
+  display: grid;
+  width: min(100%, 460px);
+  padding: 12px 14px;
+  gap: 4px;
+  border: 1px solid rgba(86, 199, 229, 0.22);
+  border-radius: 9px;
+  background: linear-gradient(135deg, rgba(86, 199, 229, 0.08), rgba(13, 18, 28, 0.3));
+}
+
+.ranking-card__leader-target--loading {
+  padding-top: 9px;
+  padding-bottom: 9px;
+  background: rgba(13, 18, 28, 0.26);
+}
+
+.ranking-card__leader-label,
+.ranking-card__leader-runs {
+  color: var(--muted);
+  font-size: 0.68rem;
+  line-height: 1.5;
+}
+
+.ranking-card__leader-score {
+  color: #effff8;
+  font-size: 1.35rem;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.2;
+}
+
+.ranking-card__leader-score span {
+  margin-right: 8px;
+  color: #82d9ec;
+  font-size: 0.55rem;
+  letter-spacing: 0.1em;
+}
+
 .ranking-card__submit {
   width: fit-content;
   max-width: 100%;
@@ -3753,6 +3790,103 @@ a:focus-visible {
   display: grid;
   grid-template-columns: minmax(0, 0.9fr) minmax(190px, 0.7fr);
   gap: 18px;
+}
+
+.ranking-card__celebration {
+  --celebration-color: #d8b65e;
+  --celebration-glow: rgba(216, 182, 94, 0.34);
+  position: relative;
+  display: grid;
+  overflow: hidden;
+  grid-column: 1 / -1;
+  padding: 18px;
+  gap: 6px;
+  border: 1px solid color-mix(in srgb, var(--celebration-color) 62%, transparent);
+  border-radius: 11px;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--celebration-color) 16%, #0d121c), rgba(13, 18, 28, 0.72));
+  animation:
+    ranking-celebration-enter 680ms cubic-bezier(0.2, 0.9, 0.25, 1),
+    ranking-celebration-glow 2.2s ease-out;
+}
+
+.ranking-card__celebration::after {
+  position: absolute;
+  top: -45%;
+  bottom: -45%;
+  left: -35%;
+  width: 22%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.34), transparent);
+  content: '';
+  pointer-events: none;
+  transform: skewX(-18deg) translateX(0);
+  animation: ranking-celebration-shine 1.15s 180ms ease-out both;
+}
+
+.ranking-card__celebration--rank-1 {
+  --celebration-color: #f1cb69;
+  --celebration-glow: rgba(241, 203, 105, 0.42);
+}
+
+.ranking-card__celebration--rank-2 {
+  --celebration-color: #c7d1dc;
+  --celebration-glow: rgba(199, 209, 220, 0.28);
+}
+
+.ranking-card__celebration--rank-3 {
+  --celebration-color: #c78b5c;
+  --celebration-glow: rgba(199, 139, 92, 0.2);
+}
+
+.ranking-card__celebration > span {
+  color: var(--celebration-color);
+  font-size: 0.61rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+}
+
+.ranking-card__celebration > strong {
+  color: #f4f7fb;
+  font-size: clamp(1.12rem, 2.7vw, 1.55rem);
+  line-height: 1.35;
+}
+
+.ranking-card__celebration > p {
+  margin: 0;
+  color: #bbc5d2;
+  font-size: 0.72rem;
+  line-height: 1.6;
+}
+
+@keyframes ranking-celebration-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.97);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes ranking-celebration-glow {
+  0%, 100% {
+    box-shadow: 0 0 0 rgba(0, 0, 0, 0);
+  }
+
+  28% {
+    box-shadow: 0 0 30px var(--celebration-glow);
+  }
+}
+
+@keyframes ranking-celebration-shine {
+  from {
+    transform: skewX(-18deg) translateX(0);
+  }
+
+  to {
+    transform: skewX(-18deg) translateX(760%);
+  }
 }
 
 .ranking-card__result {
@@ -3907,6 +4041,11 @@ a:focus-visible {
   }
 
   .ranking-card__submit--attention {
+    animation: none !important;
+  }
+
+  .ranking-card__celebration,
+  .ranking-card__celebration::after {
     animation: none !important;
   }
 

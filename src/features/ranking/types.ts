@@ -18,6 +18,13 @@ export interface RankingTopEntry {
   scoreTenths: number
 }
 
+export interface RankingOverviewPreview {
+  ok: true
+  rankingDay: string
+  totalRuns: number
+  top3: RankingTopEntry[]
+}
+
 export interface RankingSubmissionResult {
   ok: true
   entry: {
@@ -43,6 +50,7 @@ export type RankingErrorCode =
 
 export interface RankingService {
   getContext(): Promise<RankingContext>
+  getOverview(): Promise<RankingOverviewPreview>
   submitMeasurement(
     measurement: SpeedMeasurementResult,
     turnstileToken: string,

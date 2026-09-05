@@ -1,7 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
 import type { SpeedMeasurementResult } from '../../types/measurement'
 import { requestRankingTurnstileToken } from './turnstile'
-import type { RankingContext, RankingService, RankingSubmissionResult } from './types'
+import type {
+  RankingContext,
+  RankingOverviewPreview,
+  RankingService,
+  RankingSubmissionResult,
+} from './types'
 
 type RankingSubmitState = 'idle' | 'submitting' | 'success' | 'error' | 'notEligible' | 'missingMetrics'
 
@@ -21,12 +26,43 @@ const initialState = (context: RankingContext | null): RankingSubmitState => {
 export const RankingCard = ({ context, service, measurement }: RankingCardProps) => {
   const [state, setState] = useState<RankingSubmitState>(() => initialState(context))
   const [submission, setSubmission] = useState<RankingSubmissionResult | null>(null)
+  const [overview, setOverview] = useState<RankingOverviewPreview | null>(null)
+  const [isOverviewLoading, setIsOverviewLoading] = useState(
+    () => context?.rankingAvailable === true && service !== null,
+  )
   const turnstileContainerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     setState(initialState(context))
     setSubmission(null)
   }, [context, measurement.id])
+
+  useEffect(() => {
+    if (!context?.rankingAvailable || !service || typeof service.getOverview !== 'function') {
+      setOverview(null)
+      setIsOverviewLoading(false)
+      return
+    }
+
+    let isCurrent = true
+    setOverview(null)
+    setIsOverviewLoading(true)
+    void service.getOverview()
+      .then((nextOverview) => {
+        if (!isCurrent) return
+        setOverview(nextOverview.rankingDay === context.rankingDay ? nextOverview : null)
+        setIsOverviewLoading(false)
+      })
+      .catch(() => {
+        if (!isCurrent) return
+        setOverview(null)
+        setIsOverviewLoading(false)
+      })
+
+    return () => {
+      isCurrent = false
+    }
+  }, [context, measurement.id, service])
 
   const submit = async () => {
     if (!service || state === 'submitting') return
@@ -51,6 +87,11 @@ export const RankingCard = ({ context, service, measurement }: RankingCardProps)
   const scoreDifference = submission?.champion.source === 'previous_day_winner'
     && submission.champion.scoreTenths !== null
     ? submission.champion.scoreTenths - submission.entry.scoreTenths
+    : null
+  const celebrationRank = submission?.entry.rank === 1
+    || submission?.entry.rank === 2
+    || submission?.entry.rank === 3
+    ? submission.entry.rank
     : null
 
   return (
@@ -81,6 +122,33 @@ export const RankingCard = ({ context, service, measurement }: RankingCardProps)
             <strong>あなたの結果は全国で何位？</strong>
             <span>匿名・任意参加。参加するとNet Speed Scoreと今日の順位を確認できます。</span>
           </div>
+          {isOverviewLoading && (
+            <div className="ranking-card__leader-target ranking-card__leader-target--loading">
+              <span className="ranking-card__leader-label">現在の1位を確認中…</span>
+            </div>
+          )}
+          {!isOverviewLoading && overview && (
+            <div className="ranking-card__leader-target">
+              {overview.top3[0] ? (
+                <>
+                  <span className="ranking-card__leader-label">現在の1位（取得時点）</span>
+                  <strong className="ranking-card__leader-score">
+                    <span>NET SPEED SCORE</span>
+                    {formatScore(overview.top3[0].scoreTenths)}
+                  </strong>
+                  <span className="ranking-card__leader-runs">
+                    {overview.totalRuns.toLocaleString('ja-JP')}出走のトップ
+                  </span>
+                </>
+              ) : (
+                <>
+                  <span className="ranking-card__leader-label">現在の1位</span>
+                  <strong className="ranking-card__leader-score">まだありません</strong>
+                  <span className="ranking-card__leader-runs">今日最初の1位を狙えます。</span>
+                </>
+              )}
+            </div>
+          )}
           <button className="secondary-button ranking-card__submit ranking-card__submit--attention" type="button" onClick={() => void submit()}>
             全国ランキングに参加して順位を見る
           </button>
@@ -111,6 +179,19 @@ export const RankingCard = ({ context, service, measurement }: RankingCardProps)
 
       {state === 'success' && submission && (
         <div className="ranking-card__success">
+          {celebrationRank !== null && (
+            <div
+              className={`ranking-card__celebration ranking-card__celebration--rank-${celebrationRank}`}
+              role="status"
+              aria-live="polite"
+            >
+              <span>CONGRATULATIONS</span>
+              <strong>
+                現在、本日の全国{submission.entry.tieCount > 1 ? ' 同率' : ''}{celebrationRank}位！
+              </strong>
+              <p>TOP 3入りです。ランキングは出走ごとに更新されます。</p>
+            </div>
+          )}
           <div className="ranking-card__result">
             <span>NET SPEED SCORE</span>
             <strong>{formatScore(submission.entry.scoreTenths)}</strong>

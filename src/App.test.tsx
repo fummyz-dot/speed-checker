@@ -104,6 +104,16 @@ describe('App', () => {
           downloadMbps: 534.8, uploadMbps: 327.2, qualifyingRuns: 2847,
         },
       }),
+      getOverview: vi.fn().mockResolvedValue({
+        ok: true,
+        rankingDay: '2026-08-28',
+        totalRuns: 12,
+        top3: [
+          { rank: 1, scoreTenths: 8503 },
+          { rank: 2, scoreTenths: 7594 },
+          { rank: 3, scoreTenths: 7110 },
+        ],
+      }),
       submitMeasurement: vi.fn(),
     })
     const start = vi.fn()

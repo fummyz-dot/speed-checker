@@ -34,8 +34,23 @@ const successfulSubmission: RankingSubmissionResult = {
   champion,
 }
 
-const service = (submitMeasurement = vi.fn().mockResolvedValue(successfulSubmission)): RankingService => ({
+const overview = {
+  ok: true as const,
+  rankingDay: '2026-08-28',
+  totalRuns: 12,
+  top3: [
+    { rank: 1, scoreTenths: 8503 },
+    { rank: 2, scoreTenths: 7594 },
+    { rank: 3, scoreTenths: 7110 },
+  ],
+}
+
+const service = (
+  submitMeasurement = vi.fn().mockResolvedValue(successfulSubmission),
+  getOverview = vi.fn().mockResolvedValue(overview),
+): RankingService => ({
   getContext: vi.fn(),
+  getOverview,
   submitMeasurement,
 })
 
@@ -55,6 +70,31 @@ describe('RankingCard', () => {
     expect(screen.getByRole('button', { name: '全国ランキングに参加して順位を見る' })).toBeEnabled()
     expect(screen.getByText(/一つの指標だけが突出していても高得点になりにくい/)).toBeVisible()
     expect(document.body.textContent).not.toMatch(/log\(|係数|Sref|Ping\/Jitter補正式/)
+  })
+
+  it('shows the current leader before ranking participation', async () => {
+    render(<RankingCard context={eligibleContext} service={service()} measurement={measurement} />)
+
+    expect(await screen.findByText('現在の1位（取得時点）')).toBeVisible()
+    expect(screen.getByText('850.3')).toBeVisible()
+    expect(screen.getByText('12出走のトップ')).toBeVisible()
+  })
+
+  it('shows that the current ranking has no leader yet', async () => {
+    const emptyOverview = { ...overview, totalRuns: 0, top3: [] }
+    render(<RankingCard context={eligibleContext} service={service(undefined, vi.fn().mockResolvedValue(emptyOverview))} measurement={measurement} />)
+
+    expect(await screen.findByText('まだありません')).toBeVisible()
+    expect(screen.getByText('今日最初の1位を狙えます。')).toBeVisible()
+  })
+
+  it('keeps participation enabled when the overview cannot be loaded', async () => {
+    render(<RankingCard context={eligibleContext} service={service(undefined, vi.fn().mockRejectedValue(new Error('unavailable')))} measurement={measurement} />)
+
+    await waitFor(() => expect(screen.queryByText('現在の1位を確認中…')).not.toBeInTheDocument())
+    expect(screen.getByRole('button', { name: '全国ランキングに参加して順位を見る' })).toBeEnabled()
+    expect(screen.queryByText('ランキングを利用できませんでした。測定結果には影響ありません。')).not.toBeInTheDocument()
+    expect(requestRankingTurnstileToken).not.toHaveBeenCalled()
   })
 
   it('renders the integer-tenths success contract, tie ranks, top percentage, and top three', async () => {
@@ -113,6 +153,38 @@ describe('RankingCard', () => {
     expect(await screen.findByText('同率128位')).toBeVisible()
     expect(screen.queryByText(/上位[\d.]+%/)).not.toBeInTheDocument()
     expect(screen.queryByLabelText('無敗の三冠馬との比較')).not.toBeInTheDocument()
+  })
+
+  it.each([
+    [1, 1, '現在、本日の全国1位！', 'ranking-card__celebration--rank-1'],
+    [2, 1, '現在、本日の全国2位！', 'ranking-card__celebration--rank-2'],
+    [3, 2, '現在、本日の全国 同率3位！', 'ranking-card__celebration--rank-3'],
+  ])('celebrates a current rank %i finish', async (rank, tieCount, message, className) => {
+    const top3Submission = {
+      ...successfulSubmission,
+      entry: { ...successfulSubmission.entry, rank, tieCount },
+    }
+    render(<RankingCard context={eligibleContext} service={service(vi.fn().mockResolvedValue(top3Submission))} measurement={measurement} />)
+    fireEvent.click(screen.getByRole('button', { name: '全国ランキングに参加して順位を見る' }))
+
+    const celebration = await screen.findByRole('status')
+    expect(celebration).toHaveClass(className)
+    expect(celebration).toHaveTextContent('CONGRATULATIONS')
+    expect(celebration).toHaveTextContent(message)
+    expect(celebration).toHaveTextContent('TOP 3入りです。ランキングは出走ごとに更新されます。')
+  })
+
+  it('does not celebrate a rank below the top three', async () => {
+    const fourthPlaceSubmission = {
+      ...successfulSubmission,
+      entry: { ...successfulSubmission.entry, rank: 4 },
+    }
+    render(<RankingCard context={eligibleContext} service={service(vi.fn().mockResolvedValue(fourthPlaceSubmission))} measurement={measurement} />)
+    fireEvent.click(screen.getByRole('button', { name: '全国ランキングに参加して順位を見る' }))
+
+    expect(await screen.findByText('4位')).toBeVisible()
+    expect(screen.queryByText('CONGRATULATIONS')).not.toBeInTheDocument()
+    expect(screen.queryByRole('status')).not.toBeInTheDocument()
   })
 
   it('keeps ranking optional for a non-JP context', () => {

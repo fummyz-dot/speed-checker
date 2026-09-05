@@ -1,8 +1,14 @@
 import type { SpeedMeasurementResult } from '../../types/measurement'
 import type { RaceChampionReference } from '../../types/raceChampion'
-import type { RankingContext, RankingService, RankingSubmissionResult } from './types'
+import type {
+  RankingContext,
+  RankingOverviewPreview,
+  RankingService,
+  RankingSubmissionResult,
+} from './types'
 
 const CONTEXT_TIMEOUT_MS = 1000
+const OVERVIEW_TIMEOUT_MS = 1500
 const SUBMISSION_TIMEOUT_MS = 8000
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
@@ -10,6 +16,12 @@ const isRecord = (value: unknown): value is Record<string, unknown> =>
 
 const isFiniteNumber = (value: unknown): value is number =>
   typeof value === 'number' && Number.isFinite(value)
+
+const isNonNegativeSafeInteger = (value: unknown): value is number =>
+  Number.isSafeInteger(value) && (value as number) >= 0
+
+const isPositiveSafeInteger = (value: unknown): value is number =>
+  Number.isSafeInteger(value) && (value as number) > 0
 
 const isNullableString = (value: unknown): value is string | null =>
   typeof value === 'string' || value === null
@@ -60,6 +72,30 @@ const parseContext = (value: unknown): RankingContext => {
       ? { unavailableReason: 'country_not_eligible' as const }
       : {}),
     champion,
+  }
+}
+
+const parseOverview = (value: unknown): RankingOverviewPreview => {
+  if (!isRecord(value)
+    || value.ok !== true
+    || typeof value.rankingDay !== 'string'
+    || !isNonNegativeSafeInteger(value.totalRuns)
+    || !Array.isArray(value.top3)
+    || value.top3.length > 3
+    || !value.top3.every((entry) => isRecord(entry)
+      && isPositiveSafeInteger(entry.rank)
+      && isNonNegativeSafeInteger(entry.scoreTenths))) {
+    throw new Error('Invalid ranking overview response')
+  }
+
+  return {
+    ok: true,
+    rankingDay: value.rankingDay,
+    totalRuns: value.totalRuns,
+    top3: value.top3.map((entry) => ({
+      rank: (entry as Record<string, unknown>).rank as number,
+      scoreTenths: (entry as Record<string, unknown>).scoreTenths as number,
+    })),
   }
 }
 
@@ -138,6 +174,16 @@ export const createRankingApiService = (): RankingService => {
       const nextContext = parseContext(response)
       context = nextContext
       return nextContext
+    },
+
+    async getOverview() {
+      const response = await fetchJson('/api/ranking/overview', {
+        method: 'GET',
+        headers: { Accept: 'application/json' },
+        credentials: 'omit',
+        cache: 'no-store',
+      }, OVERVIEW_TIMEOUT_MS)
+      return parseOverview(response)
     },
 
     async submitMeasurement(measurement: SpeedMeasurementResult, turnstileToken: string) {
