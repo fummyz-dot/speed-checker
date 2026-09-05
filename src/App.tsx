@@ -223,18 +223,20 @@ function App() {
       <main>
         <section className="hero" aria-labelledby="page-title">
           <div
-            className="hero__intro"
+            className={`hero__intro${rankingEnabled ? ' hero__intro--with-ranking' : ''}`}
             data-race-focus-background
             aria-hidden={isRaceFocused || undefined}
             inert={isRaceFocused}
           >
-            <div className="hero__eyebrow">YOUR CONNECTION</div>
-            <h1 id="page-title">インターネット速度を、シンプルに。</h1>
-            <p className="hero__lead">
-              現在の回線品質をCloudflareの
-              <br className="hero__lead-mobile-break" />
-              エッジネットワークで測定します。
-            </p>
+            <div className="hero__intro-copy">
+              <div className="hero__eyebrow">YOUR CONNECTION</div>
+              <h1 id="page-title">インターネット速度を、シンプルに。</h1>
+              <p className="hero__lead">
+                現在の回線品質をCloudflareの
+                <br className="hero__lead-mobile-break" />
+                エッジネットワークで測定します。
+              </p>
+            </div>
             {rankingEnabled && (
               <div className="hero-ranking-promo">
                 <span className="hero-ranking-promo__eyebrow">RANKING</span>

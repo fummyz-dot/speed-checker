@@ -130,7 +130,9 @@ describe('App', () => {
     const { rerender } = render(<App />)
     expect(screen.getByText('全国ランキング開催中！')).toBeVisible()
     expect(screen.getByText('あなたの回線は今日何位？ 測って確かめよう。')).toBeVisible()
-    expect(document.querySelector('.hero-ranking-promo')).toBeInTheDocument()
+    expect(document.querySelector('.hero__intro--with-ranking')).toBeInTheDocument()
+    expect(document.querySelector('.hero__intro-copy')).toBeInTheDocument()
+    expect(document.querySelectorAll('.hero-ranking-promo')).toHaveLength(1)
     expect(screen.queryByRole('heading', { name: '本日の全国回線品質ランキング' })).not.toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: '測定開始' }))
 
@@ -179,6 +181,8 @@ describe('App', () => {
 
     expect(createRankingApiService).not.toHaveBeenCalled()
     expect(document.getElementById('ranking-results')).toBeNull()
+    expect(document.querySelector('.hero__intro--with-ranking')).not.toBeInTheDocument()
+    expect(document.querySelector('.hero-ranking-promo')).not.toBeInTheDocument()
     expect(screen.queryByText('全国ランキング開催中！')).not.toBeInTheDocument()
   })
 
