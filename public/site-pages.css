@@ -451,7 +451,7 @@ dd {
   .site-pages__article dd + dt {
     margin-top: 14px;
   }
-  
+
   /* 比較表は無理に画面幅へ縮めない */
   .site-pages__table {
     min-width: 520px;
