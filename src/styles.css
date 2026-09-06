@@ -291,6 +291,16 @@ a:focus-visible {
   line-height: 1.45;
 }
 
+@media (min-width: 761px) {
+  .connection-info__edge-rtt {
+    max-width: none;
+  }
+
+  .connection-info__edge-rtt small {
+    white-space: nowrap;
+  }
+}
+
 .connection-info__note {
   display: none;
 }
@@ -3359,6 +3369,23 @@ a:focus-visible {
   }
 }
 
+@media (max-width: 390px) {
+  .hero-ranking-promo {
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .hero-ranking-promo__copy {
+    width: 100%;
+    text-align: center;
+  }
+
+  .hero-ranking-promo__copy span {
+    text-wrap: balance;
+  }
+}
+
 @media (max-width: 760px) {
   .horse-visualization--focused {
     padding:
@@ -3555,6 +3582,10 @@ a:focus-visible {
     gap: 2px;
   }
 
+  .hero-ranking-promo__copy span {
+    text-wrap: pretty;
+  }
+
   .connection-info {
     min-height: 190px;
     padding: 18px;
@@ -3571,7 +3602,14 @@ a:focus-visible {
   }
 
   .connection-info__details {
-    gap: 8px 14px;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px 14px;
+  }
+
+  .connection-info__edge-rtt {
+    grid-column: 1 / -1;
+    max-width: none;
   }
 
   .connection-info__error {
@@ -4196,6 +4234,10 @@ a:focus-visible {
 }
 
 @media (max-width: 460px) {
+  .section-heading p {
+    text-wrap: pretty;
+  }
+
   .ranking-card__heading {
     align-items: flex-start;
     flex-direction: column;
