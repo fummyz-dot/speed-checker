@@ -3369,7 +3369,7 @@ a:focus-visible {
   }
 }
 
-@media (max-width: 390px) {
+@media (max-width: 430px) {
   .hero-ranking-promo {
     flex-direction: column;
     align-items: center;
@@ -3379,10 +3379,6 @@ a:focus-visible {
   .hero-ranking-promo__copy {
     width: 100%;
     text-align: center;
-  }
-
-  .hero-ranking-promo__copy span {
-    text-wrap: balance;
   }
 }
 
