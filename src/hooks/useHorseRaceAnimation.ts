@@ -23,7 +23,6 @@ export type HorseFinishState = HorseTimelineFinishState
 
 interface UseHorseRaceAnimationOptions {
   phase: TestPhase
-  downloadMbps: number | null
   result: SpeedMeasurementResult | null
   championReference?: RaceChampionReference
 }
@@ -69,7 +68,6 @@ const isDocumentHidden = (): boolean =>
 
 export const useHorseRaceAnimation = ({
   phase,
-  downloadMbps,
   result,
   championReference = DEFAULT_RACE_CHAMPION_REFERENCE,
 }: UseHorseRaceAnimationOptions) => {
@@ -239,7 +237,10 @@ export const useHorseRaceAnimation = ({
     } else if (phase === 'download' && previousPhase !== 'download') {
       resetRace('warmingUp')
       warmupStartedAtRef.current = Date.now()
-    } else if (phase === 'upload' && previousPhase !== 'upload') {
+    } else if (phase === 'upload' && previousPhase !== 'upload' && previousPhase !== 'download') {
+      resetRace('warmingUp')
+      warmupStartedAtRef.current = Date.now()
+    } else if (phase === 'complete' && result) {
       const warmupElapsed = warmupStartedAtRef.current === null
         ? 0
         : Date.now() - warmupStartedAtRef.current
@@ -247,10 +248,8 @@ export const useHorseRaceAnimation = ({
         WARMUP_MAX_PROGRESS,
         (warmupElapsed / WARMUP_DURATION_MS) * WARMUP_MAX_PROGRESS,
       )
-      startRace(downloadMbps ?? 0, warmupProgress)
-    } else if (phase === 'complete' && result) {
       if (!timelineRef.current && !pendingRaceStartRef.current) {
-        startRace(result.downloadMbps)
+        startRace(result.downloadMbps, warmupProgress)
       } else if (timelineRef.current && timelineRef.current.resultAvailableAtMs === null) {
         timelineRef.current.resultAvailableAtMs = Date.now()
         synchronizeTimeline()
@@ -261,7 +260,7 @@ export const useHorseRaceAnimation = ({
     }
 
     previousPhaseRef.current = phase
-  }, [downloadMbps, phase, resetRace, result, startRace, synchronizeTimeline])
+  }, [phase, resetRace, result, startRace, synchronizeTimeline])
 
   useEffect(() => {
     const handleVisibilityChange = () => {

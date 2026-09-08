@@ -58,7 +58,7 @@ const getHelperText = (state: HorseRaceState, hasUploadResult: boolean): string 
   switch (state) {
     case 'idle': return '測定開始を待っています'
     case 'measuringDownload': return 'レイテンシを測定中…'
-    case 'warmingUp': return 'ダウンロード測定中・ウォームアップ走行中…'
+    case 'warmingUp': return '測定中・ウォームアップ走行中…'
     case 'running': return hasUploadResult ? 'レース進行中' : 'レース進行中・アップロード測定中…'
     case 'waitingForAllFinish': return '先着馬はゴールで待機中…'
     case 'transitionToFrontView': return 'ALL RUNNERS FINISHED'
@@ -96,7 +96,7 @@ export const HorseSpeedVisualization = ({
     groupJumpElapsedMs,
     raceSequence,
     replay,
-  } = useHorseRaceAnimation({ phase, downloadMbps, result, championReference })
+  } = useHorseRaceAnimation({ phase, result, championReference })
   const displayedDownload = result?.downloadMbps ?? confirmedDownloadMbps ?? downloadMbps
   const displayedUpload = result?.uploadMbps ?? uploadMbps
   const isLiveDownload = phase === 'download' && result === null && downloadMbps !== null

@@ -299,21 +299,28 @@ describe('HorseSpeedVisualization runner presentation', () => {
     ])
   })
 
-  it('download開始時に3頭が同じ速度でウォームアップし、最大15%の位置から本走へ移る', () => {
+  it('Upload中はsnapshot 170で本走せず、完了時にfinal 199で最大15%の位置から本走へ移る', () => {
+    const finalResult = { ...result, downloadMbps: 199 }
     const { container, rerender } = render(
       <HorseSpeedVisualization downloadMbps={null} uploadMbps={null} phase="idle" result={null} />,
     )
     const course = () => container.querySelector('.horse-course')
 
-    rerender(<HorseSpeedVisualization downloadMbps={40} uploadMbps={null} phase="download" result={null} />)
+    rerender(<HorseSpeedVisualization downloadMbps={170} uploadMbps={null} phase="download" result={null} />)
     expect(course()).toHaveAttribute('data-animation-state', 'warmingUp')
     expect(container.querySelectorAll('.race-runner--warming')).toHaveLength(3)
     expect(container.querySelectorAll('.race-runner--warming .horse-sprite--galloping')).toHaveLength(3)
 
     act(() => vi.advanceTimersByTime(WARMUP_DURATION_MS * 2))
 
-    rerender(<HorseSpeedVisualization downloadMbps={120} uploadMbps={null} phase="upload" result={null} />)
-    expect(course()).toHaveAttribute('data-animation-state', 'running')
+    rerender(<HorseSpeedVisualization downloadMbps={170} uploadMbps={80} phase="upload" result={null} />)
+    expect(course()).toHaveAttribute('data-animation-state', 'warmingUp')
+    expect(container.querySelectorAll('.race-runner--racing')).toHaveLength(0)
+    expect(course()).not.toHaveStyle({
+      '--user-duration': `${(getUserHorseRunDuration(170) * (1 - WARMUP_MAX_PROGRESS)).toFixed(2)}s`,
+    })
+
+    rerender(<HorseSpeedVisualization downloadMbps={170} uploadMbps={80} phase="complete" result={finalResult} />)
     startRace()
     expect(course()).toHaveAttribute('data-animation-state', 'running')
     expect(screen.queryByRole('link', { name: '詳しい測定結果を見る' })).not.toBeInTheDocument()
@@ -323,6 +330,11 @@ describe('HorseSpeedVisualization runner presentation', () => {
       .toBe(`${(WARMUP_MAX_PROGRESS * 100).toFixed(3)}%`)
     expect((course() as HTMLElement).style.getPropertyValue('--standard-duration'))
       .toBe(`${getReferenceHorseDurations().standard * (1 - WARMUP_MAX_PROGRESS)}s`)
+    expect((course() as HTMLElement).style.getPropertyValue('--user-duration'))
+      .toBe(`${(getUserHorseRunDuration(199) * (1 - WARMUP_MAX_PROGRESS)).toFixed(2)}s`)
+    expect((course() as HTMLElement).style.getPropertyValue('--user-duration'))
+      .not.toBe(`${(getUserHorseRunDuration(170) * (1 - WARMUP_MAX_PROGRESS)).toFixed(2)}s`)
+    expect(container.querySelector('[data-speed-metric="download"]')).toHaveTextContent('199 Mbps')
   })
 
   it('先着馬を待機させ、最後の馬がゴールしてから正面表示へ切り替えて3人同時ジャンプを行う', () => {
@@ -332,8 +344,9 @@ describe('HorseSpeedVisualization runner presentation', () => {
     const course = () => container.querySelector('.horse-course')
 
     rerender(<HorseSpeedVisualization downloadMbps={120} uploadMbps={null} phase="upload" result={null} />)
-    startRace()
+    expect(course()).toHaveAttribute('data-animation-state', 'warmingUp')
     rerender(<HorseSpeedVisualization downloadMbps={120} uploadMbps={80} phase="complete" result={result} />)
+    startRace()
     expect(course()).toHaveAttribute('data-animation-state', 'running')
     expect((course() as HTMLElement).style.getPropertyValue('--user-jump-height'))
       .toBe(`${getUserHorseJumpHeight(80).toFixed(0)}px`)
@@ -373,7 +386,7 @@ describe('HorseSpeedVisualization runner presentation', () => {
     expect(screen.getByRole('link', { name: '詳しい測定結果を見る' })).toHaveAttribute('href', '#measurement-results')
   })
 
-  it('全頭完走時にupload未完了なら待機し、確定後にフォーカスして同時ジャンプする', () => {
+  it('Uploadが長時間続いても本走せず、完了後にフォーカスして同時ジャンプする', () => {
     const fastResult = { ...result, downloadMbps: 1_000 }
     const { container, rerender } = render(
       <HorseSpeedVisualization downloadMbps={1_000} uploadMbps={null} phase="download" result={null} />,
@@ -381,18 +394,14 @@ describe('HorseSpeedVisualization runner presentation', () => {
     const course = () => container.querySelector('.horse-course')
 
     rerender(<HorseSpeedVisualization downloadMbps={1_000} uploadMbps={null} phase="upload" result={null} />)
-    startRace()
-    act(() => vi.advanceTimersByTime((getUserHorseRunDuration(1_000) * 1_000) + 2))
-    expect(course()).toHaveAttribute('data-animation-state', 'waitingForAllFinish')
-    expect(container.querySelector('[data-runner="user"]')).toHaveClass('race-runner--waiting')
-    expect(container.querySelector('[data-runner="user"] .horse-sprite')).toHaveClass('horse-sprite--static')
-
-    const remainingTime = (getReferenceHorseDurations().standard - getUserHorseRunDuration(1_000)) * 1_000
-    act(() => vi.advanceTimersByTime(remainingTime + 1))
-    expect(course()).toHaveAttribute('data-animation-state', 'waitingForAllFinish')
-    expect(container.querySelectorAll('[data-finished="true"]')).toHaveLength(3)
+    act(() => vi.advanceTimersByTime(60_000))
+    expect(course()).toHaveAttribute('data-animation-state', 'warmingUp')
+    expect(container.querySelectorAll('.race-runner--racing')).toHaveLength(0)
 
     rerender(<HorseSpeedVisualization downloadMbps={1_000} uploadMbps={80} phase="complete" result={fastResult} />)
+    startRace()
+    expect(course()).toHaveAttribute('data-animation-state', 'running')
+    act(() => vi.advanceTimersByTime(getReferenceHorseDurations().standard * (1 - WARMUP_MAX_PROGRESS) * 1_000))
     expect(course()).toHaveAttribute('data-animation-state', 'transitionToFrontView')
     act(() => vi.advanceTimersByTime(FRONT_VIEW_TRANSITION_DURATION_MS))
     expect(course()).toHaveAttribute('data-animation-state', 'groupJumpFrontView')
@@ -401,8 +410,9 @@ describe('HorseSpeedVisualization runner presentation', () => {
   })
 
   it('もう一度見るで3頭をidleへ戻してから測定済み値で再生する', () => {
+    const finalResult = { ...result, downloadMbps: 199 }
     const { container } = render(
-      <HorseSpeedVisualization downloadMbps={120} uploadMbps={80} phase="complete" result={result} />,
+      <HorseSpeedVisualization downloadMbps={170} uploadMbps={80} phase="complete" result={finalResult} />,
     )
     const course = () => container.querySelector('.horse-course')
 
@@ -426,6 +436,10 @@ describe('HorseSpeedVisualization runner presentation', () => {
     startRace()
     expect(course()).toHaveAttribute('data-animation-state', 'running')
     expect(container.querySelectorAll('.race-runner--racing')).toHaveLength(3)
+    expect((course() as HTMLElement).style.getPropertyValue('--user-duration'))
+      .toBe(`${getUserHorseRunDuration(199).toFixed(2)}s`)
+    expect((course() as HTMLElement).style.getPropertyValue('--user-duration'))
+      .not.toBe(`${getUserHorseRunDuration(170).toFixed(2)}s`)
   })
 
   it('visible復帰時はtimer発火を待たずwall-clock時点の馬位置とfinished状態へ追いつく', () => {

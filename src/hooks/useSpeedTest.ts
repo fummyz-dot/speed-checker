@@ -174,7 +174,8 @@ export const useSpeedTest = (): UseSpeedTestResult => {
           measurement.type === 'upload'
         ) {
           if (measurement.type === 'upload') {
-            // upload開始時点の確定済みdownload値を、レース開始と同じ描画で渡す。
+            // upload開始時点のdownload snapshotを測定中表示用に保持する。
+            // 完了表示とレース開始にはonFinishのcompletedResultを使用する。
             const nextMetrics = readMetrics(engine.results)
             setMetrics(nextMetrics)
             if (confirmedDownloadRef.current === null) {

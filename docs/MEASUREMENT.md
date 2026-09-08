@@ -66,11 +66,11 @@ The active engine is paused, partial metrics are discarded, and the run enters t
 
 ## Confirmed download value
 
-At the transition to upload, the current download result is captured as the confirmed download speed for race timing.
+At the transition to upload, the current download result may be captured as a provisional snapshot for the in-progress display.
 
-This allows the race to begin while upload measurement continues instead of waiting for the full test to complete.
+This snapshot is not the authoritative final value and does not start the main race. The main race begins only after `onFinish`, using `completedResult.downloadMbps` for the user horse duration.
 
-If necessary, completion logic provides a fallback confirmed value.
+Completion logic may still provide a snapshot fallback for display compatibility, but completed UI, race, replay, history, sharing, and ranking use the completed result.
 
 ## Live vs final speed formatting
 

@@ -241,3 +241,15 @@ The browser must never calculate Net Speed Score or contain its coefficients. It
 - Production requires `START RUN` after `READY` so Web Audio starts from an explicit user gesture. Audio failure must not block gameplay.
 - Net Speed Run v0.1.2 generates restrained BGM and accepted-jump sound effects with Web Audio only; no external audio asset or preference persistence is used.
 - Mounted jockey scenes show a connected waist, white breeches, bent knees, and dark navy boots without changing the existing intro/dismount timing.
+
+---
+
+## D-017 — Completed download result is the race authority
+
+**Status:** Accepted and implemented
+**Date:** 2026-09-08
+
+- The `onFinish` result is authoritative for the completed Download value.
+- Upload-start Download may remain as a provisional display snapshot, but it does not start or determine the main race.
+- The main race starts after completion and derives the user horse duration from `completedResult.downloadMbps`.
+- Replay uses the same completed Download value. Top display, race result, history, sharing, and ranking remain aligned to that completed result.

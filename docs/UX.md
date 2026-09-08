@@ -93,11 +93,12 @@ finished
 Behavioral intent:
 
 - download phase creates anticipation/warm-up;
-- when upload begins, confirmed download speed determines race pace;
+- upload continues the warm-up presentation without starting the main race;
+- after measurement completes, the final download result determines the user horse's race pace;
 - runners reach the goal based on their mapped durations;
 - after all finish, the camera/front-view transition occurs;
 - upload speed contributes to jump height;
-- completed results can replay without re-running the network measurement.
+- completed results replay using the same final download result without re-running the network measurement.
 - only after the race is finished, a user-initiated CTA links to the detailed measurement results; it must not auto-scroll.
 
 A horse implementation should preserve this lifecycle unless the design task explicitly revises it.
