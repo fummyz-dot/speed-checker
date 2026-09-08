@@ -61,7 +61,7 @@ describe('App', () => {
     vi.mocked(useConnectionInfo).mockReturnValue({ state: { status: 'loading' }, retry: vi.fn() })
     vi.mocked(useSpeedTest).mockReturnValue({
       metrics: EMPTY_METRICS, phase: 'idle', isRunning: false, error: null, completedResult: null,
-      confirmedDownloadMbps: null, start: vi.fn(),
+      start: vi.fn(),
     })
   })
 
@@ -129,11 +129,11 @@ describe('App', () => {
     const start = vi.fn()
     const completedResult = {
       id: 'ranking-measurement', measuredAt: '2026-08-28T12:00:00.000Z',
-      downloadMbps: 199, uploadMbps: 100, pingMs: 20, jitterMs: 5,
+      downloadMbps: 400, uploadMbps: 50, pingMs: 20, jitterMs: 5,
     }
     let speedTest: ReturnType<typeof useSpeedTest> = {
       metrics: EMPTY_METRICS, phase: 'idle', isRunning: false, error: null, completedResult: null,
-      confirmedDownloadMbps: null, start,
+      start,
     }
     vi.mocked(useSpeedTest).mockImplementation(() => speedTest)
 
@@ -154,7 +154,6 @@ describe('App', () => {
       ...speedTest,
       phase: 'complete',
       completedResult,
-      confirmedDownloadMbps: 170,
     }
     rerender(<App />)
     const rankingResults = document.getElementById('ranking-results')
@@ -193,7 +192,7 @@ describe('App', () => {
     }
     vi.mocked(useSpeedTest).mockReturnValue({
       metrics: EMPTY_METRICS, phase: 'complete', isRunning: false, error: null, completedResult,
-      confirmedDownloadMbps: completedResult.downloadMbps, start: vi.fn(),
+      start: vi.fn(),
     })
 
     render(<App />)
@@ -211,7 +210,7 @@ describe('App', () => {
     const start = vi.fn()
     vi.mocked(useSpeedTest).mockReturnValue({
       metrics: EMPTY_METRICS, phase: 'idle', isRunning: false, error: null, completedResult: null,
-      confirmedDownloadMbps: null, start,
+      start,
     })
 
     render(<App />)
@@ -265,7 +264,7 @@ describe('App', () => {
     installMatchMedia(true)
     vi.mocked(useSpeedTest).mockReturnValue({
       metrics: EMPTY_METRICS, phase: 'idle', isRunning: false, error: null, completedResult: null,
-      confirmedDownloadMbps: null, start,
+      start,
     })
 
     render(<App />)
@@ -292,7 +291,7 @@ describe('App', () => {
     document.body.append(staticContent)
     vi.mocked(useSpeedTest).mockReturnValue({
       metrics: EMPTY_METRICS, phase: 'idle', isRunning: false, error: null, completedResult: null,
-      confirmedDownloadMbps: null, start,
+      start,
     })
 
     render(<App />)
@@ -347,7 +346,7 @@ describe('App', () => {
     }]))
     vi.mocked(useSpeedTest).mockReturnValue({
       metrics: EMPTY_METRICS, phase: 'idle', isRunning: false, error: null, completedResult: null,
-      confirmedDownloadMbps: null, start,
+      start,
     })
 
     render(<App />)
@@ -362,7 +361,7 @@ describe('App', () => {
     const start = vi.fn()
     vi.mocked(useSpeedTest).mockReturnValue({
       metrics: EMPTY_METRICS, phase: 'idle', isRunning: false, error: null, completedResult: null,
-      confirmedDownloadMbps: null, start,
+      start,
     })
 
     render(<App />)
@@ -379,7 +378,7 @@ describe('App', () => {
     const start = vi.fn()
     let speedTest: ReturnType<typeof useSpeedTest> = {
       metrics: EMPTY_METRICS, phase: 'idle', isRunning: false, error: null, completedResult: null,
-      confirmedDownloadMbps: null, start,
+      start,
     }
     vi.mocked(useSpeedTest).mockImplementation(() => speedTest)
 
@@ -409,7 +408,7 @@ describe('App', () => {
     const start = vi.fn()
     let speedTest: ReturnType<typeof useSpeedTest> = {
       metrics: EMPTY_METRICS, phase: 'idle', isRunning: false, error: null, completedResult: null,
-      confirmedDownloadMbps: null, start,
+      start,
     }
     vi.mocked(useSpeedTest).mockImplementation(() => speedTest)
 
@@ -434,7 +433,7 @@ describe('App', () => {
     installMatchMedia(true)
     let speedTest: ReturnType<typeof useSpeedTest> = {
       metrics: EMPTY_METRICS, phase: 'idle', isRunning: false, error: null, completedResult: null,
-      confirmedDownloadMbps: null, start,
+      start,
     }
     vi.mocked(useSpeedTest).mockImplementation(() => speedTest)
 
@@ -456,7 +455,7 @@ describe('App', () => {
     const start = vi.fn()
     let speedTest: ReturnType<typeof useSpeedTest> = {
       metrics: EMPTY_METRICS, phase: 'idle', isRunning: false, error: null, completedResult: null,
-      confirmedDownloadMbps: null, start,
+      start,
     }
     vi.mocked(useSpeedTest).mockImplementation(() => speedTest)
 
@@ -486,7 +485,7 @@ describe('App', () => {
   it('測定中は測定条件を変更できない', () => {
     vi.mocked(useSpeedTest).mockReturnValue({
       metrics: EMPTY_METRICS, phase: 'download', isRunning: true, error: null, completedResult: null,
-      confirmedDownloadMbps: null, start: vi.fn(),
+      start: vi.fn(),
     })
 
     render(<App />)
@@ -496,7 +495,7 @@ describe('App', () => {
   it('測定エラーをalertで表示する', () => {
     vi.mocked(useSpeedTest).mockReturnValue({
       metrics: EMPTY_METRICS, phase: 'error', isRunning: false, error: '測定に失敗しました', completedResult: null,
-      confirmedDownloadMbps: null, start: vi.fn(),
+      start: vi.fn(),
     })
     render(<App />)
     expect(screen.getByRole('alert')).toHaveTextContent('測定に失敗しました')
@@ -504,69 +503,72 @@ describe('App', () => {
 
   it('測定中の左カードは静的な未確定表示にし、レース下の下りだけをライブ表示する', () => {
     vi.mocked(useSpeedTest).mockReturnValue({
-      metrics: { ...EMPTY_METRICS, download: 250_812_394 },
+      metrics: { ...EMPTY_METRICS, download: 300_000_000 },
       phase: 'download',
       isRunning: true,
       error: null,
       completedResult: null,
-      confirmedDownloadMbps: null,
       start: vi.fn(),
     })
 
     const { container } = render(<App />)
     expect(container.querySelector('.speed-display__reading')).not.toHaveClass('speed-display__reading--live')
     expect(container.querySelector('.speed-display__reading strong')).toHaveTextContent('—')
-    expect(container.querySelector('[data-speed-metric="download"]')).toHaveTextContent('250.812394 Mbps')
+    expect(container.querySelector('[data-speed-metric="download"]')).toHaveTextContent('300.000000 Mbps')
     expect(container.querySelector('[data-speed-metric="download"]')).toHaveAttribute('data-live', 'true')
     expect(container.querySelector('[data-speed-metric="upload"]')).toHaveAttribute('data-live', 'false')
-    expect(container).not.toHaveTextContent('250812394.0 Mbps')
+    expect(container).not.toHaveTextContent('300000000.0 Mbps')
   })
 
-  it('upload測定中は左カードと下りを確定値で固定し、レース下の上りだけをライブ表示する', () => {
+  it('upload測定中は未確定の下りを数値表示せず、上りだけをライブ表示する', () => {
     vi.mocked(useSpeedTest).mockReturnValue({
-      metrics: { ...EMPTY_METRICS, download: 250_812_394, upload: 80_450_123 },
+      metrics: { ...EMPTY_METRICS, download: 300_000_000, upload: 50_000_000 },
       phase: 'upload',
       isRunning: true,
       error: null,
       completedResult: null,
-      confirmedDownloadMbps: 250.812394,
       start: vi.fn(),
     })
 
     const { container } = render(<App />)
-    expect(container.querySelector('.speed-display__reading strong')).toHaveTextContent('251')
-    expect(container.querySelector('[data-speed-metric="download"]')).toHaveTextContent('251 Mbps')
+    expect(container.querySelector('.speed-display__reading strong')).toHaveTextContent('—')
+    expect(container.querySelector('[data-speed-metric="download"]')).toHaveTextContent('— Mbps')
+    expect(container).not.toHaveTextContent('300 Mbps')
     expect(container.querySelector('[data-speed-metric="download"]')).toHaveAttribute('data-live', 'false')
-    expect(container.querySelector('[data-speed-metric="upload"]')).toHaveTextContent('80.450123 Mbps')
+    expect(container.querySelector('[data-speed-metric="upload"]')).toHaveTextContent('50.000000 Mbps')
     expect(container.querySelector('[data-speed-metric="upload"]')).toHaveAttribute('data-live', 'true')
+    expect(container.querySelector('.horse-course')).toHaveAttribute('data-animation-state', 'warmingUp')
+    expect(container.querySelectorAll('.race-runner--racing')).toHaveLength(0)
   })
 
-  it('Upload開始時と最終値が異なる場合、完了表示・レース・履歴を最終値へ収束させる', async () => {
+  it('Upload開始時の300を確定表示せず、完了表示・レース・履歴をfinal 400に統一する', async () => {
     const completedResult = {
       id: 'measurement-1',
       measuredAt: '2026-08-05T00:00:00.000Z',
-      downloadMbps: 199,
-      uploadMbps: 80.45,
+      downloadMbps: 400,
+      uploadMbps: 50,
       pingMs: 12,
     }
     let speedTest: ReturnType<typeof useSpeedTest> = {
-      metrics: { ...EMPTY_METRICS, download: 170_000_000, upload: 80_450_000 },
+      metrics: { ...EMPTY_METRICS, download: 300_000_000, upload: 50_000_000 },
       phase: 'upload',
       isRunning: true,
       error: null,
       completedResult: null,
-      confirmedDownloadMbps: 170,
       start: vi.fn(),
     }
     vi.mocked(useSpeedTest).mockImplementation(() => speedTest)
 
     const { container, rerender } = render(<App />)
-    expect(container.querySelector('.speed-display__reading strong')).toHaveTextContent('170')
-    expect(container.querySelector('[data-speed-metric="download"]')).toHaveTextContent('170 Mbps')
+    expect(container.querySelector('.speed-display__reading strong')).toHaveTextContent('—')
+    expect(container.querySelector('[data-speed-metric="download"]')).toHaveTextContent('— Mbps')
+    expect(container).not.toHaveTextContent('300 Mbps')
+    expect(container.querySelector('.horse-course')).toHaveAttribute('data-animation-state', 'warmingUp')
+    expect(container.querySelectorAll('.race-runner--racing')).toHaveLength(0)
 
     speedTest = {
       ...speedTest,
-      metrics: { ...speedTest.metrics, download: 199_000_000 },
+      metrics: { ...speedTest.metrics, download: 400_000_000 },
       phase: 'complete',
       isRunning: false,
       completedResult,
@@ -574,12 +576,12 @@ describe('App', () => {
     rerender(<App />)
 
     expect(container.querySelector('.speed-display__reading')).not.toHaveClass('speed-display__reading--live')
-    expect(container.querySelector('.speed-display__reading strong')).toHaveTextContent('199')
-    expect(container.querySelector('.speed-display__reading strong')).not.toHaveTextContent('170')
-    expect(container.querySelector('.horse-metrics')).toHaveTextContent('下り199 Mbps')
+    expect(container.querySelector('.speed-display__reading strong')).toHaveTextContent('400')
+    expect(container.querySelector('.speed-display__reading strong')).not.toHaveTextContent('300')
+    expect(container.querySelector('.horse-metrics')).toHaveTextContent('下り400 Mbps')
     await waitFor(() => {
       const history = JSON.parse(window.localStorage.getItem(MEASUREMENT_STORAGE_KEY) ?? '[]') as Array<{ downloadMbps: number }>
-      expect(history[0]?.downloadMbps).toBe(199)
+      expect(history[0]?.downloadMbps).toBe(400)
     })
   })
 })

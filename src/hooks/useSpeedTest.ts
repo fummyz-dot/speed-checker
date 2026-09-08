@@ -14,7 +14,6 @@ import {
   normalizeConditionLabel,
   toValidMetric,
 } from '../lib/measurementValidation'
-import { bandwidthBitsToMbps } from '../lib/speedValue'
 
 const measurements: MeasurementConfig[] = [
   { type: 'latency', numPackets: 20 },
@@ -69,7 +68,6 @@ export interface UseSpeedTestResult {
   isRunning: boolean
   error: string | null
   completedResult: SpeedMeasurementResult | null
-  confirmedDownloadMbps: number | null
   start: (options?: StartSpeedTestOptions) => void
 }
 
@@ -83,14 +81,12 @@ export const useSpeedTest = (): UseSpeedTestResult => {
   const activeRunIdRef = useRef<number | null>(null)
   const mountedRef = useRef(true)
   const wakeLockRef = useRef<WakeLockSentinelLike | null>(null)
-  const confirmedDownloadRef = useRef<number | null>(null)
   const runConditionLabelRef = useRef<string | null>(null)
   const [metrics, setMetrics] = useState<SpeedTestMetrics>(EMPTY_METRICS)
   const [phase, setPhase] = useState<TestPhase>('idle')
   const [isRunning, setIsRunning] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [completedResult, setCompletedResult] = useState<SpeedMeasurementResult | null>(null)
-  const [confirmedDownloadMbps, setConfirmedDownloadMbps] = useState<number | null>(null)
 
   const releaseWakeLock = useCallback(() => {
     const wakeLock = wakeLockRef.current
@@ -135,11 +131,9 @@ export const useSpeedTest = (): UseSpeedTestResult => {
     engineRef.current?.pause()
     engineRef.current = null
     releaseWakeLock()
-    confirmedDownloadRef.current = null
     runConditionLabelRef.current = null
     setMetrics(EMPTY_METRICS)
     setCompletedResult(null)
-    setConfirmedDownloadMbps(null)
     setError(VISIBILITY_INTERRUPTION_ERROR)
     setPhase('error')
     setIsRunning(false)
@@ -153,8 +147,6 @@ export const useSpeedTest = (): UseSpeedTestResult => {
     runConditionLabelRef.current = normalizeConditionLabel(options?.conditionLabel)
     setMetrics(EMPTY_METRICS)
     setCompletedResult(null)
-    confirmedDownloadRef.current = null
-    setConfirmedDownloadMbps(null)
     setError(null)
     setPhase('latency')
     setIsRunning(true)
@@ -174,14 +166,7 @@ export const useSpeedTest = (): UseSpeedTestResult => {
           measurement.type === 'upload'
         ) {
           if (measurement.type === 'upload') {
-            // upload開始時点のdownload snapshotを測定中表示用に保持する。
-            // 完了表示とレース開始にはonFinishのcompletedResultを使用する。
-            const nextMetrics = readMetrics(engine.results)
-            setMetrics(nextMetrics)
-            if (confirmedDownloadRef.current === null) {
-              confirmedDownloadRef.current = bandwidthBitsToMbps(nextMetrics.download)
-              setConfirmedDownloadMbps(confirmedDownloadRef.current)
-            }
+            setMetrics(readMetrics(engine.results))
           }
           setPhase(measurement.type)
         }
@@ -200,10 +185,6 @@ export const useSpeedTest = (): UseSpeedTestResult => {
         })
         setMetrics(finalMetrics)
         setCompletedResult(measurement)
-        if (measurement && confirmedDownloadRef.current === null) {
-          confirmedDownloadRef.current = measurement.downloadMbps
-          setConfirmedDownloadMbps(measurement.downloadMbps)
-        }
         setPhase(measurement ? 'complete' : 'error')
         setError(measurement ? null : '速度の測定値を取得できませんでした。もう一度お試しください。')
         setIsRunning(false)
@@ -263,7 +244,6 @@ export const useSpeedTest = (): UseSpeedTestResult => {
     isRunning,
     error,
     completedResult,
-    confirmedDownloadMbps,
     start,
   }
 }

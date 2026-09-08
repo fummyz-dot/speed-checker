@@ -64,13 +64,11 @@ During an active `latency`, `download`, or `upload` phase, the run is invalidate
 
 The active engine is paused, partial metrics are discarded, and the run enters the normal error state. A late completion callback from that invalidated run is ignored. It never creates a completed result or browser-local history entry. A page becoming hidden after `complete` does not invalidate the already completed measurement.
 
-## Confirmed download value
+## Final download value
 
-At the transition to upload, the current download result may be captured as a provisional snapshot for the in-progress display.
+Before `onFinish`, Download values are provisional. They may appear only as the live speedometer during the download phase and are not presented as a completed value during upload.
 
-This snapshot is not the authoritative final value and does not start the main race. The main race begins only after `onFinish`, using `completedResult.downloadMbps` for the user horse duration.
-
-Completion logic may still provide a snapshot fallback for display compatibility, but completed UI, race, replay, history, sharing, and ranking use the completed result.
+The single authoritative final Download value is `completedResult.downloadMbps`. The main race begins only after `onFinish`, and completed UI, race, replay, history, sharing, and ranking all use that completed result.
 
 ## Live vs final speed formatting
 

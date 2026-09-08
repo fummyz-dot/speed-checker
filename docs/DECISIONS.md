@@ -250,6 +250,6 @@ The browser must never calculate Net Speed Score or contain its coefficients. It
 **Date:** 2026-09-08
 
 - The `onFinish` result is authoritative for the completed Download value.
-- Upload-start Download may remain as a provisional display snapshot, but it does not start or determine the main race.
+- Pre-finish Download values are provisional and appear only as live measurement during the download phase; upload does not show them as a fixed completed value.
 - The main race starts after completion and derives the user horse duration from `completedResult.downloadMbps`.
 - Replay uses the same completed Download value. Top display, race result, history, sharing, and ranking remain aligned to that completed result.

@@ -22,7 +22,6 @@ import { HorseSprite } from './HorseSprite'
 interface HorseSpeedVisualizationProps {
   downloadMbps: number | null
   uploadMbps: number | null
-  confirmedDownloadMbps?: number | null
   phase: TestPhase
   result: SpeedMeasurementResult | null
   championReference?: RaceChampionReference
@@ -70,7 +69,6 @@ const getHelperText = (state: HorseRaceState, hasUploadResult: boolean): string 
 export const HorseSpeedVisualization = ({
   downloadMbps,
   uploadMbps,
-  confirmedDownloadMbps = null,
   phase,
   result,
   championReference = DEFAULT_RACE_CHAMPION_REFERENCE,
@@ -97,13 +95,17 @@ export const HorseSpeedVisualization = ({
     raceSequence,
     replay,
   } = useHorseRaceAnimation({ phase, result, championReference })
-  const displayedDownload = result?.downloadMbps ?? confirmedDownloadMbps ?? downloadMbps
   const displayedUpload = result?.uploadMbps ?? uploadMbps
   const isLiveDownload = phase === 'download' && result === null && downloadMbps !== null
   const isLiveUpload = phase === 'upload' && result === null && uploadMbps !== null
+  const displayedDownload = phase === 'complete' && result
+    ? result.downloadMbps
+    : isLiveDownload
+      ? downloadMbps
+      : null
   const animatedDownloadMbps = useLiveSpeedDisplay({
     actualMeasuredMbps: downloadMbps,
-    finalMeasuredMbps: result?.downloadMbps ?? confirmedDownloadMbps,
+    finalMeasuredMbps: result?.downloadMbps ?? null,
     isMeasuring: isLiveDownload,
   })
   const animatedUploadMbps = useLiveSpeedDisplay({

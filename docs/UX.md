@@ -93,7 +93,8 @@ finished
 Behavioral intent:
 
 - download phase creates anticipation/warm-up;
-- upload continues the warm-up presentation without starting the main race;
+- provisional Download is shown only as a live value during download, not as a completed value during upload;
+- upload continues the warm-up presentation without starting the main race or showing a fixed Download number;
 - after measurement completes, the final download result determines the user horse's race pace;
 - runners reach the goal based on their mapped durations;
 - after all finish, the camera/front-view transition occurs;

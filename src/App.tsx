@@ -36,7 +36,6 @@ function App() {
     isRunning,
     error,
     completedResult,
-    confirmedDownloadMbps,
     start,
   } = useSpeedTest()
   const rankingEnabled = isRankingEnabled()
@@ -57,7 +56,7 @@ function App() {
   const pendingRaceFocusExitRef = useRef<RaceFocusExitRequest | null>(null)
   const displayedDownloadMbps = phase === 'complete' && completedResult
     ? completedResult.downloadMbps
-    : confirmedDownloadMbps
+    : null
   const displayedDownload = formatFinalSpeedDisplay(displayedDownloadMbps)
   const hasStarted = phase !== 'idle'
   const buttonLabel = isPreparingContext
@@ -269,7 +268,6 @@ function App() {
             <HorseSpeedVisualization
               downloadMbps={bandwidthBitsToMbps(metrics.download)}
               uploadMbps={bandwidthBitsToMbps(metrics.upload)}
-              confirmedDownloadMbps={confirmedDownloadMbps}
               phase={phase}
               result={completedResult}
               championReference={championReference}
