@@ -211,7 +211,7 @@ The browser must never calculate Net Speed Score or contain its coefficients. It
 
 ## D-015 — Net Speed Run uses a private score authority and public stateless Run tickets
 
-**Status:** Accepted and implemented
+**Status:** Superseded by D-016
 **Date:** 2026-09-08
 
 - The private `netspeedrace-ranking` Worker remains the Net Speed Score authority; the browser and public Worker do not copy its score formula.
@@ -224,3 +224,20 @@ The browser must never calculate Net Speed Score or contain its coefficients. It
 - The issued ticket is stored only in `sessionStorage`; `/run/` verifies it before passing the verified run time to the game. The ticket remains available until expiry for refresh and retry.
 - Production `/run/` starts in a horse-free `BOOT` state and never shows the development title or time selector. Invalid or expired tickets return home; service failure shows a manual recovery path.
 - Production `RETRY` reuses the same verified run time, while the second result action returns to the speed test. Raw score and time query values are ignored.
+
+---
+
+## D-016 — Net Speed Run requires successful ranking participation and a consumed handoff
+
+**Status:** Accepted and implemented
+**Date:** 2026-09-08
+
+- Net Speed Run access is issued only as part of a successful `POST /api/ranking/entries` response; standalone `POST /api/run-ticket` issuance is removed.
+- The accepted private ranking response's `entry.scoreTenths` is authoritative. The public Worker does not recalculate the score or call the private score endpoint again.
+- A Run signing failure does not turn a successful ranking submission into an error; the ranking result remains visible with Run marked unavailable.
+- `GO TO RUN!` is shown only in the successful ranking result and stores the ticket in `sessionStorage` only when selected.
+- `/run/` consumes the ticket immediately after successful verification. Reload, direct re-entry, and BFCache restoration require a new successful ranking participation.
+- In-game `RETRY` reuses the verified run time held in page memory and does not require another ticket.
+- Production requires `START RUN` after `READY` so Web Audio starts from an explicit user gesture. Audio failure must not block gameplay.
+- Net Speed Run v0.1.2 generates restrained BGM and accepted-jump sound effects with Web Audio only; no external audio asset or preference persistence is used.
+- Mounted jockey scenes show a connected waist, white breeches, bent knees, and dark navy boots without changing the existing intro/dismount timing.

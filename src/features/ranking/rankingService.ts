@@ -14,14 +14,23 @@ const SUBMISSION_TIMEOUT_MS = 8000
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value)
 
+const isExactRecord = (value: unknown, keys: readonly string[]): value is Record<string, unknown> => {
+  if (!isRecord(value)) return false
+  const valueKeys = Object.keys(value)
+  return valueKeys.length === keys.length && keys.every((key) => Object.hasOwn(value, key))
+}
+
 const isFiniteNumber = (value: unknown): value is number =>
   typeof value === 'number' && Number.isFinite(value)
 
+const isSafeInteger = (value: unknown): value is number =>
+  typeof value === 'number' && Number.isSafeInteger(value)
+
 const isNonNegativeSafeInteger = (value: unknown): value is number =>
-  Number.isSafeInteger(value) && (value as number) >= 0
+  isSafeInteger(value) && value >= 0
 
 const isPositiveSafeInteger = (value: unknown): value is number =>
-  Number.isSafeInteger(value) && (value as number) > 0
+  isSafeInteger(value) && value > 0
 
 const isNullableString = (value: unknown): value is string | null =>
   typeof value === 'string' || value === null
@@ -120,6 +129,24 @@ const parseSubmissionChampion = (value: unknown): RaceChampionReference => {
   }
 }
 
+const parseRunAccess = (value: unknown): RankingSubmissionResult['run'] => {
+  if (isExactRecord(value, ['available', 'ticket', 'expiresAtMs'])
+    && value.available === true
+    && typeof value.ticket === 'string'
+    && value.ticket.length > 0
+    && isSafeInteger(value.expiresAtMs)) {
+    return { available: true, ticket: value.ticket, expiresAtMs: value.expiresAtMs }
+  }
+
+  if (isExactRecord(value, ['available', 'reason'])
+    && value.available === false
+    && value.reason === 'SERVICE_UNAVAILABLE') {
+    return { available: false, reason: 'SERVICE_UNAVAILABLE' }
+  }
+
+  throw new Error('Invalid ranking submission response')
+}
+
 const parseSubmission = (value: unknown): RankingSubmissionResult => {
   if (!isRecord(value) || value.ok !== true || !isRecord(value.entry) || !Array.isArray(value.top3)
     || !isFiniteNumber(value.entry.scoreTenths)
@@ -146,6 +173,7 @@ const parseSubmission = (value: unknown): RankingSubmissionResult => {
       scoreTenths: (entry as Record<string, unknown>).scoreTenths as number,
     })),
     champion: parseSubmissionChampion(value.champion),
+    run: parseRunAccess(value.run),
   }
 }
 

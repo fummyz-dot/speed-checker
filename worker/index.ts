@@ -5,7 +5,6 @@ import {
 } from './runTimeMapping'
 import {
   issueRunTicket,
-  RUN_TICKET_SCORE_VERSION,
   RunTicketError,
   verifyRunTicket,
 } from './runTicket'
@@ -16,7 +15,6 @@ const RANKING_MAX_BODY_BYTES = 8192
 const RANKING_CONTEXT_URL = 'https://ranking.internal/internal/ranking/context'
 const RANKING_OVERVIEW_URL = 'https://ranking.internal/internal/ranking/overview'
 const RANKING_SUBMIT_URL = 'https://ranking.internal/internal/ranking/submit'
-const RUN_SCORE_URL = 'https://ranking.internal/internal/run/score'
 const RUN_TICKET_MAX_BODY_BYTES = 4096
 
 type RankingServiceEnv = Env & { RANKING_SERVICE: Fetcher }
@@ -53,8 +51,11 @@ const runTicketErrorResponse = (error: unknown): Response => {
 const getRequestCountry = (request: Request): string =>
   typeof request.cf?.country === 'string' ? request.cf.country : ''
 
+const isObject = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null && !Array.isArray(value)
+
 const isExactObject = (value: unknown, keys: readonly string[]): value is Record<string, unknown> => {
-  if (typeof value !== 'object' || value === null || Array.isArray(value)) return false
+  if (!isObject(value)) return false
 
   const valueKeys = Object.keys(value)
   return valueKeys.length === keys.length && keys.every((key) => Object.hasOwn(value, key))
@@ -76,53 +77,33 @@ const readRunTicketJson = async (request: Request): Promise<{ ok: true, value: u
   }
 }
 
-type RunScoreResult =
-  | { ok: true, scoreTenths: number }
-  | { ok: false, measurementNotEligible: boolean }
-
-const requestRunScore = async (
-  env: RankingServiceEnv,
-  measurement: Record<string, unknown>,
-): Promise<RunScoreResult> => {
+const readRankingSubmissionSuccess = async (
+  response: Response,
+): Promise<{ body: Record<string, unknown>, scoreTenths: number } | null> => {
   try {
-    const response = await env.RANKING_SERVICE.fetch(new Request(RUN_SCORE_URL, {
-      method: 'POST',
-      headers: rankingRequestHeaders,
-      body: JSON.stringify({ measurement }),
-    }))
     const contentLength = response.headers.get('Content-Length')
     if (contentLength !== null
-      && (!/^\d+$/u.test(contentLength) || Number(contentLength) > RUN_TICKET_MAX_BODY_BYTES)) {
-      return { ok: false, measurementNotEligible: false }
+      && (!/^\d+$/u.test(contentLength) || Number(contentLength) > RANKING_MAX_BODY_BYTES)) {
+      return null
     }
 
     const bodyBytes = await response.arrayBuffer()
-    if (bodyBytes.byteLength > RUN_TICKET_MAX_BODY_BYTES) {
-      return { ok: false, measurementNotEligible: false }
-    }
+    if (bodyBytes.byteLength > RANKING_MAX_BODY_BYTES) return null
     const body: unknown = JSON.parse(new TextDecoder().decode(bodyBytes))
 
-    if (response.status === 400
-      && isExactObject(body, ['ok', 'code'])
-      && body.ok === false
-      && body.code === 'MEASUREMENT_NOT_ELIGIBLE') {
-      return { ok: false, measurementNotEligible: true }
-    }
-
-    if (response.status !== 200
-      || !isExactObject(body, ['ok', 'scoreTenths', 'scoreVersion'])
+    if (!isObject(body)
       || body.ok !== true
-      || typeof body.scoreTenths !== 'number'
-      || !Number.isSafeInteger(body.scoreTenths)
-      || body.scoreTenths < 0
-      || body.scoreTenths > RUN_SCORE_MAX_TENTHS
-      || body.scoreVersion !== RUN_TICKET_SCORE_VERSION) {
-      return { ok: false, measurementNotEligible: false }
+      || !isObject(body.entry)
+      || typeof body.entry.scoreTenths !== 'number'
+      || !Number.isSafeInteger(body.entry.scoreTenths)
+      || body.entry.scoreTenths < 0
+      || body.entry.scoreTenths > RUN_SCORE_MAX_TENTHS) {
+      return null
     }
 
-    return { ok: true, scoreTenths: body.scoreTenths }
+    return { body, scoreTenths: body.entry.scoreTenths }
   } catch {
-    return { ok: false, measurementNotEligible: false }
+    return null
   }
 }
 
@@ -178,7 +159,7 @@ export const handleRankingOverviewRequest = async (
 
 export const handleRankingEntriesRequest = async (
   request: Request,
-  env: RankingServiceEnv,
+  env: RunTicketEnv,
 ): Promise<Response> => {
   if (request.method !== 'POST') {
     const response = jsonResponse({ error: 'Method Not Allowed' }, 405)
@@ -206,51 +187,44 @@ export const handleRankingEntriesRequest = async (
     return invalidRankingRequest()
   }
 
-  return relayRankingRequest(env, RANKING_SUBMIT_URL, {
-    country: getRequestCountry(request),
-    ticket: body.ticket,
-    turnstileToken: body.turnstileToken,
-    measurement: body.measurement,
-  })
-}
-
-export const handleRunTicketRequest = async (
-  request: Request,
-  env: RunTicketEnv,
-): Promise<Response> => {
-  if (request.method !== 'POST') {
-    const response = jsonResponse({ error: 'Method Not Allowed' }, 405)
-    response.headers.set('Allow', 'POST')
-    return response
-  }
-
-  const parsed = await readRunTicketJson(request)
-  if (!parsed.ok
-    || !isExactObject(parsed.value, ['measurement'])
-    || !isExactObject(parsed.value.measurement, [
-      'id', 'downloadMbps', 'uploadMbps', 'pingMs', 'jitterMs',
-    ])) {
-    return invalidRankingRequest()
-  }
-
-  if (!env.RUN_TICKET_HMAC_SECRET) return serviceUnavailable()
-
-  const score = await requestRunScore(env, parsed.value.measurement)
-  if (!score.ok) {
-    return score.measurementNotEligible
-      ? jsonResponse({ ok: false, code: 'MEASUREMENT_NOT_ELIGIBLE' }, 400)
-      : serviceUnavailable()
-  }
-
   try {
-    const runTimeTenths = mapScoreTenthsToRunTimeTenths(score.scoreTenths)
-    const { ticket, payload } = await issueRunTicket(
-      env.RUN_TICKET_HMAC_SECRET,
-      runTimeTenths,
-    )
-    return jsonResponse({ ok: true, ticket, expiresAtMs: payload.expiresAtMs })
-  } catch (error) {
-    return runTicketErrorResponse(error)
+    const response = await env.RANKING_SERVICE.fetch(new Request(RANKING_SUBMIT_URL, {
+      method: 'POST',
+      headers: rankingRequestHeaders,
+      body: JSON.stringify({
+        country: getRequestCountry(request),
+        ticket: body.ticket,
+        turnstileToken: body.turnstileToken,
+        measurement: body.measurement,
+      }),
+    }))
+
+    if (!response.ok) {
+      return new Response(response.body, { status: response.status, headers: jsonHeaders })
+    }
+
+    const submission = await readRankingSubmissionSuccess(response)
+    if (submission === null) return serviceUnavailable()
+
+    let run: { available: true, ticket: string, expiresAtMs: number }
+      | { available: false, reason: 'SERVICE_UNAVAILABLE' }
+    try {
+      const runTimeTenths = mapScoreTenthsToRunTimeTenths(
+        submission.scoreTenths,
+      )
+      const issued = await issueRunTicket(env.RUN_TICKET_HMAC_SECRET, runTimeTenths)
+      run = {
+        available: true,
+        ticket: issued.ticket,
+        expiresAtMs: issued.payload.expiresAtMs,
+      }
+    } catch {
+      run = { available: false, reason: 'SERVICE_UNAVAILABLE' }
+    }
+
+    return jsonResponse({ ...submission.body, run }, response.status)
+  } catch {
+    return serviceUnavailable()
   }
 }
 
@@ -333,11 +307,7 @@ export const handleRequest = (request: Request, env: Env): Response | Promise<Re
   }
 
   if (pathname === '/api/ranking/entries') {
-    return handleRankingEntriesRequest(request, env as RankingServiceEnv)
-  }
-
-  if (pathname === '/api/run-ticket') {
-    return handleRunTicketRequest(request, env as RunTicketEnv)
+    return handleRankingEntriesRequest(request, env as RunTicketEnv)
   }
 
   if (pathname === '/api/run-ticket/verify') {

@@ -104,9 +104,13 @@ A horse implementation should preserve this lifecycle unless the design task exp
 
 ## Net Speed Run launch
 
-The completed-measurement area offers a separate, user-initiated Net Speed Run card. It is available independently of ranking participation and requests a Run ticket only after the user presses the launch button. Missing Ping or jitter keeps the action disabled with a neutral explanation; a service error stays within the card so the measurement result, history, and ranking UI remain usable.
+Net Speed Run is a follow-up available only after successful ranking participation. The ranking result keeps issued Run access in memory and places `GO TO RUN!` after the score, rank, top three, and champion comparison. The action stores the ticket and moves to `/run/`; it is never shown before ranking succeeds. If ticket signing alone is unavailable, the complete ranking result remains visible with a quiet message instead of the Run action.
 
-The `/run/` time selector is a localhost-only gameplay tool. On production-like hosts, the initial screen is a quiet `BOOT` state with no horse, jockey, obstacles, or test-time choices. A verified ticket proceeds directly to the intro. Invalid or expired tickets return to the measurement page; temporary verification failure shows a keyboard-accessible manual return link. Results offer `RETRY` with the same verified time and `SPEED TEST` to return home.
+The `/run/` time selector is a localhost-only gameplay tool. On production-like hosts, the initial `BOOT` and verified `READY` states contain no horse, jockey, obstacles, or test-time choices. `START RUN` is the explicit gesture that starts the optional Web Audio BGM and then the intro. The ticket is consumed after verification, so reload, direct re-entry, or BFCache restoration returns to the measurement page and requires a new successful ranking participation. In-game `RETRY` uses the verified time held in memory; `SPEED TEST` returns home.
+
+The game uses a restrained oscillator-based BGM and a short effect only when a jump is accepted. Pause/resume follows the game state; clear and time-up fade the BGM, and retry restarts it. `SOUND: ON/OFF` is page-memory-only and does not use browser storage. Audio startup failure never blocks the game.
+
+Mounted jockey scenes must show a visually connected waist, white breeches, bent knees, and dark navy boots so the rider reads as seated on the saddle rather than as a floating upper body. Dismount keeps the existing timing while preserving continuous head, torso, waist, and leg movement.
 
 ## Measurement visibility and race recovery
 

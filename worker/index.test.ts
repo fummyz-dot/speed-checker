@@ -57,6 +57,35 @@ const measurement = {
   jitterMs: 8,
 }
 
+const privateRankingSubmission = (scoreTenths = 5_003) => ({
+  ok: true,
+  entry: {
+    scoreTenths,
+    rank: 12,
+    tieCount: 1,
+    totalRuns: 200,
+    topPercentTenths: 60,
+  },
+  top3: [{ rank: 1, scoreTenths: 8_500 }],
+  champion: {
+    source: 'previous_day_winner',
+    sourceDay: '2026-09-07',
+    scoreTenths: 8_500,
+    downloadTenths: 7_000,
+    uploadTenths: 2_500,
+    qualifyingRuns: 199,
+  },
+})
+
+const rankingEntryRequest = (): Request => rankingRequest('/api/ranking/entries', {
+  method: 'POST',
+  body: JSON.stringify({
+    ticket: 'ticket',
+    turnstileToken: 'token',
+    measurement,
+  }),
+})
+
 describe('handleConnectionRequest', () => {
   it('安全なJSONとセキュリティヘッダーを返す', async () => {
     const response = handleConnectionRequest(requestWithCf())
@@ -255,6 +284,7 @@ describe('ranking service proxy', () => {
 
   it('entries requestを国コード付きの許可済みpayloadだけでPrivate Workerへ中継する', async () => {
     const { env, rankingFetch } = createEnv()
+    rankingFetch.mockReturnValue(new Response(JSON.stringify(privateRankingSubmission())))
     const response = await handleRequest(rankingRequest('/api/ranking/entries', {
       method: 'POST',
       body: JSON.stringify({
@@ -344,180 +374,122 @@ describe('ranking service proxy', () => {
   })
 })
 
-describe('Run Ticket API', () => {
-  it('issues a ticket from the private score and verifies runTimeSec without another service call', async () => {
+describe('Run Ticket ranking gate and verification', () => {
+  it('removes standalone issuance and returns the unknown API response', async () => {
+    const { env, rankingFetch } = createEnv()
+
+    const response = await handleRequest(runTicketRequest('/api/run-ticket', { measurement }), env)
+
+    expect(response.status).toBe(404)
+    expect(await response.json()).toEqual({ error: 'Not Found' })
+    expect(rankingFetch).not.toHaveBeenCalled()
+  })
+
+  it.each([
+    [5_003, 39.7],
+    [8_500, 50],
+    [16_243, 50],
+  ])('issues from accepted ranking scoreTenths %d and verifies %d seconds', async (scoreTenths, runTimeSec) => {
     vi.spyOn(Date, 'now').mockReturnValue(RUN_TICKET_TEST_NOW_MS)
     const { env, rankingFetch } = createEnv()
-    rankingFetch.mockReturnValue(new Response(JSON.stringify({
-      ok: true, scoreTenths: 5_003, scoreVersion: 1,
-    })))
-    const clientRequest = runTicketRequest('/api/run-ticket', { measurement })
-    clientRequest.headers.set('CF-Connecting-IP', '203.0.113.1')
-    clientRequest.headers.set('Cookie', 'session=secret')
+    rankingFetch.mockReturnValue(new Response(JSON.stringify(privateRankingSubmission(scoreTenths))))
 
-    const issueResponse = await handleRequest(clientRequest, env)
-    const issueBody = await issueResponse.json() as {
-      ok: boolean, ticket: string, expiresAtMs: number
+    const submissionResponse = await handleRequest(rankingEntryRequest(), env)
+    const submissionBody = await submissionResponse.json() as {
+      ok: boolean
+      entry: { scoreTenths: number }
+      run: { available: boolean, ticket: string, expiresAtMs: number }
     }
     const privateRequest = rankingFetch.mock.calls[0][0] as Request
 
-    expect(issueResponse.status).toBe(200)
-    expect(issueResponse.headers.get('Cache-Control')).toBe('private, no-store')
-    expect(issueResponse.headers.get('X-Content-Type-Options')).toBe('nosniff')
-    expect(issueBody).toMatchObject({
-      ok: true,
+    expect(submissionResponse.status).toBe(200)
+    expect(submissionBody.ok).toBe(true)
+    expect(submissionBody.entry.scoreTenths).toBe(scoreTenths)
+    expect(submissionBody.run).toMatchObject({
+      available: true,
       expiresAtMs: RUN_TICKET_TEST_NOW_MS + RUN_TICKET_TTL_MS,
     })
-    expect(Object.keys(issueBody).sort()).toEqual(['expiresAtMs', 'ok', 'ticket'])
-    expect(privateRequest.url).toBe('https://ranking.internal/internal/run/score')
-    expect(privateRequest.method).toBe('POST')
-    expect([...privateRequest.headers.entries()]).toEqual([['content-type', 'application/json']])
-    expect(await privateRequest.json()).toEqual({ measurement })
+    expect(privateRequest.url).toBe('https://ranking.internal/internal/ranking/submit')
+    expect(rankingFetch).toHaveBeenCalledTimes(1)
 
     const verifyResponse = await handleRequest(
-      runTicketRequest('/api/run-ticket/verify', { ticket: issueBody.ticket }),
+      runTicketRequest('/api/run-ticket/verify', { ticket: submissionBody.run.ticket }),
       env,
     )
     expect(verifyResponse.status).toBe(200)
     expect(await verifyResponse.json()).toEqual({
       ok: true,
-      runTimeSec: 39.7,
+      runTimeSec,
       expiresAtMs: RUN_TICKET_TEST_NOW_MS + RUN_TICKET_TTL_MS,
     })
     expect(rankingFetch).toHaveBeenCalledTimes(1)
   })
 
-  it.each([
-    [8_500, 50],
-    [16_243, 50],
-  ])('clamps private scoreTenths %d to %d seconds', async (scoreTenths, runTimeSec) => {
-    vi.spyOn(Date, 'now').mockReturnValue(RUN_TICKET_TEST_NOW_MS)
-    const { env, rankingFetch } = createEnv()
-    rankingFetch.mockReturnValue(new Response(JSON.stringify({ ok: true, scoreTenths, scoreVersion: 1 })))
+  it('keeps ranking success when Run Ticket signing is unavailable', async () => {
+    const { env, rankingFetch } = createEnv(null)
+    const privateBody = privateRankingSubmission()
+    rankingFetch.mockReturnValue(new Response(JSON.stringify(privateBody)))
 
-    const issueResponse = await handleRequest(
-      runTicketRequest('/api/run-ticket', { measurement }),
-      env,
-    )
-    const issueBody = await issueResponse.json() as { ticket: string }
-    const verifyResponse = await handleRequest(
-      runTicketRequest('/api/run-ticket/verify', { ticket: issueBody.ticket }),
-      env,
-    )
+    const response = await handleRequest(rankingEntryRequest(), env)
 
-    expect(await verifyResponse.json()).toMatchObject({ ok: true, runTimeSec })
+    expect(response.status).toBe(200)
+    expect(await response.json()).toEqual({
+      ...privateBody,
+      run: { available: false, reason: 'SERVICE_UNAVAILABLE' },
+    })
+    expect(rankingFetch).toHaveBeenCalledTimes(1)
   })
 
   it.each([
-    ['unknown field', { ok: true, scoreTenths: 5_003, scoreVersion: 1, rank: 1 }],
-    ['negative score', { ok: true, scoreTenths: -1, scoreVersion: 1 }],
-    ['score above validated maximum', { ok: true, scoreTenths: 20_609, scoreVersion: 1 }],
-    ['non-integer score', { ok: true, scoreTenths: 5_003.5, scoreVersion: 1 }],
-  ])('fails closed for a malformed private response with %s', async (_caseName, privateBody) => {
+    ['missing entry', { ok: true }],
+    ['missing score', { ...privateRankingSubmission(), entry: { rank: 1 } }],
+    ['negative score', privateRankingSubmission(-1)],
+    ['score above maximum', privateRankingSubmission(20_609)],
+    ['fractional score', privateRankingSubmission(5_003.5)],
+  ])('fails closed for malformed ranking success: %s', async (_caseName, privateBody) => {
     const { env, rankingFetch } = createEnv()
     rankingFetch.mockReturnValue(new Response(JSON.stringify(privateBody)))
 
-    const response = await handleRequest(runTicketRequest('/api/run-ticket', { measurement }), env)
+    const response = await handleRequest(rankingEntryRequest(), env)
 
     expect(response.status).toBe(503)
     expect(await response.json()).toEqual({ ok: false, code: 'SERVICE_UNAVAILABLE' })
+    expect(rankingFetch).toHaveBeenCalledTimes(1)
   })
 
-  it('fails closed for a private score version mismatch', async () => {
+  it('preserves private ranking error status and body without issuing a ticket', async () => {
     const { env, rankingFetch } = createEnv()
     rankingFetch.mockReturnValue(new Response(JSON.stringify({
-      ok: true, scoreTenths: 5_003, scoreVersion: 2,
-    })))
+      ok: false, code: 'TURNSTILE_FAILED',
+    }), { status: 403 }))
 
-    const response = await handleRequest(runTicketRequest('/api/run-ticket', { measurement }), env)
+    const response = await handleRequest(rankingEntryRequest(), env)
 
-    expect(response.status).toBe(503)
-    expect(await response.json()).toEqual({ ok: false, code: 'SERVICE_UNAVAILABLE' })
+    expect(response.status).toBe(403)
+    expect(await response.json()).toEqual({ ok: false, code: 'TURNSTILE_FAILED' })
+    expect(rankingFetch).toHaveBeenCalledTimes(1)
   })
 
-  it('safely converts the private SCORE_VERSION_MISMATCH error', async () => {
+  it('keeps verify method and input validation behavior', async () => {
     const { env, rankingFetch } = createEnv()
-    rankingFetch.mockReturnValue(new Response(JSON.stringify({
-      ok: false, code: 'SCORE_VERSION_MISMATCH',
-    }), { status: 409 }))
-
-    const response = await handleRequest(runTicketRequest('/api/run-ticket', { measurement }), env)
-
-    expect(response.status).toBe(503)
-    expect(await response.json()).toEqual({ ok: false, code: 'SERVICE_UNAVAILABLE' })
-  })
-
-  it('passes through the allow-listed measurement rejection without issuing a ticket', async () => {
-    const { env, rankingFetch } = createEnv()
-    rankingFetch.mockReturnValue(new Response(JSON.stringify({
-      ok: false, code: 'MEASUREMENT_NOT_ELIGIBLE',
-    }), { status: 400 }))
-
-    const response = await handleRequest(runTicketRequest('/api/run-ticket', { measurement }), env)
-
-    expect(response.status).toBe(400)
-    expect(await response.json()).toEqual({ ok: false, code: 'MEASUREMENT_NOT_ELIGIBLE' })
-  })
-
-  it('rejects wrong methods with Allow headers', async () => {
-    const { env, rankingFetch } = createEnv()
-
-    const issueResponse = await handleRequest(
-      runTicketRequest('/api/run-ticket', {}, 'GET'), env,
-    )
-    const verifyResponse = await handleRequest(
+    const wrongMethod = await handleRequest(
       runTicketRequest('/api/run-ticket/verify', {}, 'GET'), env,
     )
-
-    expect(issueResponse.status).toBe(405)
-    expect(issueResponse.headers.get('Allow')).toBe('POST')
-    expect(verifyResponse.status).toBe(405)
-    expect(verifyResponse.headers.get('Allow')).toBe('POST')
-    expect(rankingFetch).not.toHaveBeenCalled()
-  })
-
-  it('rejects invalid shapes, invalid JSON, and oversized bodies', async () => {
-    const { env, rankingFetch } = createEnv()
-
-    const extraIssue = await handleRequest(runTicketRequest('/api/run-ticket', {
-      measurement, scoreTenths: 5_003,
-    }), env)
-    const extraMeasurement = await handleRequest(runTicketRequest('/api/run-ticket', {
-      measurement: { ...measurement, scoreTenths: 5_003 },
-    }), env)
-    const extraVerify = await handleRequest(runTicketRequest('/api/run-ticket/verify', {
+    const extraField = await handleRequest(runTicketRequest('/api/run-ticket/verify', {
       ticket: 'ticket', scoreTenths: 5_003,
     }), env)
-    const invalidVerifyShape = await handleRequest(runTicketRequest('/api/run-ticket/verify', {
+    const invalidShape = await handleRequest(runTicketRequest('/api/run-ticket/verify', {
       ticket: 123,
     }), env)
-    const invalidJson = await handleRequest(new Request('https://example.com/api/run-ticket', {
-      method: 'POST', body: '{',
-    }), env)
-    const oversized = await handleRequest(new Request('https://example.com/api/run-ticket', {
-      method: 'POST', body: 'x'.repeat(4097),
-    }), env)
 
-    expect(extraIssue.status).toBe(400)
-    expect(extraMeasurement.status).toBe(400)
-    expect(extraVerify.status).toBe(400)
-    expect(invalidVerifyShape.status).toBe(400)
-    expect(invalidJson.status).toBe(400)
-    expect(oversized.status).toBe(400)
+    expect(wrongMethod.status).toBe(405)
+    expect(wrongMethod.headers.get('Allow')).toBe('POST')
+    expect(extraField.status).toBe(400)
+    expect(invalidShape.status).toBe(400)
     expect(rankingFetch).not.toHaveBeenCalled()
   })
 
-  it('fails closed before calling the score service when the dedicated secret is missing', async () => {
-    const { env, rankingFetch } = createEnv(null)
-
-    const response = await handleRequest(runTicketRequest('/api/run-ticket', { measurement }), env)
-
-    expect(response.status).toBe(503)
-    expect(await response.json()).toEqual({ ok: false, code: 'SERVICE_UNAVAILABLE' })
-    expect(rankingFetch).not.toHaveBeenCalled()
-  })
-
-  it('maps tampered and expired ticket failures without calling the score service', async () => {
+  it('maps tampered and expired ticket failures without calling ranking', async () => {
     const nowSpy = vi.spyOn(Date, 'now').mockReturnValue(RUN_TICKET_TEST_NOW_MS)
     const { env, rankingFetch } = createEnv()
     const { ticket } = await issueRunTicket(

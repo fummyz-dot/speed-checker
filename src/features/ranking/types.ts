@@ -18,6 +18,17 @@ export interface RankingTopEntry {
   scoreTenths: number
 }
 
+export type RankingRunAccess =
+  | {
+      available: true
+      ticket: string
+      expiresAtMs: number
+    }
+  | {
+      available: false
+      reason: 'SERVICE_UNAVAILABLE'
+    }
+
 export interface RankingOverviewPreview {
   ok: true
   rankingDay: string
@@ -36,6 +47,7 @@ export interface RankingSubmissionResult {
   }
   top3: RankingTopEntry[]
   champion: RankingChampionSummary
+  run: RankingRunAccess
 }
 
 export type RankingErrorCode =

@@ -3,7 +3,6 @@ import type { SpeedMeasurementResult } from '../types/measurement'
 import { evaluateUseCases, generateMeasurementComment } from '../lib/measurementEvaluation'
 import { clearMeasurements, loadMeasurements, saveMeasurement } from '../lib/measurementStorage'
 import { normalizeConditionLabel } from '../lib/measurementValidation'
-import { RunLaunchCard } from '../features/run/RunLaunchCard'
 import { MeasurementComment } from './MeasurementComment'
 import { LoadedLatencyResponsiveness } from './LoadedLatencyResponsiveness'
 import { MeasurementHistoryTrend } from './MeasurementHistoryTrend'
@@ -50,7 +49,6 @@ export const CompletedMeasurement = ({ result }: CompletedMeasurementProps) => {
           </div>
         </section>
       )}
-      <RunLaunchCard measurement={result} />
       <LoadedLatencyResponsiveness result={result} />
       <UseCaseEvaluation evaluations={evaluations} />
       <MeasurementComment comment={comment} />

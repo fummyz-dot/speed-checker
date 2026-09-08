@@ -146,6 +146,15 @@ button {
   text-decoration: none;
 }
 
+.boot-start {
+  width: 100%;
+  margin-top: 22px;
+}
+
+.boot-start[hidden] {
+  display: none;
+}
+
 .boot-return[hidden] {
   display: none;
 }
@@ -210,6 +219,40 @@ h1 span {
     border-color 120ms ease,
     background 120ms ease,
     box-shadow 120ms ease;
+}
+
+.sound-toggle {
+  position: absolute;
+  right: max(12px, env(safe-area-inset-right));
+  bottom: max(12px, env(safe-area-inset-bottom));
+  z-index: 4;
+  display: none;
+  min-height: 34px;
+  padding: 6px 10px;
+  border: 1px solid rgba(135, 231, 247, 0.34);
+  border-radius: 999px;
+  background: rgba(5, 17, 28, 0.84);
+  color: rgba(239, 251, 254, 0.86);
+  cursor: pointer;
+  font-size: 0.68rem;
+  font-weight: 850;
+  letter-spacing: 0.08em;
+  touch-action: manipulation;
+}
+
+.game-frame[data-state="TITLE"] .sound-toggle,
+.game-frame[data-state="INTRO"] .sound-toggle,
+.game-frame[data-state="COUNTDOWN"] .sound-toggle,
+.game-frame[data-state="RUNNING"] .sound-toggle,
+.game-frame[data-state="PAUSED"] .sound-toggle {
+  display: block;
+}
+
+.sound-toggle:hover,
+.sound-toggle:focus-visible {
+  border-color: var(--cyan-bright);
+  box-shadow: 0 0 0 3px rgba(82, 231, 255, 0.16);
+  outline: none;
 }
 
 .time-button {
@@ -558,6 +601,14 @@ h1 span {
     gap: 6px;
     font-size: 0.68rem;
     letter-spacing: 0.045em;
+  }
+
+  .sound-toggle {
+    right: max(8px, env(safe-area-inset-right));
+    bottom: max(8px, env(safe-area-inset-bottom));
+    min-height: 32px;
+    padding: 5px 8px;
+    font-size: 0.63rem;
   }
 
   .result-card {

@@ -1,4 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
+import { saveRunTicket } from '../run/runTicketStorage'
+import type { IssuedRunTicket } from '../run/types'
 import type { SpeedMeasurementResult } from '../../types/measurement'
 import { requestRankingTurnstileToken } from './turnstile'
 import type {
@@ -14,6 +16,8 @@ interface RankingCardProps {
   context: RankingContext | null
   service: RankingService | null
   measurement: SpeedMeasurementResult
+  saveRunAccess?: (issued: IssuedRunTicket) => unknown
+  navigateToRun?: () => void
 }
 
 const formatScore = (scoreTenths: number): string => (scoreTenths / 10).toFixed(1)
@@ -23,7 +27,15 @@ const initialState = (context: RankingContext | null): RankingSubmitState => {
   return context.rankingAvailable ? 'idle' : 'notEligible'
 }
 
-export const RankingCard = ({ context, service, measurement }: RankingCardProps) => {
+const defaultNavigateToRun = () => window.location.assign('/run/')
+
+export const RankingCard = ({
+  context,
+  service,
+  measurement,
+  saveRunAccess = saveRunTicket,
+  navigateToRun = defaultNavigateToRun,
+}: RankingCardProps) => {
   const [state, setState] = useState<RankingSubmitState>(() => initialState(context))
   const [submission, setSubmission] = useState<RankingSubmissionResult | null>(null)
   const [overview, setOverview] = useState<RankingOverviewPreview | null>(null)
@@ -93,6 +105,16 @@ export const RankingCard = ({ context, service, measurement }: RankingCardProps)
     || submission?.entry.rank === 3
     ? submission.entry.rank
     : null
+
+  const launchRun = () => {
+    if (!submission?.run.available) return
+    saveRunAccess({
+      ok: true,
+      ticket: submission.run.ticket,
+      expiresAtMs: submission.run.expiresAtMs,
+    })
+    navigateToRun()
+  }
 
   return (
     <section className="ranking-card result-panel" aria-labelledby="ranking-title">
@@ -228,6 +250,23 @@ export const RankingCard = ({ context, service, measurement }: RankingCardProps)
                     : '無敗の三冠馬と同じ総合スコア'}
               </strong>
             </section>
+          )}
+
+          {submission.run.available ? (
+            <section className="ranking-card__run" aria-labelledby="ranking-run-title">
+              <div>
+                <span className="ranking-card__run-eyebrow">NET SPEED RUN</span>
+                <h4 id="ranking-run-title">今回のNET SPEED SCOREで持ち時間が決まります。</h4>
+                <p>ジャンプだけでGOALを目指します。</p>
+              </div>
+              <button className="ranking-card__run-button" type="button" onClick={launchRun}>
+                GO TO RUN!
+              </button>
+            </section>
+          ) : (
+            <p className="ranking-card__run-unavailable" role="status">
+              現在Net Speed Runを利用できません。測定結果とランキング結果には影響ありません。
+            </p>
           )}
         </div>
       )}

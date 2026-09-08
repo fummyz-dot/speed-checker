@@ -47,6 +47,7 @@ const submissionResponse = {
     uploadTenths: 3272,
     qualifyingRuns: 2847,
   },
+  run: { available: true, ticket: 'run-ticket', expiresAtMs: 1_800_000_000_000 },
 }
 
 const overviewResponse = {
@@ -204,6 +205,7 @@ describe('createRankingApiService', () => {
       ok: true,
       entry: submissionResponse.entry,
       top3: submissionResponse.top3,
+      run: submissionResponse.run,
     })
     expect(submission.champion).toEqual({
       source: 'previous_day_winner', sourceDay: '2026-08-27', scoreTenths: 16834,
@@ -248,5 +250,25 @@ describe('createRankingApiService', () => {
     await service.getContext()
 
     await expect(service.submitMeasurement(measurement, 'turnstile-token')).rejects.toThrow()
+  })
+
+  it.each([
+    ['missing run', undefined],
+    ['empty ticket', { available: true, ticket: '', expiresAtMs: 1_800_000_000_000 }],
+    ['fractional expiry', { available: true, ticket: 'ticket', expiresAtMs: 1.5 }],
+    ['unknown available field', { available: true, ticket: 'ticket', expiresAtMs: 1_800_000_000_000, score: 1 }],
+    ['unknown unavailable reason', { available: false, reason: 'OTHER' }],
+    ['unknown unavailable field', { available: false, reason: 'SERVICE_UNAVAILABLE', ticket: 'ticket' }],
+  ])('rejects a submission with %s', async (_caseName, run) => {
+    const fetch = vi.fn()
+      .mockResolvedValueOnce(jsonResponse(contextResponse))
+      .mockResolvedValueOnce(jsonResponse({ ...submissionResponse, run }))
+    vi.stubGlobal('fetch', fetch)
+    const service = createRankingApiService()
+    await service.getContext()
+
+    await expect(service.submitMeasurement(measurement, 'turnstile-token')).rejects.toThrow(
+      'Invalid ranking submission response',
+    )
   })
 })

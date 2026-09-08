@@ -81,14 +81,41 @@ const showBootError = ({ bootPanel, bootMessage, returnLink }) => {
   returnLink.hidden = false;
 };
 
+const showReady = ({ bootPanel, bootMessage, startButton, returnLink }) => {
+  bootPanel.hidden = false;
+  bootPanel.removeAttribute("role");
+  bootMessage.textContent = "準備ができました。START RUNを押すとゲームとサウンドが始まります。";
+  returnLink.hidden = true;
+  startButton.hidden = false;
+  startButton.focus({ preventScroll: true });
+};
+
+export const startVerifiedRun = async ({ runTimeSec, gameApi, audioApi }) => {
+  try {
+    await audioApi.start();
+    audioApi.startBgm();
+  } catch {
+    // Audio is optional. A blocked or unavailable AudioContext must not stop the game.
+  }
+  gameApi.start(runTimeSec);
+};
+
+export const redirectRestoredProductionRun = ({ hostname, persisted, locationController }) => {
+  if (isLocalRunHost(hostname) || persisted !== true) return false;
+  locationController.replace("/");
+  return true;
+};
+
 export const bootstrapProductionRun = async ({
   hostname,
   storage,
   fetchImpl,
   locationController,
   gameApi,
+  audioApi,
   bootPanel,
   bootMessage,
+  startButton,
   returnLink,
   nowMs = Date.now(),
 }) => {
@@ -129,8 +156,16 @@ export const bootstrapProductionRun = async ({
   }
 
   if (parsed.status === "verified") {
-    gameApi.start(parsed.runTimeSec);
-    return parsed;
+    removeStoredRunTicket(storage);
+    showReady({ bootPanel, bootMessage, startButton, returnLink });
+    let started = false;
+    startButton.addEventListener("click", () => {
+      if (started) return;
+      started = true;
+      startButton.disabled = true;
+      void startVerifiedRun({ runTimeSec: parsed.runTimeSec, gameApi, audioApi });
+    }, { once: true });
+    return { status: "ready", runTimeSec: parsed.runTimeSec };
   }
   if (parsed.status === "invalid") {
     removeStoredRunTicket(storage);
@@ -145,8 +180,9 @@ export const bootstrapProductionRun = async ({
 const startBrowserBoot = () => {
   const bootPanel = document.getElementById("bootPanel");
   const bootMessage = document.getElementById("bootMessage");
+  const startButton = document.getElementById("startRunButton");
   const returnLink = document.getElementById("bootReturnLink");
-  if (!bootPanel || !bootMessage || !returnLink) return;
+  if (!bootPanel || !bootMessage || !startButton || !returnLink) return;
   if (!window.NetSpeedRun) {
     if (document.readyState !== "complete") {
       window.addEventListener("load", startBrowserBoot, { once: true });
@@ -160,13 +196,25 @@ const startBrowserBoot = () => {
     fetchImpl: window.fetch.bind(window),
     locationController: window.location,
     gameApi: window.NetSpeedRun,
+    audioApi: window.NetSpeedRunAudio || {
+      start: async () => false,
+      startBgm: () => false,
+    },
     bootPanel,
     bootMessage,
+    startButton,
     returnLink,
   });
 };
 
 if (typeof document !== "undefined" && document.getElementById("gameFrame")) {
+  window.addEventListener("pageshow", (event) => {
+    redirectRestoredProductionRun({
+      hostname: window.location.hostname,
+      persisted: event.persisted,
+      locationController: window.location,
+    });
+  });
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", startBrowserBoot, { once: true });
   } else {

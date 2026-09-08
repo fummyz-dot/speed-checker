@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   bootstrapProductionRun,
   loadStoredRunTicket,
+  redirectRestoredProductionRun,
   RUN_TICKET_STORAGE_KEY,
 } from "../../../public/run/boot.js";
 
@@ -13,7 +14,7 @@ const jsonResponse = (body, status = 200) =>
 
 const setup = (response) => {
   document.body.innerHTML = `
-    <section id="bootPanel" hidden><p id="bootMessage"></p><a id="bootReturnLink" href="/" hidden>戻る</a></section>
+    <section id="bootPanel" hidden><p id="bootMessage"></p><button id="startRunButton" hidden>START RUN</button><a id="bootReturnLink" href="/" hidden>戻る</a></section>
   `;
   sessionStorage.setItem(RUN_TICKET_STORAGE_KEY, JSON.stringify(stored));
   return {
@@ -22,8 +23,10 @@ const setup = (response) => {
     fetchImpl: vi.fn().mockResolvedValue(response),
     locationController: { replace: vi.fn() },
     gameApi: { start: vi.fn() },
+    audioApi: { start: vi.fn().mockResolvedValue(true), startBgm: vi.fn() },
     bootPanel: document.getElementById("bootPanel"),
     bootMessage: document.getElementById("bootMessage"),
+    startButton: document.getElementById("startRunButton"),
     returnLink: document.getElementById("bootReturnLink"),
     nowMs,
   };
@@ -36,13 +39,13 @@ describe("Net Speed Run production boot", () => {
     localStorage.clear();
   });
 
-  it("uses the verified runtime only and keeps the session ticket for refresh", async () => {
+  it("consumes the verified ticket and waits for START RUN before audio and gameplay", async () => {
     const context = setup(jsonResponse({
       ok: true, runTimeSec: 39.7, expiresAtMs: nowMs + 60_000,
     }));
 
     await expect(bootstrapProductionRun(context)).resolves.toEqual({
-      status: "verified", runTimeSec: 39.7,
+      status: "ready", runTimeSec: 39.7,
     });
     expect(context.fetchImpl).toHaveBeenCalledWith("/api/run-ticket/verify", expect.objectContaining({
       method: "POST",
@@ -50,9 +53,18 @@ describe("Net Speed Run production boot", () => {
       cache: "no-store",
       body: JSON.stringify({ ticket: "signed-ticket" }),
     }));
-    expect(context.gameApi.start).toHaveBeenCalledWith(39.7);
-    expect(sessionStorage.getItem(RUN_TICKET_STORAGE_KEY)).toBe(JSON.stringify(stored));
+    expect(context.gameApi.start).not.toHaveBeenCalled();
+    expect(context.audioApi.start).not.toHaveBeenCalled();
+    expect(context.startButton).not.toHaveAttribute("hidden");
+    expect(sessionStorage.getItem(RUN_TICKET_STORAGE_KEY)).toBeNull();
     expect(localStorage.length).toBe(0);
+
+    context.startButton.click();
+    await vi.waitFor(() => expect(context.gameApi.start).toHaveBeenCalledWith(39.7));
+    expect(context.audioApi.start).toHaveBeenCalledTimes(1);
+    expect(context.audioApi.startBgm).toHaveBeenCalledTimes(1);
+    context.startButton.click();
+    expect(context.gameApi.start).toHaveBeenCalledTimes(1);
   });
 
   it.each([
@@ -75,6 +87,19 @@ describe("Net Speed Run production boot", () => {
     expect(context.locationController.replace).toHaveBeenCalledWith("/");
     expect(context.fetchImpl).not.toHaveBeenCalled();
     expect(context.gameApi.start).not.toHaveBeenCalled();
+  });
+
+  it("redirects a reload after a successful verification consumed the ticket", async () => {
+    const first = setup(jsonResponse({
+      ok: true, runTimeSec: 39.7, expiresAtMs: nowMs + 60_000,
+    }));
+    await bootstrapProductionRun(first);
+
+    const reloaded = setup(jsonResponse({}));
+    sessionStorage.clear();
+    await expect(bootstrapProductionRun(reloaded)).resolves.toEqual({ status: "redirected" });
+    expect(reloaded.locationController.replace).toHaveBeenCalledWith("/");
+    expect(reloaded.fetchImpl).not.toHaveBeenCalled();
   });
 
   it.each([
@@ -103,6 +128,7 @@ describe("Net Speed Run production boot", () => {
     expect(context.bootPanel).not.toHaveAttribute("hidden");
     expect(context.bootPanel).toHaveAttribute("role", "alert");
     expect(context.returnLink).not.toHaveAttribute("hidden");
+    expect(context.startButton).toHaveAttribute("hidden");
     expect(sessionStorage.getItem(RUN_TICKET_STORAGE_KEY)).toBe(JSON.stringify(stored));
   });
 
@@ -126,5 +152,36 @@ describe("Net Speed Run production boot", () => {
     expect(context.locationController.replace).toHaveBeenCalledWith("/");
     expect(context.fetchImpl).not.toHaveBeenCalled();
     expect(context.gameApi.start).not.toHaveBeenCalled();
+  });
+
+  it("continues gameplay when AudioContext startup fails", async () => {
+    const context = setup(jsonResponse({
+      ok: true, runTimeSec: 39.7, expiresAtMs: nowMs + 60_000,
+    }));
+    context.audioApi.start.mockRejectedValue(new Error("audio blocked"));
+
+    await bootstrapProductionRun(context);
+    context.startButton.click();
+
+    await vi.waitFor(() => expect(context.gameApi.start).toHaveBeenCalledWith(39.7));
+    expect(context.audioApi.startBgm).not.toHaveBeenCalled();
+  });
+
+  it("redirects a production BFCache restore but ignores normal pageshow and local development", () => {
+    const locationController = { replace: vi.fn() };
+
+    expect(redirectRestoredProductionRun({
+      hostname: "netspeedrace.com", persisted: true, locationController,
+    })).toBe(true);
+    expect(locationController.replace).toHaveBeenCalledWith("/");
+
+    locationController.replace.mockClear();
+    expect(redirectRestoredProductionRun({
+      hostname: "netspeedrace.com", persisted: false, locationController,
+    })).toBe(false);
+    expect(redirectRestoredProductionRun({
+      hostname: "localhost", persisted: true, locationController,
+    })).toBe(false);
+    expect(locationController.replace).not.toHaveBeenCalled();
   });
 });

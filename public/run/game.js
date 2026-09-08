@@ -4,7 +4,7 @@
   const LOCAL_HOSTNAMES = new Set(["localhost", "127.0.0.1", "::1", "[::1]"]);
   const IS_LOCAL = LOCAL_HOSTNAMES.has(window.location.hostname);
 
-  const GAME_VERSION = "0.1.1";
+  const GAME_VERSION = "0.1.2";
 
   const CONFIG = Object.freeze({
     courseLength: 1000,
@@ -117,6 +117,7 @@
   const retryButton = document.getElementById("retryButton");
   const changeTimeButton = document.getElementById("changeTimeButton");
   const resumeButton = document.getElementById("resumeButton");
+  const soundToggle = document.getElementById("soundToggle");
   const liveRegion = document.getElementById("liveRegion");
   const ctx = canvas.getContext("2d", { alpha: false });
 
@@ -234,6 +235,24 @@
     pausePanel.hidden = activePanel !== "pause";
   }
 
+  function getAudio() {
+    return window.NetSpeedRunAudio || null;
+  }
+
+  function callAudio(method, ...args) {
+    try {
+      return getAudio()?.[method]?.(...args);
+    } catch {
+      return undefined;
+    }
+  }
+
+  function updateSoundToggle() {
+    const enabled = getAudio()?.isEnabled?.() !== false;
+    soundToggle.textContent = `SOUND: ${enabled ? "ON" : "OFF"}`;
+    soundToggle.setAttribute("aria-pressed", String(enabled));
+  }
+
   function renderResult(state) {
     if (state === STATES.CLEAR) {
       resultPanel.dataset.result = "clear";
@@ -323,9 +342,11 @@
         resumeButton.focus({ preventScroll: true });
         break;
       case STATES.CLEAR:
+        callAudio("stopBgm", { fadeMs: 180 });
         beginClearCelebration();
         break;
       case STATES.TIME_UP:
+        callAudio("stopBgm", { fadeMs: 180 });
         setPanelVisibility("result");
         renderResult(STATES.TIME_UP);
         retryButton.focus({ preventScroll: true });
@@ -368,14 +389,17 @@
     if (game.state !== STATES.RUNNING) return;
     if (game.run.jumpElapsedSec !== null || game.run.stumbleRemainingSec > 0) return;
     game.run.jumpElapsedSec = 0;
+    callAudio("playJump");
   }
 
   function requestRetry() {
     if (game.selectedRunTimeSec === null) return;
+    callAudio("restartBgm");
     startGame(game.selectedRunTimeSec, { retry: true });
   }
 
   function requestChangeTime() {
+    callAudio("stopBgm");
     if (!IS_LOCAL) {
       window.location.assign("/");
       return;
@@ -397,6 +421,7 @@
 
     game.pause.resumeState = game.state;
     game.pause.elapsedInStateMs = now - game.stateEnteredAt;
+    callAudio("pauseBgm");
     transitionTo(STATES.PAUSED, now);
   }
 
@@ -407,6 +432,7 @@
     const elapsedInStateMs = game.pause.elapsedInStateMs;
     game.pause.resumeState = null;
     game.pause.elapsedInStateMs = 0;
+    callAudio("resumeBgm");
     transitionTo(resumeState, now, { elapsedInStateMs });
   }
 
@@ -945,6 +971,112 @@
     }
   }
 
+  function drawRunningJockeyLegs(runPhase, navy, bootNavy, turquoiseLight, racingWhite) {
+    const leftKneeX = -7 - runPhase * 8;
+    const leftFootX = -17 - runPhase * 12;
+    const rightKneeX = 7 + runPhase * 8;
+    const rightFootX = 17 + runPhase * 12;
+
+    ctx.strokeStyle = navy;
+    ctx.lineWidth = 12;
+    ctx.beginPath();
+    ctx.moveTo(-3, -30);
+    ctx.lineTo(leftKneeX, -15);
+    ctx.lineTo(leftFootX, -1);
+    ctx.moveTo(3, -30);
+    ctx.lineTo(rightKneeX, -15);
+    ctx.lineTo(rightFootX, -1);
+    ctx.stroke();
+
+    ctx.strokeStyle = racingWhite;
+    ctx.lineWidth = 8;
+    ctx.beginPath();
+    ctx.moveTo(-3, -30);
+    ctx.lineTo(leftKneeX, -15);
+    ctx.moveTo(3, -30);
+    ctx.lineTo(rightKneeX, -15);
+    ctx.stroke();
+
+    ctx.strokeStyle = bootNavy;
+    ctx.lineWidth = 8;
+    ctx.beginPath();
+    ctx.moveTo(leftKneeX, -16);
+    ctx.lineTo(leftFootX, -1);
+    ctx.moveTo(rightKneeX, -16);
+    ctx.lineTo(rightFootX, -1);
+    ctx.stroke();
+
+    ctx.strokeStyle = turquoiseLight;
+    ctx.lineWidth = 1.6;
+    ctx.beginPath();
+    ctx.moveTo(leftKneeX - 1, -14);
+    ctx.lineTo(leftFootX - 1, -3);
+    ctx.moveTo(rightKneeX - 1, -14);
+    ctx.lineTo(rightFootX - 1, -3);
+    ctx.stroke();
+
+    ctx.strokeStyle = navy;
+    ctx.lineWidth = 5;
+    ctx.beginPath();
+    ctx.moveTo(leftFootX - 2, -1);
+    ctx.lineTo(leftFootX + 6, -1);
+    ctx.moveTo(rightFootX - 2, -1);
+    ctx.lineTo(rightFootX + 6, -1);
+    ctx.stroke();
+  }
+
+  function drawMountedJockeyLegs(navy, bootNavy, turquoiseLight, racingWhite) {
+    ctx.save();
+    ctx.globalAlpha = 0.72;
+    ctx.strokeStyle = racingWhite;
+    ctx.lineWidth = 9;
+    ctx.beginPath();
+    ctx.moveTo(3, -31);
+    ctx.lineTo(15, -17);
+    ctx.stroke();
+    ctx.strokeStyle = bootNavy;
+    ctx.lineWidth = 8;
+    ctx.beginPath();
+    ctx.moveTo(15, -17);
+    ctx.lineTo(8, 1);
+    ctx.stroke();
+    ctx.restore();
+
+    ctx.fillStyle = racingWhite;
+    ctx.strokeStyle = navy;
+    ctx.lineWidth = 2.5;
+    ctx.beginPath();
+    ctx.ellipse(0, -30, 9, 6, 0.08, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+
+    ctx.strokeStyle = racingWhite;
+    ctx.lineWidth = 10;
+    ctx.beginPath();
+    ctx.moveTo(-3, -30);
+    ctx.lineTo(-17, -15);
+    ctx.stroke();
+
+    ctx.strokeStyle = bootNavy;
+    ctx.lineWidth = 9;
+    ctx.beginPath();
+    ctx.moveTo(-17, -15);
+    ctx.lineTo(-7, 4);
+    ctx.stroke();
+    ctx.strokeStyle = turquoiseLight;
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(-15, -13);
+    ctx.lineTo(-7, 2);
+    ctx.stroke();
+    ctx.strokeStyle = navy;
+    ctx.lineWidth = 5;
+    ctx.beginPath();
+    ctx.moveTo(-9, 4);
+    ctx.lineTo(0, 4);
+    ctx.stroke();
+  }
+
   function drawJockey(x, feetY, now, options = {}) {
     const scale = options.scale || clamp(viewport.height / 630, 0.78, 1.12);
     const running = Boolean(options.running);
@@ -976,58 +1108,10 @@
     ctx.lineCap = "round";
     ctx.lineJoin = "round";
 
-    if (!mounted) {
-      const leftKneeX = -7 - runPhase * 8;
-      const leftFootX = -17 - runPhase * 12;
-      const rightKneeX = 7 + runPhase * 8;
-      const rightFootX = 17 + runPhase * 12;
-
-      ctx.strokeStyle = navy;
-      ctx.lineWidth = 12;
-      ctx.beginPath();
-      ctx.moveTo(-3, -30);
-      ctx.lineTo(leftKneeX, -15);
-      ctx.lineTo(leftFootX, -1);
-      ctx.moveTo(3, -30);
-      ctx.lineTo(rightKneeX, -15);
-      ctx.lineTo(rightFootX, -1);
-      ctx.stroke();
-
-      ctx.strokeStyle = racingWhite;
-      ctx.lineWidth = 8;
-      ctx.beginPath();
-      ctx.moveTo(-3, -30);
-      ctx.lineTo(leftKneeX, -15);
-      ctx.moveTo(3, -30);
-      ctx.lineTo(rightKneeX, -15);
-      ctx.stroke();
-
-      ctx.strokeStyle = bootNavy;
-      ctx.lineWidth = 8;
-      ctx.beginPath();
-      ctx.moveTo(leftKneeX, -16);
-      ctx.lineTo(leftFootX, -1);
-      ctx.moveTo(rightKneeX, -16);
-      ctx.lineTo(rightFootX, -1);
-      ctx.stroke();
-
-      ctx.strokeStyle = turquoiseLight;
-      ctx.lineWidth = 1.6;
-      ctx.beginPath();
-      ctx.moveTo(leftKneeX - 1, -14);
-      ctx.lineTo(leftFootX - 1, -3);
-      ctx.moveTo(rightKneeX - 1, -14);
-      ctx.lineTo(rightFootX - 1, -3);
-      ctx.stroke();
-
-      ctx.strokeStyle = navy;
-      ctx.lineWidth = 5;
-      ctx.beginPath();
-      ctx.moveTo(leftFootX - 2, -1);
-      ctx.lineTo(leftFootX + 6, -1);
-      ctx.moveTo(rightFootX - 2, -1);
-      ctx.lineTo(rightFootX + 6, -1);
-      ctx.stroke();
+    if (mounted) {
+      drawMountedJockeyLegs(navy, bootNavy, turquoiseLight, racingWhite);
+    } else {
+      drawRunningJockeyLegs(runPhase, navy, bootNavy, turquoiseLight, racingWhite);
     }
 
     const frontArmOffset = runPhase * 4;
@@ -1451,13 +1535,14 @@
     });
 
     let jockeyX = horseX;
-    let jockeyFeetY = camera.groundY - 73 * horseScale;
+    const mountedFeetY = camera.groundY - 73 * horseScale;
+    let jockeyFeetY = mountedFeetY;
     let mounted = true;
 
     if (elapsed >= 0.72) {
       const dismountProgress = easeInOutCubic((elapsed - 0.72) / 0.7);
       jockeyX = lerp(horseX, horseX - 56, dismountProgress);
-      jockeyFeetY = lerp(camera.groundY - 73, camera.groundY, dismountProgress);
+      jockeyFeetY = lerp(mountedFeetY, camera.groundY, dismountProgress);
       mounted = dismountProgress < 0.86;
     }
 
@@ -1805,16 +1890,33 @@
     canvas.height = Math.round(height * dpr);
   }
 
+  let localStartPending = false;
   document.querySelectorAll(".time-button").forEach((button) => {
     button.addEventListener("click", () => {
       const runTimeSec = Number(button.dataset.time);
-      if (IS_LOCAL && CONFIG.testRunTimes.includes(runTimeSec)) startGame(runTimeSec);
+      if (!IS_LOCAL || !CONFIG.testRunTimes.includes(runTimeSec) || localStartPending) return;
+      localStartPending = true;
+      void (async () => {
+        try {
+          await getAudio()?.start?.();
+          callAudio("startBgm");
+        } catch {
+          // Audio is optional and must not block local gameplay.
+        }
+        startGame(runTimeSec);
+        localStartPending = false;
+      })();
     });
   });
 
   retryButton.addEventListener("click", requestRetry);
   changeTimeButton.addEventListener("click", requestChangeTime);
   resumeButton.addEventListener("click", requestResume);
+  soundToggle.addEventListener("click", () => {
+    const enabled = getAudio()?.isEnabled?.() !== false;
+    callAudio("setEnabled", !enabled);
+    updateSoundToggle();
+  });
 
   canvas.addEventListener(
     "pointerdown",
@@ -1859,6 +1961,7 @@
   });
 
   if (!IS_LOCAL) changeTimeButton.textContent = "SPEED TEST";
+  updateSoundToggle();
   resizeCanvas();
   transitionTo(IS_LOCAL ? STATES.TITLE : STATES.BOOT, performance.now());
   requestAnimationFrame(frameLoop);

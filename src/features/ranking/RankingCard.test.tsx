@@ -32,6 +32,7 @@ const successfulSubmission: RankingSubmissionResult = {
     { rank: 3, scoreTenths: 16804 },
   ],
   champion,
+  run: { available: true, ticket: 'run-ticket', expiresAtMs: 1_800_000_000_000 },
 }
 
 const overview = {
@@ -68,6 +69,7 @@ describe('RankingCard', () => {
     expect(screen.getByText('匿名・任意参加。参加するとNet Speed Scoreと今日の順位を確認できます。')).toBeVisible()
     expect(screen.getByRole('button', { name: '全国ランキングに参加して順位を見る' })).toHaveClass('ranking-card__submit--attention')
     expect(screen.getByRole('button', { name: '全国ランキングに参加して順位を見る' })).toBeEnabled()
+    expect(screen.queryByRole('button', { name: 'GO TO RUN!' })).not.toBeInTheDocument()
     expect(screen.getByText(/一つの指標だけが突出していても高得点になりにくい/)).toBeVisible()
     expect(document.body.textContent).not.toMatch(/log\(|係数|Sref|Ping\/Jitter補正式/)
   })
@@ -121,6 +123,7 @@ describe('RankingCard', () => {
     const pendingButton = screen.getByRole('button', { name: 'ランキングに登録中…' })
     expect(pendingButton).toBeDisabled()
     expect(pendingButton).not.toHaveClass('ranking-card__submit--attention')
+    expect(screen.queryByRole('button', { name: 'GO TO RUN!' })).not.toBeInTheDocument()
     await waitFor(() => expect(submitMeasurement).toHaveBeenCalledTimes(1))
     completeSubmission?.(successfulSubmission)
     expect(await screen.findByText('1524.7')).toBeVisible()
@@ -134,6 +137,7 @@ describe('RankingCard', () => {
 
     fireEvent.click(screen.getByRole('button', { name: '全国ランキングに参加して順位を見る' }))
     expect(await screen.findByText('ランキングを利用できませんでした。測定結果には影響ありません。')).toBeVisible()
+    expect(screen.queryByRole('button', { name: 'GO TO RUN!' })).not.toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: 'もう一度試す' }))
     expect(await screen.findByText('1524.7')).toBeVisible()
     expect(submitMeasurement).toHaveBeenCalledTimes(2)
@@ -203,6 +207,7 @@ describe('RankingCard', () => {
     )
     expect(screen.getByText(/日本国内と判定された測定のみ参加できます/)).toBeVisible()
     expect(screen.queryByRole('button', { name: '全国ランキングに参加して順位を見る' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'GO TO RUN!' })).not.toBeInTheDocument()
   })
 
   it('does not run Turnstile or submit when Ping or Jitter is unavailable', () => {
@@ -214,5 +219,46 @@ describe('RankingCard', () => {
     expect(screen.getByText('今回の測定ではPingまたはJitterを取得できなかったため、ランキングには参加できません。')).toBeVisible()
     expect(requestRankingTurnstileToken).not.toHaveBeenCalled()
     expect(submitMeasurement).not.toHaveBeenCalled()
+    expect(screen.queryByRole('button', { name: 'GO TO RUN!' })).not.toBeInTheDocument()
+  })
+
+  it('stores and navigates only when GO TO RUN is clicked after ranking success', async () => {
+    const saveRunAccess = vi.fn()
+    const navigateToRun = vi.fn()
+    render(
+      <RankingCard
+        context={eligibleContext}
+        service={service()}
+        measurement={measurement}
+        saveRunAccess={saveRunAccess}
+        navigateToRun={navigateToRun}
+      />,
+    )
+
+    fireEvent.click(screen.getByRole('button', { name: '全国ランキングに参加して順位を見る' }))
+    const runButton = await screen.findByRole('button', { name: 'GO TO RUN!' })
+    expect(saveRunAccess).not.toHaveBeenCalled()
+    expect(navigateToRun).not.toHaveBeenCalled()
+
+    fireEvent.click(runButton)
+
+    expect(saveRunAccess).toHaveBeenCalledWith({
+      ok: true, ticket: 'run-ticket', expiresAtMs: 1_800_000_000_000,
+    })
+    expect(navigateToRun).toHaveBeenCalledTimes(1)
+  })
+
+  it('keeps ranking results and shows a quiet message when Run is unavailable', async () => {
+    const unavailableSubmission: RankingSubmissionResult = {
+      ...successfulSubmission,
+      run: { available: false, reason: 'SERVICE_UNAVAILABLE' },
+    }
+    render(<RankingCard context={eligibleContext} service={service(vi.fn().mockResolvedValue(unavailableSubmission))} measurement={measurement} />)
+
+    fireEvent.click(screen.getByRole('button', { name: '全国ランキングに参加して順位を見る' }))
+
+    expect(await screen.findByText('1524.7')).toBeVisible()
+    expect(screen.queryByRole('button', { name: 'GO TO RUN!' })).not.toBeInTheDocument()
+    expect(screen.getByText('現在Net Speed Runを利用できません。測定結果とランキング結果には影響ありません。')).toBeVisible()
   })
 })
