@@ -1,5 +1,9 @@
 import { describe, expect, it, vi } from 'vitest'
 import { handleConnectionRequest, handleRequest } from './index'
+import { issueRunTicket, RUN_TICKET_TTL_MS } from './runTicket'
+
+const RUN_TICKET_TEST_SECRET = 'dedicated-run-ticket-test-secret'
+const RUN_TICKET_TEST_NOW_MS = Date.UTC(2026, 8, 8, 0, 0, 0)
 
 const requestWithCf = (method = 'GET'): Request => {
   const request = new Request('https://example.com/api/connection', { method })
@@ -12,11 +16,15 @@ const requestWithCf = (method = 'GET'): Request => {
   return request
 }
 
-const createEnv = () => {
+const createEnv = (runTicketSecret: string | null = RUN_TICKET_TEST_SECRET) => {
   const fetch = vi.fn(() => new Response('asset'))
   const rankingFetch = vi.fn(() => new Response(JSON.stringify({ ok: true })))
   return {
-    env: { ASSETS: { fetch }, RANKING_SERVICE: { fetch: rankingFetch } } as unknown as Env,
+    env: {
+      ASSETS: { fetch },
+      RANKING_SERVICE: { fetch: rankingFetch },
+      RUN_TICKET_HMAC_SECRET: runTicketSecret ?? undefined,
+    } as unknown as Env,
     fetch,
     rankingFetch,
   }
@@ -30,6 +38,23 @@ const rankingRequest = (
   const request = new Request(`https://example.com${pathname}`, init)
   Object.defineProperty(request, 'cf', { value: { country } })
   return request
+}
+
+const runTicketRequest = (
+  pathname: '/api/run-ticket' | '/api/run-ticket/verify',
+  body: unknown,
+  method = 'POST',
+): Request => new Request(`https://example.com${pathname}`, {
+  method,
+  ...(method === 'POST' ? { body: JSON.stringify(body) } : {}),
+})
+
+const measurement = {
+  id: 'measurement',
+  downloadMbps: 100,
+  uploadMbps: 30,
+  pingMs: 30,
+  jitterMs: 8,
 }
 
 describe('handleConnectionRequest', () => {
@@ -315,6 +340,202 @@ describe('ranking service proxy', () => {
 
     expect(response.status).toBe(404)
     expect(fetch).not.toHaveBeenCalled()
+    expect(rankingFetch).not.toHaveBeenCalled()
+  })
+})
+
+describe('Run Ticket API', () => {
+  it('issues a ticket from the private score and verifies runTimeSec without another service call', async () => {
+    vi.spyOn(Date, 'now').mockReturnValue(RUN_TICKET_TEST_NOW_MS)
+    const { env, rankingFetch } = createEnv()
+    rankingFetch.mockReturnValue(new Response(JSON.stringify({
+      ok: true, scoreTenths: 5_003, scoreVersion: 1,
+    })))
+    const clientRequest = runTicketRequest('/api/run-ticket', { measurement })
+    clientRequest.headers.set('CF-Connecting-IP', '203.0.113.1')
+    clientRequest.headers.set('Cookie', 'session=secret')
+
+    const issueResponse = await handleRequest(clientRequest, env)
+    const issueBody = await issueResponse.json() as {
+      ok: boolean, ticket: string, expiresAtMs: number
+    }
+    const privateRequest = rankingFetch.mock.calls[0][0] as Request
+
+    expect(issueResponse.status).toBe(200)
+    expect(issueResponse.headers.get('Cache-Control')).toBe('private, no-store')
+    expect(issueResponse.headers.get('X-Content-Type-Options')).toBe('nosniff')
+    expect(issueBody).toMatchObject({
+      ok: true,
+      expiresAtMs: RUN_TICKET_TEST_NOW_MS + RUN_TICKET_TTL_MS,
+    })
+    expect(Object.keys(issueBody).sort()).toEqual(['expiresAtMs', 'ok', 'ticket'])
+    expect(privateRequest.url).toBe('https://ranking.internal/internal/run/score')
+    expect(privateRequest.method).toBe('POST')
+    expect([...privateRequest.headers.entries()]).toEqual([['content-type', 'application/json']])
+    expect(await privateRequest.json()).toEqual({ measurement })
+
+    const verifyResponse = await handleRequest(
+      runTicketRequest('/api/run-ticket/verify', { ticket: issueBody.ticket }),
+      env,
+    )
+    expect(verifyResponse.status).toBe(200)
+    expect(await verifyResponse.json()).toEqual({
+      ok: true,
+      runTimeSec: 39.7,
+      expiresAtMs: RUN_TICKET_TEST_NOW_MS + RUN_TICKET_TTL_MS,
+    })
+    expect(rankingFetch).toHaveBeenCalledTimes(1)
+  })
+
+  it.each([
+    [8_500, 50],
+    [16_243, 50],
+  ])('clamps private scoreTenths %d to %d seconds', async (scoreTenths, runTimeSec) => {
+    vi.spyOn(Date, 'now').mockReturnValue(RUN_TICKET_TEST_NOW_MS)
+    const { env, rankingFetch } = createEnv()
+    rankingFetch.mockReturnValue(new Response(JSON.stringify({ ok: true, scoreTenths, scoreVersion: 1 })))
+
+    const issueResponse = await handleRequest(
+      runTicketRequest('/api/run-ticket', { measurement }),
+      env,
+    )
+    const issueBody = await issueResponse.json() as { ticket: string }
+    const verifyResponse = await handleRequest(
+      runTicketRequest('/api/run-ticket/verify', { ticket: issueBody.ticket }),
+      env,
+    )
+
+    expect(await verifyResponse.json()).toMatchObject({ ok: true, runTimeSec })
+  })
+
+  it.each([
+    ['unknown field', { ok: true, scoreTenths: 5_003, scoreVersion: 1, rank: 1 }],
+    ['negative score', { ok: true, scoreTenths: -1, scoreVersion: 1 }],
+    ['score above validated maximum', { ok: true, scoreTenths: 20_609, scoreVersion: 1 }],
+    ['non-integer score', { ok: true, scoreTenths: 5_003.5, scoreVersion: 1 }],
+  ])('fails closed for a malformed private response with %s', async (_caseName, privateBody) => {
+    const { env, rankingFetch } = createEnv()
+    rankingFetch.mockReturnValue(new Response(JSON.stringify(privateBody)))
+
+    const response = await handleRequest(runTicketRequest('/api/run-ticket', { measurement }), env)
+
+    expect(response.status).toBe(503)
+    expect(await response.json()).toEqual({ ok: false, code: 'SERVICE_UNAVAILABLE' })
+  })
+
+  it('fails closed for a private score version mismatch', async () => {
+    const { env, rankingFetch } = createEnv()
+    rankingFetch.mockReturnValue(new Response(JSON.stringify({
+      ok: true, scoreTenths: 5_003, scoreVersion: 2,
+    })))
+
+    const response = await handleRequest(runTicketRequest('/api/run-ticket', { measurement }), env)
+
+    expect(response.status).toBe(503)
+    expect(await response.json()).toEqual({ ok: false, code: 'SERVICE_UNAVAILABLE' })
+  })
+
+  it('safely converts the private SCORE_VERSION_MISMATCH error', async () => {
+    const { env, rankingFetch } = createEnv()
+    rankingFetch.mockReturnValue(new Response(JSON.stringify({
+      ok: false, code: 'SCORE_VERSION_MISMATCH',
+    }), { status: 409 }))
+
+    const response = await handleRequest(runTicketRequest('/api/run-ticket', { measurement }), env)
+
+    expect(response.status).toBe(503)
+    expect(await response.json()).toEqual({ ok: false, code: 'SERVICE_UNAVAILABLE' })
+  })
+
+  it('passes through the allow-listed measurement rejection without issuing a ticket', async () => {
+    const { env, rankingFetch } = createEnv()
+    rankingFetch.mockReturnValue(new Response(JSON.stringify({
+      ok: false, code: 'MEASUREMENT_NOT_ELIGIBLE',
+    }), { status: 400 }))
+
+    const response = await handleRequest(runTicketRequest('/api/run-ticket', { measurement }), env)
+
+    expect(response.status).toBe(400)
+    expect(await response.json()).toEqual({ ok: false, code: 'MEASUREMENT_NOT_ELIGIBLE' })
+  })
+
+  it('rejects wrong methods with Allow headers', async () => {
+    const { env, rankingFetch } = createEnv()
+
+    const issueResponse = await handleRequest(
+      runTicketRequest('/api/run-ticket', {}, 'GET'), env,
+    )
+    const verifyResponse = await handleRequest(
+      runTicketRequest('/api/run-ticket/verify', {}, 'GET'), env,
+    )
+
+    expect(issueResponse.status).toBe(405)
+    expect(issueResponse.headers.get('Allow')).toBe('POST')
+    expect(verifyResponse.status).toBe(405)
+    expect(verifyResponse.headers.get('Allow')).toBe('POST')
+    expect(rankingFetch).not.toHaveBeenCalled()
+  })
+
+  it('rejects invalid shapes, invalid JSON, and oversized bodies', async () => {
+    const { env, rankingFetch } = createEnv()
+
+    const extraIssue = await handleRequest(runTicketRequest('/api/run-ticket', {
+      measurement, scoreTenths: 5_003,
+    }), env)
+    const extraMeasurement = await handleRequest(runTicketRequest('/api/run-ticket', {
+      measurement: { ...measurement, scoreTenths: 5_003 },
+    }), env)
+    const extraVerify = await handleRequest(runTicketRequest('/api/run-ticket/verify', {
+      ticket: 'ticket', scoreTenths: 5_003,
+    }), env)
+    const invalidVerifyShape = await handleRequest(runTicketRequest('/api/run-ticket/verify', {
+      ticket: 123,
+    }), env)
+    const invalidJson = await handleRequest(new Request('https://example.com/api/run-ticket', {
+      method: 'POST', body: '{',
+    }), env)
+    const oversized = await handleRequest(new Request('https://example.com/api/run-ticket', {
+      method: 'POST', body: 'x'.repeat(4097),
+    }), env)
+
+    expect(extraIssue.status).toBe(400)
+    expect(extraMeasurement.status).toBe(400)
+    expect(extraVerify.status).toBe(400)
+    expect(invalidVerifyShape.status).toBe(400)
+    expect(invalidJson.status).toBe(400)
+    expect(oversized.status).toBe(400)
+    expect(rankingFetch).not.toHaveBeenCalled()
+  })
+
+  it('fails closed before calling the score service when the dedicated secret is missing', async () => {
+    const { env, rankingFetch } = createEnv(null)
+
+    const response = await handleRequest(runTicketRequest('/api/run-ticket', { measurement }), env)
+
+    expect(response.status).toBe(503)
+    expect(await response.json()).toEqual({ ok: false, code: 'SERVICE_UNAVAILABLE' })
+    expect(rankingFetch).not.toHaveBeenCalled()
+  })
+
+  it('maps tampered and expired ticket failures without calling the score service', async () => {
+    const nowSpy = vi.spyOn(Date, 'now').mockReturnValue(RUN_TICKET_TEST_NOW_MS)
+    const { env, rankingFetch } = createEnv()
+    const { ticket } = await issueRunTicket(
+      RUN_TICKET_TEST_SECRET, 397, RUN_TICKET_TEST_NOW_MS,
+    )
+
+    const tamperedResponse = await handleRequest(runTicketRequest('/api/run-ticket/verify', {
+      ticket: `${ticket}x`,
+    }), env)
+    nowSpy.mockReturnValue(RUN_TICKET_TEST_NOW_MS + RUN_TICKET_TTL_MS)
+    const expiredResponse = await handleRequest(runTicketRequest('/api/run-ticket/verify', {
+      ticket,
+    }), env)
+
+    expect(tamperedResponse.status).toBe(403)
+    expect(await tamperedResponse.json()).toEqual({ ok: false, code: 'INVALID_RUN_TICKET' })
+    expect(expiredResponse.status).toBe(403)
+    expect(await expiredResponse.json()).toEqual({ ok: false, code: 'RUN_TICKET_EXPIRED' })
     expect(rankingFetch).not.toHaveBeenCalled()
   })
 })

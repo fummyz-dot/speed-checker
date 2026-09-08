@@ -206,3 +206,18 @@ The browser must never calculate Net Speed Score or contain its coefficients. It
 - Turnstile remains deferred until explicit ranking participation.
 - The private service and deferred Turnstile design in D-013 remains in effect.
 - D-014 replaces only the preview gate in D-013.
+
+---
+
+## D-015 — Net Speed Run uses a private score authority and public stateless Run tickets
+
+**Status:** Accepted and backend implemented
+**Date:** 2026-09-08
+
+- The private `netspeedrace-ranking` Worker remains the Net Speed Score authority; the browser and public Worker do not copy its score formula.
+- The public Worker maps score tenths with mapping v1: 0 points maps to 25.0 seconds, 850 points maps to 50.0 seconds, and scores at or above 850 clamp to 50.0 seconds.
+- The public Worker signs Run tickets with HMAC-SHA256 and the dedicated `RUN_TICKET_HMAC_SECRET`, separate from the private ranking ticket secret.
+- Run tickets have a 30-minute TTL, a cryptographically random nonce, and the fixed purpose `net-speed-run`.
+- Verification is stateless. Replay is allowed until expiry because the game has no reward, prize, or game ranking.
+- Tickets contain the mapped Run time, not raw score, measurements, client IP, connection metadata, or condition labels.
+- Browser `sessionStorage` handoff and `/run/` production boot integration remain a later phase. Raw score and time values from the browser are not trusted.

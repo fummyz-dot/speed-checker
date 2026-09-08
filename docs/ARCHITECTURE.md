@@ -67,6 +67,12 @@ After measurement completion, Turnstile is loaded and executed only if the user 
 
 The public Worker calls the private `netspeedrace-ranking` Worker through the `RANKING_SERVICE` Service Binding. It creates new requests containing only the country and allow-listed ranking payload rather than forwarding the original client request or headers. The private ranking Worker owns D1; the public `speed-checker` Worker does not bind D1 directly.
 
+### Net Speed Run ticket boundary
+
+The public Worker issues stateless Net Speed Run tickets through `POST /api/run-ticket`. It sends only the allow-listed measurement to the private ranking Worker's `POST /internal/run/score` endpoint through `RANKING_SERVICE`; the private Worker remains the Net Speed Score authority. The public Worker runtime-validates that response and maps score tenths to Run time tenths using mapping v1: 0 points is 25.0 seconds, 850 points is 50.0 seconds, and higher scores clamp to 50.0 seconds.
+
+Run tickets use HMAC-SHA256 with the dedicated `RUN_TICKET_HMAC_SECRET`, a 30-minute TTL, a cryptographically random 32-byte nonce, and a fixed `net-speed-run` purpose. They contain the mapped Run time but not the raw score, measurement, client IP, connection metadata, or condition label. Verification through `POST /api/run-ticket/verify` is stateless and allows replay until expiry; it does not call the ranking service or use persistence. The browser integration and `sessionStorage` handoff to `/run/` remain a later phase, so browser-supplied raw score or time values are not trusted.
+
 ### Evaluation
 
 `src/lib/measurementEvaluation.ts` converts a completed measurement into:
@@ -137,7 +143,7 @@ Users explicitly choose whether to copy the PNG image, save it, open an X post w
 
 Node.js 24 is the repository baseline.
 
-`public/run/` contains the standalone Net Speed Run v0.1.1 static source and is copied by Vite to `dist/run/` without entering the homepage React bundle. Until Run Ticket validation is implemented, its gameplay test selector is available only on `localhost`, `127.0.0.1`, and `::1`; other hosts redirect `/run/` requests to `/` and do not consume raw `time` or `score` query parameters.
+`public/run/` contains the standalone Net Speed Run v0.1.1 static source and is copied by Vite to `dist/run/` without entering the homepage React bundle. The Worker-side Run Ticket issue and verification APIs are implemented, but the browser handoff is not connected yet. Its gameplay test selector remains available only on `localhost`, `127.0.0.1`, and `::1`; other hosts redirect `/run/` requests to `/` and do not consume raw `time` or `score` query parameters.
 
 Normal build:
 
