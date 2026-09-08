@@ -96,7 +96,9 @@ export const HorseSpeedVisualization = ({
     replay,
   } = useHorseRaceAnimation({ phase, result, championReference })
   const displayedUpload = result?.uploadMbps ?? uploadMbps
-  const isLiveDownload = phase === 'download' && result === null && downloadMbps !== null
+  const isLiveDownload = (phase === 'download' || phase === 'upload')
+    && result === null
+    && downloadMbps !== null
   const isLiveUpload = phase === 'upload' && result === null && uploadMbps !== null
   const displayedDownload = phase === 'complete' && result
     ? result.downloadMbps

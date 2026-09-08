@@ -129,7 +129,7 @@ describe('App', () => {
     const start = vi.fn()
     const completedResult = {
       id: 'ranking-measurement', measuredAt: '2026-08-28T12:00:00.000Z',
-      downloadMbps: 400, uploadMbps: 50, pingMs: 20, jitterMs: 5,
+      downloadMbps: 510, uploadMbps: 51, pingMs: 20, jitterMs: 5,
     }
     let speedTest: ReturnType<typeof useSpeedTest> = {
       metrics: EMPTY_METRICS, phase: 'idle', isRunning: false, error: null, completedResult: null,
@@ -503,7 +503,7 @@ describe('App', () => {
 
   it('測定中の左カードは静的な未確定表示にし、レース下の下りだけをライブ表示する', () => {
     vi.mocked(useSpeedTest).mockReturnValue({
-      metrics: { ...EMPTY_METRICS, download: 300_000_000 },
+      metrics: { ...EMPTY_METRICS, download: 500_000_000 },
       phase: 'download',
       isRunning: true,
       error: null,
@@ -514,15 +514,15 @@ describe('App', () => {
     const { container } = render(<App />)
     expect(container.querySelector('.speed-display__reading')).not.toHaveClass('speed-display__reading--live')
     expect(container.querySelector('.speed-display__reading strong')).toHaveTextContent('—')
-    expect(container.querySelector('[data-speed-metric="download"]')).toHaveTextContent('300.000000 Mbps')
+    expect(container.querySelector('[data-speed-metric="download"]')).toHaveTextContent('500.000000 Mbps')
     expect(container.querySelector('[data-speed-metric="download"]')).toHaveAttribute('data-live', 'true')
     expect(container.querySelector('[data-speed-metric="upload"]')).toHaveAttribute('data-live', 'false')
-    expect(container).not.toHaveTextContent('300000000.0 Mbps')
+    expect(container).not.toHaveTextContent('500000000.0 Mbps')
   })
 
-  it('upload測定中は未確定の下りを数値表示せず、上りだけをライブ表示する', () => {
+  it('upload測定中もレース内の下りと上りをlive表示し、トップは未確定のままにする', () => {
     vi.mocked(useSpeedTest).mockReturnValue({
-      metrics: { ...EMPTY_METRICS, download: 300_000_000, upload: 50_000_000 },
+      metrics: { ...EMPTY_METRICS, download: 500_000_000, upload: 50_000_000 },
       phase: 'upload',
       isRunning: true,
       error: null,
@@ -532,25 +532,25 @@ describe('App', () => {
 
     const { container } = render(<App />)
     expect(container.querySelector('.speed-display__reading strong')).toHaveTextContent('—')
-    expect(container.querySelector('[data-speed-metric="download"]')).toHaveTextContent('— Mbps')
-    expect(container).not.toHaveTextContent('300 Mbps')
-    expect(container.querySelector('[data-speed-metric="download"]')).toHaveAttribute('data-live', 'false')
+    expect(container.querySelector('[data-speed-metric="download"]')).toHaveTextContent('500.000000 Mbps')
+    expect(container.querySelector('[data-speed-metric="download"]')).not.toHaveTextContent('— Mbps')
+    expect(container.querySelector('[data-speed-metric="download"]')).toHaveAttribute('data-live', 'true')
     expect(container.querySelector('[data-speed-metric="upload"]')).toHaveTextContent('50.000000 Mbps')
     expect(container.querySelector('[data-speed-metric="upload"]')).toHaveAttribute('data-live', 'true')
     expect(container.querySelector('.horse-course')).toHaveAttribute('data-animation-state', 'warmingUp')
     expect(container.querySelectorAll('.race-runner--racing')).toHaveLength(0)
   })
 
-  it('Upload開始時の300を確定表示せず、完了表示・レース・履歴をfinal 400に統一する', async () => {
+  it('Upload中はprovisional 500をlive表示し、完了表示・レース・履歴をfinal 510に統一する', async () => {
     const completedResult = {
       id: 'measurement-1',
       measuredAt: '2026-08-05T00:00:00.000Z',
-      downloadMbps: 400,
-      uploadMbps: 50,
+      downloadMbps: 510,
+      uploadMbps: 51,
       pingMs: 12,
     }
     let speedTest: ReturnType<typeof useSpeedTest> = {
-      metrics: { ...EMPTY_METRICS, download: 300_000_000, upload: 50_000_000 },
+      metrics: { ...EMPTY_METRICS, download: 500_000_000, upload: 50_000_000 },
       phase: 'upload',
       isRunning: true,
       error: null,
@@ -561,14 +561,14 @@ describe('App', () => {
 
     const { container, rerender } = render(<App />)
     expect(container.querySelector('.speed-display__reading strong')).toHaveTextContent('—')
-    expect(container.querySelector('[data-speed-metric="download"]')).toHaveTextContent('— Mbps')
-    expect(container).not.toHaveTextContent('300 Mbps')
+    expect(container.querySelector('[data-speed-metric="download"]')).toHaveTextContent('500.000000 Mbps')
+    expect(container.querySelector('[data-speed-metric="download"]')).toHaveAttribute('data-live', 'true')
     expect(container.querySelector('.horse-course')).toHaveAttribute('data-animation-state', 'warmingUp')
     expect(container.querySelectorAll('.race-runner--racing')).toHaveLength(0)
 
     speedTest = {
       ...speedTest,
-      metrics: { ...speedTest.metrics, download: 400_000_000 },
+      metrics: { ...speedTest.metrics, download: 510_000_000, upload: 51_000_000 },
       phase: 'complete',
       isRunning: false,
       completedResult,
@@ -576,12 +576,14 @@ describe('App', () => {
     rerender(<App />)
 
     expect(container.querySelector('.speed-display__reading')).not.toHaveClass('speed-display__reading--live')
-    expect(container.querySelector('.speed-display__reading strong')).toHaveTextContent('400')
-    expect(container.querySelector('.speed-display__reading strong')).not.toHaveTextContent('300')
-    expect(container.querySelector('.horse-metrics')).toHaveTextContent('下り400 Mbps')
+    expect(container.querySelector('.speed-display__reading strong')).toHaveTextContent('510')
+    expect(container.querySelector('.horse-metrics')).toHaveTextContent('下り510 Mbps')
+    expect(container.querySelector('[data-speed-metric="download"]')).toHaveAttribute('data-live', 'false')
+    expect(container.querySelector('[data-speed-metric="upload"]')).toHaveTextContent('51.0 Mbps')
+    expect(container.querySelector('[data-speed-metric="upload"]')).toHaveAttribute('data-live', 'false')
     await waitFor(() => {
       const history = JSON.parse(window.localStorage.getItem(MEASUREMENT_STORAGE_KEY) ?? '[]') as Array<{ downloadMbps: number }>
-      expect(history[0]?.downloadMbps).toBe(400)
+      expect(history[0]?.downloadMbps).toBe(510)
     })
   })
 })

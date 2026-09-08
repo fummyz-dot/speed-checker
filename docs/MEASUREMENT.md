@@ -66,7 +66,7 @@ The active engine is paused, partial metrics are discarded, and the run enters t
 
 ## Final download value
 
-Before `onFinish`, Download values are provisional. They may appear only as the live speedometer during the download phase and are not presented as a completed value during upload.
+Before `onFinish`, Download values are provisional. The live speedometer continues through the upload phase using the last `metrics.download` value as its animation base; Download is not measured again during upload.
 
 The single authoritative final Download value is `completedResult.downloadMbps`. The main race begins only after `onFinish`, and completed UI, race, replay, history, sharing, and ranking all use that completed result.
 
