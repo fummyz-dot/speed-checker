@@ -253,3 +253,14 @@ The browser must never calculate Net Speed Score or contain its coefficients. It
 - The provisional Download live meter continues through upload from the last `metrics.download` value; this is presentation only and does not re-measure Download.
 - The main race starts after completion and derives the user horse duration from `completedResult.downloadMbps`.
 - Replay uses the same completed Download value. Top display, race result, history, sharing, and ranking remain aligned to that completed result.
+
+---
+
+## D-018 — Unmatched public paths return a real 404
+
+**Status:** Accepted and implemented
+**Date:** 2026-09-09
+
+- The React application is served at `/`; public subpages are file-backed static assets rather than client-side routes.
+- Workers Static Assets uses `not_found_handling: "404-page"` and serves the custom `404.html` with HTTP 404 for unmatched public paths.
+- `/api/*` remains Worker-first, including the existing JSON response for unknown API routes.

@@ -2,7 +2,7 @@
 
 ## Overview
 
-Net Speed Race is a React/TypeScript single-page application deployed on Cloudflare Workers with Workers Static Assets.
+Net Speed Race has a React/TypeScript application at `/` and file-backed public content pages, deployed on Cloudflare Workers with Workers Static Assets.
 
 High-level flow:
 
@@ -98,7 +98,7 @@ Keep evaluation rules deterministic and testable.
 - permanent apex HTTP redirects to HTTPS before API and Static Assets handling;
 - disabled `workers.dev` hostname after the custom-domain migration;
 - static asset directory: `dist/`;
-- SPA fallback;
+- custom `404.html` responses with HTTP 404 for unmatched public paths;
 - Worker-first handling for `/api/*`.
 
 `public/_headers` supplies security headers for static asset responses. It is copied into `dist/` during the Vite build and interpreted by Workers Static Assets rather than served as a downloadable asset. Worker-generated API responses retain their own header policy.

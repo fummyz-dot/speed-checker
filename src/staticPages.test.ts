@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { describe, expect, it } from 'vitest'
 
@@ -31,10 +31,59 @@ const staticPages = [...trustPages, ...guidePages, ...rankingPages]
 const readPublicFile = (path: string): string =>
   readFileSync(resolve('public', path), 'utf8')
 
+const readProjectFile = (path: string): string =>
+  readFileSync(resolve(path), 'utf8')
+
 const parsePage = (path: string): Document =>
   new DOMParser().parseFromString(readPublicFile(`${path}/index.html`), 'text/html')
 
 describe('public static pages', () => {
+  it('Workers Static Assetsは未一致パスへcustom 404を返す設定を維持する', () => {
+    const config = JSON.parse(readProjectFile('wrangler.jsonc')) as {
+      assets?: {
+        directory?: string
+        binding?: string
+        not_found_handling?: string
+        run_worker_first?: string[]
+      }
+    }
+
+    expect(config.assets).toEqual({
+      directory: './dist',
+      binding: 'ASSETS',
+      not_found_handling: '404-page',
+      run_worker_first: ['/api/*'],
+    })
+  })
+
+  it('custom 404は検索対象外で主要ページへの導線を持ち、canonicalを持たない', () => {
+    const page = new DOMParser().parseFromString(readPublicFile('404.html'), 'text/html')
+
+    expect(page.documentElement.lang).toBe('ja')
+    expect(page.title).toBe('ページが見つかりません | Net Speed Race')
+    expect(page.querySelectorAll('h1')).toHaveLength(1)
+    expect(page.querySelector('h1')?.textContent).toBe('ページが見つかりません')
+    expect(page.querySelector('meta[name="robots"]')?.getAttribute('content')).toBe('noindex, follow')
+    ;['/', '/guide/', '/ranking/', '/about/'].forEach((href) => {
+      expect(page.querySelector(`main a[href="${href}"]`)).not.toBeNull()
+    })
+    expect(page.querySelector('link[rel="canonical"]')).toBeNull()
+    expect(page.querySelector('#root')).toBeNull()
+  })
+
+  it('公開URLに対応する既存assetを維持する', () => {
+    const publicAssets = [
+      ...staticPages.map(({ path }) => `${path}/index.html`),
+      'run/index.html',
+      'robots.txt',
+      'sitemap.xml',
+      'ads.txt',
+    ]
+
+    expect(existsSync(resolve('index.html'))).toBe(true)
+    publicAssets.forEach((path) => expect(existsSync(resolve('public', path)), path).toBe(true))
+  })
+
   it('TurnstileのscriptとframeだけをCSPで許可する', () => {
     const headers = readPublicFile('_headers')
 
@@ -339,5 +388,6 @@ describe('public static pages', () => {
       ...staticPages.map(({ canonical }) => canonical),
     ])
     expect(new Set(urls).size).toBe(16)
+    expect(sitemap).not.toContain('404.html')
   })
 })

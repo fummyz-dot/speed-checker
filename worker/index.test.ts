@@ -366,9 +366,11 @@ describe('ranking service proxy', () => {
   it('unknown API routeは404を維持する', async () => {
     const { env, fetch, rankingFetch } = createEnv()
 
-    const response = await handleRequest(new Request('https://example.com/api/foo'), env)
+    const response = await handleRequest(new Request('https://example.com/api/does-not-exist'), env)
 
     expect(response.status).toBe(404)
+    expect(response.headers.get('Content-Type')).toBe('application/json; charset=utf-8')
+    expect(await response.json()).toEqual({ error: 'Not Found' })
     expect(fetch).not.toHaveBeenCalled()
     expect(rankingFetch).not.toHaveBeenCalled()
   })
