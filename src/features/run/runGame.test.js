@@ -1,3 +1,5 @@
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import { beforeAll, describe, expect, it, vi } from "vitest";
 
 const createCanvasContext = () => new Proxy({}, {
@@ -71,6 +73,14 @@ describe("Net Speed Run game audio integration", () => {
     expect(document.getElementById("gameFrame")).toHaveAttribute("data-state", "INTRO");
   });
 
+  it("keeps the v0.1.3 user-visible shell and runtime aligned", () => {
+    const html = readFileSync(resolve("public/run/index.html"), "utf8");
+
+    expect(html).toContain("Net Speed Run v0.1.3")
+    expect(html).toContain("v0.1.3 GAMEPLAY TEST")
+    expect(window.NetSpeedRun.version).toBe("0.1.3");
+  });
+
   it("plays jump SE only for accepted jumps and suppresses double-jump and stumble input", () => {
     runFrame(10_000);
     runFrame(20_000);
@@ -103,6 +113,7 @@ describe("Net Speed Run game audio integration", () => {
     document.getElementById("retryButton").click();
     expect(audio.restartBgm).toHaveBeenCalledTimes(1);
     expect(document.getElementById("gameFrame")).toHaveAttribute("data-state", "COUNTDOWN");
+    expect(document.getElementById("gameFrame")).toHaveAttribute("data-run-time-sec", "25.0");
   });
 
   it("toggles the in-memory SOUND state", () => {

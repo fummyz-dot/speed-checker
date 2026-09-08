@@ -239,7 +239,9 @@ The browser must never calculate Net Speed Score or contain its coefficients. It
 - `/run/` consumes the ticket immediately after successful verification. Reload, direct re-entry, and BFCache restoration require a new successful ranking participation.
 - In-game `RETRY` reuses the verified run time held in page memory and does not require another ticket.
 - Production requires `START RUN` after `READY` so Web Audio starts from an explicit user gesture. Audio failure must not block gameplay.
-- Net Speed Run v0.1.2 generates restrained BGM and accepted-jump sound effects with Web Audio only; no external audio asset or preference persistence is used.
+- `READY` displays the server-verified `runTimeSec` to one decimal place and passes that same value to the game; the browser does not derive time from score.
+- Production result actions are「リトライ」and「結果に戻る」. Retry reuses the verified time, while return consumes a separate `sessionStorage` context containing only the source measurement ID and restores its browser-local result without reopening ranking submission.
+- Net Speed Run v0.1.3 generates restrained BGM and accepted-jump sound effects with Web Audio only; no external audio asset or preference persistence is used.
 - Mounted jockey scenes show a connected waist, white breeches, bent knees, and dark navy boots without changing the existing intro/dismount timing.
 
 ---

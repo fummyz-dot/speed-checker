@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { saveRunTicket } from '../run/runTicketStorage'
+import { saveRunReturnContext } from '../run/runReturnContext'
 import type { IssuedRunTicket } from '../run/types'
 import type { SpeedMeasurementResult } from '../../types/measurement'
 import { requestRankingTurnstileToken } from './turnstile'
@@ -17,6 +18,7 @@ interface RankingCardProps {
   service: RankingService | null
   measurement: SpeedMeasurementResult
   saveRunAccess?: (issued: IssuedRunTicket) => unknown
+  saveRunReturn?: (measurementId: string) => unknown
   navigateToRun?: () => void
 }
 
@@ -34,6 +36,7 @@ export const RankingCard = ({
   service,
   measurement,
   saveRunAccess = saveRunTicket,
+  saveRunReturn = saveRunReturnContext,
   navigateToRun = defaultNavigateToRun,
 }: RankingCardProps) => {
   const [state, setState] = useState<RankingSubmitState>(() => initialState(context))
@@ -113,6 +116,7 @@ export const RankingCard = ({
       ticket: submission.run.ticket,
       expiresAtMs: submission.run.expiresAtMs,
     })
+    saveRunReturn(measurement.id)
     navigateToRun()
   }
 

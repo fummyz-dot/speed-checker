@@ -7,6 +7,7 @@ import {
   MAX_RECENT_CONDITION_LABELS,
   MAX_MEASUREMENT_HISTORY,
   MEASUREMENT_STORAGE_KEY,
+  measurementResultToMetrics,
   saveMeasurement,
 } from './measurementStorage'
 
@@ -33,6 +34,36 @@ const setHistory = (storage: Storage, records: unknown[]): void => {
 }
 
 describe('measurementStorage', () => {
+  it('保存結果を表示用のbits/secとmsへ変換する', () => {
+    expect(measurementResultToMetrics({
+      ...measurement('metrics'),
+      downloadMbps: 321.4,
+      uploadMbps: 87.6,
+      pingMs: 12.3,
+      jitterMs: 2.1,
+      downloadLoadedLatencyMs: 34.5,
+      uploadLoadedLatencyMs: 45.6,
+    })).toEqual({
+      download: 321_400_000,
+      upload: 87_600_000,
+      latency: 12.3,
+      jitter: 2.1,
+      downloadLoadedLatency: 34.5,
+      uploadLoadedLatency: 45.6,
+    })
+  })
+
+  it('保存結果の未取得optional指標をnullへ変換する', () => {
+    expect(measurementResultToMetrics(measurement('legacy'))).toEqual({
+      download: 10_000_000,
+      upload: 5_000_000,
+      latency: 20,
+      jitter: null,
+      downloadLoadedLatency: null,
+      uploadLoadedLatency: null,
+    })
+  })
+
   it('初回は空の履歴を返す', () => {
     expect(loadMeasurements(new MemoryStorage())).toEqual([])
   })

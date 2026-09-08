@@ -4,7 +4,7 @@
   const LOCAL_HOSTNAMES = new Set(["localhost", "127.0.0.1", "::1", "[::1]"]);
   const IS_LOCAL = LOCAL_HOSTNAMES.has(window.location.hostname);
 
-  const GAME_VERSION = "0.1.2";
+  const GAME_VERSION = "0.1.3";
 
   const CONFIG = Object.freeze({
     courseLength: 1000,
@@ -369,6 +369,7 @@
 
     const now = performance.now();
     game.selectedRunTimeSec = runTimeSec;
+    frame.dataset.runTimeSec = runTimeSec.toFixed(1);
 
     if (!retry || !game.course.length) {
       game.courseSeed = createSeed();
@@ -1960,7 +1961,6 @@
     },
   });
 
-  if (!IS_LOCAL) changeTimeButton.textContent = "SPEED TEST";
   updateSoundToggle();
   resizeCanvas();
   transitionTo(IS_LOCAL ? STATES.TITLE : STATES.BOOT, performance.now());

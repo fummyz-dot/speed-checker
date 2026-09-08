@@ -12,9 +12,10 @@ import { UseCaseEvaluation } from './UseCaseEvaluation'
 
 interface CompletedMeasurementProps {
   result: SpeedMeasurementResult
+  persistResult?: boolean
 }
 
-export const CompletedMeasurement = ({ result }: CompletedMeasurementProps) => {
+export const CompletedMeasurement = ({ result, persistResult = true }: CompletedMeasurementProps) => {
   const [previous, setPrevious] = useState<SpeedMeasurementResult | null>(null)
   const [history, setHistory] = useState<SpeedMeasurementResult[]>([])
   const [savedResultId, setSavedResultId] = useState<string | null>(null)
@@ -25,11 +26,11 @@ export const CompletedMeasurement = ({ result }: CompletedMeasurementProps) => {
 
   useEffect(() => {
     const oldHistory = loadMeasurements()
-    const updatedHistory = saveMeasurement(result)
+    const updatedHistory = persistResult ? saveMeasurement(result) : oldHistory
     setPrevious(oldHistory.find((item) => item.id !== result.id) ?? null)
     setHistory(updatedHistory)
     setSavedResultId(updatedHistory.some((item) => item.id === result.id) ? result.id : null)
-  }, [result])
+  }, [persistResult, result])
 
   const clearHistory = () => {
     if (!window.confirm('このブラウザに保存された測定履歴を削除しますか？')) return

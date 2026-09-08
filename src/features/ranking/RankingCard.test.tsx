@@ -224,6 +224,7 @@ describe('RankingCard', () => {
 
   it('stores and navigates only when GO TO RUN is clicked after ranking success', async () => {
     const saveRunAccess = vi.fn()
+    const saveRunReturn = vi.fn()
     const navigateToRun = vi.fn()
     render(
       <RankingCard
@@ -231,6 +232,7 @@ describe('RankingCard', () => {
         service={service()}
         measurement={measurement}
         saveRunAccess={saveRunAccess}
+        saveRunReturn={saveRunReturn}
         navigateToRun={navigateToRun}
       />,
     )
@@ -238,6 +240,7 @@ describe('RankingCard', () => {
     fireEvent.click(screen.getByRole('button', { name: '全国ランキングに参加して順位を見る' }))
     const runButton = await screen.findByRole('button', { name: 'GO TO RUN!' })
     expect(saveRunAccess).not.toHaveBeenCalled()
+    expect(saveRunReturn).not.toHaveBeenCalled()
     expect(navigateToRun).not.toHaveBeenCalled()
 
     fireEvent.click(runButton)
@@ -245,6 +248,7 @@ describe('RankingCard', () => {
     expect(saveRunAccess).toHaveBeenCalledWith({
       ok: true, ticket: 'run-ticket', expiresAtMs: 1_800_000_000_000,
     })
+    expect(saveRunReturn).toHaveBeenCalledWith('measurement-1')
     expect(navigateToRun).toHaveBeenCalledTimes(1)
   })
 

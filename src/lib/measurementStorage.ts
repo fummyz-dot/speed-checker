@@ -1,4 +1,5 @@
 import type { SpeedMeasurementResult } from '../types/measurement'
+import type { SpeedTestMetrics } from '../types/speedTest'
 import {
   isValidMeasurementResult,
   normalizeConditionLabel,
@@ -66,6 +67,17 @@ export const loadMeasurements = (
     return []
   }
 }
+
+export const measurementResultToMetrics = (
+  result: SpeedMeasurementResult,
+): SpeedTestMetrics => ({
+  download: result.downloadMbps * 1_000_000,
+  upload: result.uploadMbps * 1_000_000,
+  latency: result.pingMs,
+  jitter: result.jitterMs ?? null,
+  downloadLoadedLatency: result.downloadLoadedLatencyMs ?? null,
+  uploadLoadedLatency: result.uploadLoadedLatencyMs ?? null,
+})
 
 export const saveMeasurement = (
   result: SpeedMeasurementResult,

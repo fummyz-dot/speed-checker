@@ -12,11 +12,13 @@ import { useSpeedTest } from './hooks/useSpeedTest'
 import { RankingCard } from './features/ranking/RankingCard'
 import { isRankingEnabled } from './features/ranking/rankingFeature'
 import { useRanking } from './features/ranking/useRanking'
+import { consumeRunReturnContext } from './features/run/runReturnContext'
 import {
   bandwidthBitsToMbps,
   formatFinalSpeedDisplay,
 } from './lib/speedValue'
-import { loadMeasurements } from './lib/measurementStorage'
+import { loadMeasurements, measurementResultToMetrics } from './lib/measurementStorage'
+import type { SpeedMeasurementResult } from './types/measurement'
 import { normalizeConditionLabel } from './lib/measurementValidation'
 
 const getInitialConditionLabel = (): string | null =>
@@ -51,19 +53,24 @@ function App() {
   const [isConditionEditing, setIsConditionEditing] = useState(false)
   const [isRaceFocused, setIsRaceFocused] = useState(false)
   const [isRaceFocusExiting, setIsRaceFocusExiting] = useState(false)
+  const [restoredResult, setRestoredResult] = useState<SpeedMeasurementResult | null>(null)
+  const hasConsumedRunReturnRef = useRef(false)
   const focusReturnTargetRef = useRef<HTMLElement | null>(null)
   const raceFocusExitTimerRef = useRef<number | null>(null)
   const pendingRaceFocusExitRef = useRef<RaceFocusExitRequest | null>(null)
   const displayedDownloadMbps = phase === 'complete' && completedResult
     ? completedResult.downloadMbps
-    : null
+    : restoredResult?.downloadMbps ?? null
+  const displayedMetrics = restoredResult
+    ? measurementResultToMetrics(restoredResult)
+    : metrics
   const displayedDownload = formatFinalSpeedDisplay(displayedDownloadMbps)
-  const hasStarted = phase !== 'idle'
+  const hasStarted = phase !== 'idle' || restoredResult !== null
   const buttonLabel = isPreparingContext
     ? '準備中…'
     : isRunning
     ? '測定中…'
-    : phase === 'complete' || phase === 'error'
+    : phase === 'complete' || phase === 'error' || restoredResult !== null
       ? 'もう一度測定'
       : '測定開始'
 
@@ -105,6 +112,22 @@ function App() {
       document.getElementById('results-title')?.focus({ preventScroll: true })
     })
   }, [exitRaceFocus, rankingEnabled])
+
+  useEffect(() => {
+    if (hasConsumedRunReturnRef.current) return
+    hasConsumedRunReturnRef.current = true
+    const context = consumeRunReturnContext()
+    if (!context) return
+    const matchingResult = loadMeasurements().find(({ id }) => id === context.measurementId)
+    if (matchingResult) setRestoredResult(matchingResult)
+  }, [])
+
+  useEffect(() => {
+    if (!restoredResult) return
+    const results = document.getElementById('measurement-results')
+    results?.scrollIntoView({ block: 'start' })
+    document.getElementById('results-title')?.focus({ preventScroll: true })
+  }, [restoredResult])
 
   useEffect(() => {
     if (!isRaceFocused) return
@@ -153,11 +176,15 @@ function App() {
     if (isConditionEditing || isPreparingContext) return
     requestRaceFocus()
     if (!rankingEnabled) {
+      setRestoredResult(null)
       start({ conditionLabel })
       return
     }
     void prepareMeasurement().then((shouldStart) => {
-      if (shouldStart) start({ conditionLabel })
+      if (shouldStart) {
+        setRestoredResult(null)
+        start({ conditionLabel })
+      }
     })
   }
 
@@ -312,11 +339,18 @@ function App() {
               <span>DETAILS</span>
               <h2 id="results-title" tabIndex={-1}>回線品質の詳細</h2>
             </div>
-            <p>速度は高いほど、レイテンシとジッターは低いほど快適です。</p>
+            <p>
+              {restoredResult
+                ? 'Runで使用した測定結果を表示しています。'
+                : '速度は高いほど、レイテンシとジッターは低いほど快適です。'}
+            </p>
           </div>
-          <MetricsGrid metrics={metrics} />
+          <MetricsGrid metrics={displayedMetrics} />
           {phase === 'complete' && completedResult && (
             <CompletedMeasurement result={completedResult} />
+          )}
+          {restoredResult && (
+            <CompletedMeasurement result={restoredResult} persistResult={false} />
           )}
         </section>
 

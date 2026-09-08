@@ -139,6 +139,32 @@ button {
   line-height: 1.7;
 }
 
+.boot-run-time {
+  display: grid;
+  gap: 3px;
+  margin-top: 20px;
+  padding: 15px;
+  border: 1px solid rgba(82, 231, 255, 0.28);
+  border-radius: 14px;
+  background: rgba(12, 43, 58, 0.72);
+}
+
+.boot-run-time[hidden] {
+  display: none;
+}
+
+.boot-run-time span {
+  color: rgba(239, 251, 254, 0.72);
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.boot-run-time strong {
+  color: var(--cyan-bright);
+  font-size: clamp(1.75rem, 6vw, 2.35rem);
+  line-height: 1.2;
+}
+
 .boot-return {
   display: grid;
   place-items: center;

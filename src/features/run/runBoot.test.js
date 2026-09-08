@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   bootstrapProductionRun,
+  configureRunResultActions,
   loadStoredRunTicket,
   redirectRestoredProductionRun,
   RUN_TICKET_STORAGE_KEY,
@@ -14,7 +15,8 @@ const jsonResponse = (body, status = 200) =>
 
 const setup = (response) => {
   document.body.innerHTML = `
-    <section id="bootPanel" hidden><p id="bootMessage"></p><button id="startRunButton" hidden>START RUN</button><a id="bootReturnLink" href="/" hidden>戻る</a></section>
+    <section id="bootPanel" hidden><p id="bootMessage"></p><div id="bootRunTime" hidden><span>今回の持ち時間</span><strong id="bootRunTimeValue"></strong></div><button id="startRunButton" hidden>START RUN</button><a id="bootReturnLink" href="/" hidden>戻る</a></section>
+    <button id="retryButton">RETRY</button><button id="changeTimeButton">CHANGE TIME</button>
   `;
   sessionStorage.setItem(RUN_TICKET_STORAGE_KEY, JSON.stringify(stored));
   return {
@@ -26,8 +28,12 @@ const setup = (response) => {
     audioApi: { start: vi.fn().mockResolvedValue(true), startBgm: vi.fn() },
     bootPanel: document.getElementById("bootPanel"),
     bootMessage: document.getElementById("bootMessage"),
+    bootRunTime: document.getElementById("bootRunTime"),
+    bootRunTimeValue: document.getElementById("bootRunTimeValue"),
     startButton: document.getElementById("startRunButton"),
     returnLink: document.getElementById("bootReturnLink"),
+    retryButton: document.getElementById("retryButton"),
+    returnButton: document.getElementById("changeTimeButton"),
     nowMs,
   };
 };
@@ -56,6 +62,9 @@ describe("Net Speed Run production boot", () => {
     expect(context.gameApi.start).not.toHaveBeenCalled();
     expect(context.audioApi.start).not.toHaveBeenCalled();
     expect(context.startButton).not.toHaveAttribute("hidden");
+    expect(context.bootRunTime).not.toHaveAttribute("hidden");
+    expect(context.bootRunTime).toHaveTextContent("今回の持ち時間");
+    expect(context.bootRunTimeValue).toHaveTextContent("39.7秒");
     expect(sessionStorage.getItem(RUN_TICKET_STORAGE_KEY)).toBeNull();
     expect(localStorage.length).toBe(0);
 
@@ -65,6 +74,39 @@ describe("Net Speed Run production boot", () => {
     expect(context.audioApi.startBgm).toHaveBeenCalledTimes(1);
     context.startButton.click();
     expect(context.gameApi.start).toHaveBeenCalledTimes(1);
+  });
+
+  it.each([
+    [25, "25.0秒"],
+    [42.6, "42.6秒"],
+    [50, "50.0秒"],
+  ])("shows verified runtime %s as %s and starts with the same value", async (runTimeSec, label) => {
+    const context = setup(jsonResponse({
+      ok: true, runTimeSec, expiresAtMs: nowMs + 60_000,
+    }));
+
+    await bootstrapProductionRun(context);
+
+    expect(context.bootRunTimeValue).toHaveTextContent(label);
+    context.startButton.click();
+    await vi.waitFor(() => expect(context.gameApi.start).toHaveBeenCalledWith(runTimeSec));
+  });
+
+  it("uses Japanese production result actions and preserves local test labels", () => {
+    const retryButton = document.createElement("button");
+    const returnButton = document.createElement("button");
+    retryButton.textContent = "RETRY";
+    returnButton.textContent = "CHANGE TIME";
+
+    configureRunResultActions({ hostname: "netspeedrace.com", retryButton, returnButton });
+    expect(retryButton).toHaveTextContent("リトライ");
+    expect(returnButton).toHaveTextContent("結果に戻る");
+
+    retryButton.textContent = "RETRY";
+    returnButton.textContent = "CHANGE TIME";
+    configureRunResultActions({ hostname: "localhost", retryButton, returnButton });
+    expect(retryButton).toHaveTextContent("RETRY");
+    expect(returnButton).toHaveTextContent("CHANGE TIME");
   });
 
   it.each([

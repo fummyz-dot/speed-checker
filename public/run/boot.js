@@ -81,13 +81,21 @@ const showBootError = ({ bootPanel, bootMessage, returnLink }) => {
   returnLink.hidden = false;
 };
 
-const showReady = ({ bootPanel, bootMessage, startButton, returnLink }) => {
+const showReady = ({ bootPanel, bootMessage, bootRunTime, bootRunTimeValue, startButton, returnLink, runTimeSec }) => {
   bootPanel.hidden = false;
   bootPanel.removeAttribute("role");
   bootMessage.textContent = "準備ができました。START RUNを押すとゲームとサウンドが始まります。";
+  bootRunTimeValue.textContent = `${runTimeSec.toFixed(1)}秒`;
+  bootRunTime.hidden = false;
   returnLink.hidden = true;
   startButton.hidden = false;
   startButton.focus({ preventScroll: true });
+};
+
+export const configureRunResultActions = ({ hostname, retryButton, returnButton }) => {
+  if (isLocalRunHost(hostname)) return;
+  retryButton.textContent = "リトライ";
+  returnButton.textContent = "結果に戻る";
 };
 
 export const startVerifiedRun = async ({ runTimeSec, gameApi, audioApi }) => {
@@ -115,10 +123,15 @@ export const bootstrapProductionRun = async ({
   audioApi,
   bootPanel,
   bootMessage,
+  bootRunTime,
+  bootRunTimeValue,
   startButton,
   returnLink,
+  retryButton,
+  returnButton,
   nowMs = Date.now(),
 }) => {
+  configureRunResultActions({ hostname, retryButton, returnButton });
   if (isLocalRunHost(hostname)) return { status: "local" };
 
   const stored = loadStoredRunTicket(storage, nowMs);
@@ -157,7 +170,15 @@ export const bootstrapProductionRun = async ({
 
   if (parsed.status === "verified") {
     removeStoredRunTicket(storage);
-    showReady({ bootPanel, bootMessage, startButton, returnLink });
+    showReady({
+      bootPanel,
+      bootMessage,
+      bootRunTime,
+      bootRunTimeValue,
+      startButton,
+      returnLink,
+      runTimeSec: parsed.runTimeSec,
+    });
     let started = false;
     startButton.addEventListener("click", () => {
       if (started) return;
@@ -180,9 +201,14 @@ export const bootstrapProductionRun = async ({
 const startBrowserBoot = () => {
   const bootPanel = document.getElementById("bootPanel");
   const bootMessage = document.getElementById("bootMessage");
+  const bootRunTime = document.getElementById("bootRunTime");
+  const bootRunTimeValue = document.getElementById("bootRunTimeValue");
   const startButton = document.getElementById("startRunButton");
   const returnLink = document.getElementById("bootReturnLink");
-  if (!bootPanel || !bootMessage || !startButton || !returnLink) return;
+  const retryButton = document.getElementById("retryButton");
+  const returnButton = document.getElementById("changeTimeButton");
+  if (!bootPanel || !bootMessage || !bootRunTime || !bootRunTimeValue
+    || !startButton || !returnLink || !retryButton || !returnButton) return;
   if (!window.NetSpeedRun) {
     if (document.readyState !== "complete") {
       window.addEventListener("load", startBrowserBoot, { once: true });
@@ -202,8 +228,12 @@ const startBrowserBoot = () => {
     },
     bootPanel,
     bootMessage,
+    bootRunTime,
+    bootRunTimeValue,
     startButton,
     returnLink,
+    retryButton,
+    returnButton,
   });
 };
 

@@ -7,6 +7,10 @@ import { useSpeedTest } from './hooks/useSpeedTest'
 import { createRankingApiService } from './features/ranking/rankingService'
 import { EMPTY_METRICS } from './types/speedTest'
 import { MEASUREMENT_STORAGE_KEY } from './lib/measurementStorage'
+import {
+  RUN_RETURN_CONTEXT_STORAGE_KEY,
+  saveRunReturnContext,
+} from './features/run/runReturnContext'
 
 vi.mock('./hooks/useConnectionInfo')
 vi.mock('./hooks/useSpeedTest')
@@ -56,6 +60,7 @@ describe('App', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     window.localStorage.clear()
+    window.sessionStorage.clear()
     document.documentElement.classList.remove('race-focus-lock')
     document.body.classList.remove('race-focus-lock')
     vi.mocked(useConnectionInfo).mockReturnValue({ state: { status: 'loading' }, retry: vi.fn() })
@@ -218,6 +223,91 @@ describe('App', () => {
 
     expect(start).toHaveBeenCalledWith({ conditionLabel: null })
     expect(createRankingApiService).not.toHaveBeenCalled()
+  })
+
+  it('Runの元measurementを履歴から復元し、再送信せず詳細へ移動する', async () => {
+    vi.stubEnv('VITE_RANKING_ENABLED', 'true')
+    const restoredResult = {
+      id: 'run-source',
+      measuredAt: '2026-09-09T00:00:00.000Z',
+      downloadMbps: 321.4,
+      uploadMbps: 87.6,
+      pingMs: 12.3,
+      jitterMs: 2.1,
+      downloadLoadedLatencyMs: 34.5,
+      uploadLoadedLatencyMs: 45.6,
+    }
+    window.localStorage.setItem(MEASUREMENT_STORAGE_KEY, JSON.stringify([restoredResult]))
+    saveRunReturnContext(restoredResult.id)
+    const scrollIntoView = vi.fn()
+    HTMLElement.prototype.scrollIntoView = scrollIntoView
+    const start = vi.fn()
+    vi.mocked(useSpeedTest).mockReturnValue({
+      metrics: EMPTY_METRICS, phase: 'idle', isRunning: false, error: null, completedResult: null,
+      start,
+    })
+
+    const { container } = render(<App />)
+
+    expect(await screen.findByText('Runで使用した測定結果を表示しています。')).toBeVisible()
+    expect(container.querySelector('.speed-display__reading strong')).toHaveTextContent('321')
+    const details = document.getElementById('measurement-results') as HTMLElement
+    expect(within(details).getByText('87.6')).toBeVisible()
+    expect(within(details).getByText('12')).toBeVisible()
+    expect(within(details).getByText('2.1')).toBeVisible()
+    expect(within(details).getByText('35')).toBeVisible()
+    expect(within(details).getByText('46')).toBeVisible()
+    expect(screen.getByRole('button', { name: 'もう一度測定' })).toBeVisible()
+    expect(screen.queryByRole('heading', { name: '本日の全国回線品質ランキング' })).not.toBeInTheDocument()
+    expect(createRankingApiService).not.toHaveBeenCalled()
+    expect(start).not.toHaveBeenCalled()
+    expect(scrollIntoView).toHaveBeenCalledWith({ block: 'start' })
+    expect(document.getElementById('results-title')).toHaveFocus()
+    expect(window.sessionStorage.getItem(RUN_RETURN_CONTEXT_STORAGE_KEY)).toBeNull()
+    expect(JSON.parse(window.localStorage.getItem(MEASUREMENT_STORAGE_KEY) ?? '[]')).toEqual([restoredResult])
+  })
+
+  it('Return Contextと一致する履歴がなければ通常トップへ戻る', async () => {
+    window.localStorage.setItem(MEASUREMENT_STORAGE_KEY, JSON.stringify([{
+      id: 'other', measuredAt: '2026-09-08T00:00:00.000Z',
+      downloadMbps: 100, uploadMbps: 50, pingMs: 20,
+    }]))
+    saveRunReturnContext('missing')
+
+    const { container } = render(<App />)
+
+    await waitFor(() => {
+      expect(window.sessionStorage.getItem(RUN_RETURN_CONTEXT_STORAGE_KEY)).toBeNull()
+    })
+    expect(screen.getByRole('button', { name: '測定開始' })).toBeVisible()
+    expect(container.querySelector('.speed-display__reading strong')).toHaveTextContent('—')
+    expect(screen.queryByText('Runで使用した測定結果を表示しています。')).not.toBeInTheDocument()
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument()
+  })
+
+  it('復元結果からもう一度測定すると古い表示を解除して新規測定を開始する', async () => {
+    const user = userEvent.setup()
+    const restoredResult = {
+      id: 'run-source', measuredAt: '2026-09-09T00:00:00.000Z',
+      downloadMbps: 321.4, uploadMbps: 87.6, pingMs: 12.3,
+    }
+    window.localStorage.setItem(MEASUREMENT_STORAGE_KEY, JSON.stringify([restoredResult]))
+    saveRunReturnContext(restoredResult.id)
+    HTMLElement.prototype.scrollIntoView = vi.fn()
+    const start = vi.fn()
+    vi.mocked(useSpeedTest).mockReturnValue({
+      metrics: EMPTY_METRICS, phase: 'idle', isRunning: false, error: null, completedResult: null,
+      start,
+    })
+
+    const { container } = render(<App />)
+    await screen.findByText('Runで使用した測定結果を表示しています。')
+    await user.click(screen.getByRole('button', { name: 'もう一度測定' }))
+
+    expect(start).toHaveBeenCalledWith({ conditionLabel: null })
+    expect(screen.queryByText('Runで使用した測定結果を表示しています。')).not.toBeInTheDocument()
+    expect(container.querySelector('.speed-display__reading strong')).toHaveTextContent('—')
+    expect(screen.queryByText('今回の測定条件')).not.toBeInTheDocument()
   })
 
   it('desktopとmobileでhero controlsのDOM順を切り替え、viewport変更にも追従する', async () => {
