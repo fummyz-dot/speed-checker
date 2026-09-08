@@ -164,6 +164,9 @@ describe('App', () => {
     expect(rankingResults).toHaveAttribute('aria-hidden', 'true')
     expect(rankingResults).toHaveAttribute('inert')
     expect(screen.getByRole('button', { name: '全国ランキングに参加して順位を見る', hidden: true })).toBeEnabled()
+    expect(within(measurementResults as HTMLElement).getByRole('heading', {
+      name: 'この測定結果で走る', hidden: true,
+    })).toBeInTheDocument()
   })
 
   it('rankingを明示的に無効化した場合は完了後もcardを表示せずserviceを呼ばない', () => {
@@ -184,6 +187,7 @@ describe('App', () => {
     expect(document.querySelector('.hero__intro--with-ranking')).not.toBeInTheDocument()
     expect(document.querySelector('.hero-ranking-promo')).not.toBeInTheDocument()
     expect(screen.queryByText('全国ランキング開催中！')).not.toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'この測定結果で走る' })).toBeVisible()
   })
 
   it('development/testのdefaultではranking serviceを呼ばない', async () => {

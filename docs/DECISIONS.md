@@ -211,7 +211,7 @@ The browser must never calculate Net Speed Score or contain its coefficients. It
 
 ## D-015 — Net Speed Run uses a private score authority and public stateless Run tickets
 
-**Status:** Accepted and backend implemented
+**Status:** Accepted and implemented
 **Date:** 2026-09-08
 
 - The private `netspeedrace-ranking` Worker remains the Net Speed Score authority; the browser and public Worker do not copy its score formula.
@@ -220,4 +220,7 @@ The browser must never calculate Net Speed Score or contain its coefficients. It
 - Run tickets have a 30-minute TTL, a cryptographically random nonce, and the fixed purpose `net-speed-run`.
 - Verification is stateless. Replay is allowed until expiry because the game has no reward, prize, or game ranking.
 - Tickets contain the mapped Run time, not raw score, measurements, client IP, connection metadata, or condition labels.
-- Browser `sessionStorage` handoff and `/run/` production boot integration remain a later phase. Raw score and time values from the browser are not trusted.
+- Run launch is user initiated from the completed-measurement UI and independent of ranking participation.
+- The issued ticket is stored only in `sessionStorage`; `/run/` verifies it before passing the verified run time to the game. The ticket remains available until expiry for refresh and retry.
+- Production `/run/` starts in a horse-free `BOOT` state and never shows the development title or time selector. Invalid or expired tickets return home; service failure shows a manual recovery path.
+- Production `RETRY` reuses the same verified run time, while the second result action returns to the speed test. Raw score and time query values are ignored.

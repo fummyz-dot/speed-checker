@@ -20,6 +20,15 @@
           aria-label="Net Speed Run ゲーム画面。プレイ中はSpace、クリック、タップでジャンプします。"
         ></canvas>
 
+        <section class="overlay panel panel--boot" id="bootPanel" aria-live="polite" hidden>
+          <div class="boot-card">
+            <p class="boot-kicker">NET SPEED RUN</p>
+            <h1 class="boot-title">READY</h1>
+            <p id="bootMessage">ゲームを準備しています…</p>
+            <a class="action-button boot-return" id="bootReturnLink" href="/" hidden>測定画面へ戻る</a>
+          </div>
+        </section>
+
         <section class="overlay panel panel--title" id="titlePanel" aria-labelledby="gameTitle" hidden>
           <div class="version-mark">v0.1 GAMEPLAY TEST</div>
           <h1 id="gameTitle"><span>NET SPEED</span> RUN</h1>
@@ -61,5 +70,6 @@
       </div>
     </main>
     <script src="game.js" defer></script>
+    <script src="boot.js" type="module"></script>
   </body>
 </html>

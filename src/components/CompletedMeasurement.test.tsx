@@ -22,6 +22,13 @@ describe('CompletedMeasurement history', () => {
 
   afterEach(() => vi.restoreAllMocks())
 
+  it('測定完了結果にNet Speed Runの起動導線を表示する', () => {
+    render(<CompletedMeasurement result={{ ...measurement('current'), jitterMs: 5 }} />)
+
+    expect(screen.getByRole('heading', { name: 'この測定結果で走る' })).toBeVisible()
+    expect(screen.getByRole('button', { name: 'NET SPEED RUNを開始' })).toBeEnabled()
+  })
+
   it('有効な測定条件を最初に表示し、履歴への保存を確認できた場合だけ明示する', async () => {
     const result = { ...measurement('current'), conditionLabel: 'リビング 5GHz' }
     const { container } = render(<CompletedMeasurement result={result} />)

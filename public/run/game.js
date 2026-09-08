@@ -2,11 +2,7 @@
   "use strict";
 
   const LOCAL_HOSTNAMES = new Set(["localhost", "127.0.0.1", "::1", "[::1]"]);
-
-  if (!LOCAL_HOSTNAMES.has(window.location.hostname)) {
-    window.location.replace("/");
-    return;
-  }
+  const IS_LOCAL = LOCAL_HOSTNAMES.has(window.location.hostname);
 
   const GAME_VERSION = "0.1.1";
 
@@ -43,6 +39,7 @@
   const BASE_SPEED_MPS = CONFIG.courseLength / CONFIG.idealClearTimeSec;
 
   const STATES = Object.freeze({
+    BOOT: "BOOT",
     TITLE: "TITLE",
     INTRO: "INTRO",
     COUNTDOWN: "COUNTDOWN",
@@ -110,6 +107,7 @@
 
   const canvas = document.getElementById("gameCanvas");
   const frame = document.getElementById("gameFrame");
+  const bootPanel = document.getElementById("bootPanel");
   const titlePanel = document.getElementById("titlePanel");
   const resultPanel = document.getElementById("resultPanel");
   const pausePanel = document.getElementById("pausePanel");
@@ -129,7 +127,7 @@
   };
 
   const game = {
-    state: STATES.TITLE,
+    state: IS_LOCAL ? STATES.TITLE : STATES.BOOT,
     stateEnteredAt: performance.now(),
     introPlayed: false,
     selectedRunTimeSec: null,
@@ -230,6 +228,7 @@
   }
 
   function setPanelVisibility(activePanel) {
+    bootPanel.hidden = activePanel !== "boot";
     titlePanel.hidden = activePanel !== "title";
     resultPanel.hidden = activePanel !== "result";
     pausePanel.hidden = activePanel !== "pause";
@@ -313,6 +312,9 @@
     }
 
     switch (nextState) {
+      case STATES.BOOT:
+        setPanelVisibility("boot");
+        break;
       case STATES.TITLE:
         setPanelVisibility("title");
         break;
@@ -374,6 +376,10 @@
   }
 
   function requestChangeTime() {
+    if (!IS_LOCAL) {
+      window.location.assign("/");
+      return;
+    }
     game.course = [];
     game.courseSeed = null;
     transitionTo(STATES.TITLE);
@@ -1737,9 +1743,16 @@
   }
 
   function render(now) {
-    const camera = getCamera();
     ctx.setTransform(viewport.dpr, 0, 0, viewport.dpr, 0, 0);
     ctx.clearRect(0, 0, viewport.width, viewport.height);
+
+    if (game.state === STATES.BOOT) {
+      ctx.fillStyle = "#07131f";
+      ctx.fillRect(0, 0, viewport.width, viewport.height);
+      return;
+    }
+
+    const camera = getCamera();
 
     const shakeStrength = game.run.shakeRemainingSec > 0 ? 5 * (game.run.shakeRemainingSec / 0.22) : 0;
     const clearShakeStrength =
@@ -1795,7 +1808,7 @@
   document.querySelectorAll(".time-button").forEach((button) => {
     button.addEventListener("click", () => {
       const runTimeSec = Number(button.dataset.time);
-      if (CONFIG.testRunTimes.includes(runTimeSec)) startGame(runTimeSec);
+      if (IS_LOCAL && CONFIG.testRunTimes.includes(runTimeSec)) startGame(runTimeSec);
     });
   });
 
@@ -1845,7 +1858,8 @@
     },
   });
 
+  if (!IS_LOCAL) changeTimeButton.textContent = "SPEED TEST";
   resizeCanvas();
-  transitionTo(STATES.TITLE, performance.now());
+  transitionTo(IS_LOCAL ? STATES.TITLE : STATES.BOOT, performance.now());
   requestAnimationFrame(frameLoop);
 })();

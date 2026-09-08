@@ -102,6 +102,12 @@ Behavioral intent:
 
 A horse implementation should preserve this lifecycle unless the design task explicitly revises it.
 
+## Net Speed Run launch
+
+The completed-measurement area offers a separate, user-initiated Net Speed Run card. It is available independently of ranking participation and requests a Run ticket only after the user presses the launch button. Missing Ping or jitter keeps the action disabled with a neutral explanation; a service error stays within the card so the measurement result, history, and ranking UI remain usable.
+
+The `/run/` time selector is a localhost-only gameplay tool. On production-like hosts, the initial screen is a quiet `BOOT` state with no horse, jockey, obstacles, or test-time choices. A verified ticket proceeds directly to the intro. Invalid or expired tickets return to the measurement page; temporary verification failure shows a keyboard-accessible manual return link. Results offer `RETRY` with the same verified time and `SPEED TEST` to return home.
+
 ## Measurement visibility and race recovery
 
 Users should keep this page open while a measurement is in progress. If the page is hidden during an active measurement, the measurement is stopped and shown as an error rather than presented as a comparable result. Where supported, Screen Wake Lock is requested as a best-effort aid while measuring; it is optional, can fail silently, and does not change the hidden-page interruption policy.

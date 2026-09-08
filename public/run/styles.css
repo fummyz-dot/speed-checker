@@ -105,6 +105,51 @@ button {
     linear-gradient(180deg, rgba(3, 10, 17, 0.08), rgba(3, 10, 17, 0.68));
 }
 
+.panel--boot {
+  background:
+    radial-gradient(circle at 50% 35%, rgba(82, 231, 255, 0.12), transparent 38%),
+    #07131f;
+}
+
+.boot-card {
+  width: min(100%, 430px);
+  padding: clamp(28px, 6vw, 44px);
+  border: 1px solid rgba(135, 231, 247, 0.3);
+  border-radius: 24px;
+  background: rgba(5, 17, 28, 0.94);
+  box-shadow: 0 22px 60px rgba(0, 0, 0, 0.42);
+  text-align: center;
+}
+
+.boot-kicker {
+  margin: 0 0 8px;
+  color: var(--cyan-bright);
+  font-size: 0.75rem;
+  font-weight: 850;
+  letter-spacing: 0.19em;
+}
+
+.boot-title {
+  font-size: clamp(2.5rem, 8vw, 4.5rem);
+}
+
+.boot-card p:not(.boot-kicker) {
+  margin: 18px 0 0;
+  color: rgba(239, 251, 254, 0.78);
+  line-height: 1.7;
+}
+
+.boot-return {
+  display: grid;
+  place-items: center;
+  margin-top: 22px;
+  text-decoration: none;
+}
+
+.boot-return[hidden] {
+  display: none;
+}
+
 .panel--title > * {
   width: min(100%, 520px);
 }
