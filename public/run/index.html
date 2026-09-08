@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#07131f" />
+    <meta
+      name="description"
+      content="ジャンプだけで固定GOALを目指す、Net Speed Run v0.1ゲーム性検証版"
+    />
+    <title>Net Speed Run v0.1</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="game-shell" aria-label="Net Speed Run v0.1">
+      <div class="game-frame" id="gameFrame">
+        <canvas
+          id="gameCanvas"
+          tabindex="0"
+          aria-label="Net Speed Run ゲーム画面。プレイ中はSpace、クリック、タップでジャンプします。"
+        ></canvas>
+
+        <section class="overlay panel panel--title" id="titlePanel" aria-labelledby="gameTitle" hidden>
+          <div class="version-mark">v0.1 GAMEPLAY TEST</div>
+          <h1 id="gameTitle"><span>NET SPEED</span> RUN</h1>
+          <p class="section-label">TEST RUN TIME</p>
+          <div class="time-grid" role="group" aria-label="テスト用の制限時間を選択">
+            <button class="time-button" type="button" data-time="25">
+              <strong>25</strong><span>SEC</span>
+            </button>
+            <button class="time-button" type="button" data-time="35">
+              <strong>35</strong><span>SEC</span>
+            </button>
+            <button class="time-button time-button--accent" type="button" data-time="45">
+              <strong>45</strong><span>SEC</span>
+            </button>
+            <button class="time-button" type="button" data-time="50">
+              <strong>50</strong><span>SEC</span>
+            </button>
+          </div>
+          <p class="control-hint"><span>SPACE</span><i></i><span>CLICK</span><i></i><span>TAP</span> — JUMP</p>
+        </section>
+
+        <section class="overlay panel panel--result" id="resultPanel" aria-live="polite" hidden>
+          <div class="result-card">
+            <p class="result-kicker" id="resultKicker"></p>
+            <h2 id="resultTitle"></h2>
+            <div class="result-detail" id="resultDetail"></div>
+            <div class="result-actions">
+              <button class="action-button action-button--primary" id="retryButton" type="button">RETRY</button>
+              <button class="action-button" id="changeTimeButton" type="button">CHANGE TIME</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="overlay panel panel--pause" id="pausePanel" aria-live="polite" hidden>
+          <button class="resume-button" id="resumeButton" type="button">TAP TO RESUME</button>
+        </section>
+
+        <div class="sr-only" id="liveRegion" aria-live="assertive"></div>
+      </div>
+    </main>
+    <script src="game.js" defer></script>
+  </body>
+</html>

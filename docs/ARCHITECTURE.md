@@ -137,6 +137,8 @@ Users explicitly choose whether to copy the PNG image, save it, open an X post w
 
 Node.js 24 is the repository baseline.
 
+`public/run/` contains the standalone Net Speed Run v0.1.1 static source and is copied by Vite to `dist/run/` without entering the homepage React bundle. Until Run Ticket validation is implemented, its gameplay test selector is available only on `localhost`, `127.0.0.1`, and `::1`; other hosts redirect `/run/` requests to `/` and do not consume raw `time` or `score` query parameters.
+
 Normal build:
 
 ```bash
