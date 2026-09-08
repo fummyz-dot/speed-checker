@@ -145,7 +145,7 @@ Users explicitly choose whether to copy the PNG image, save it, open an X post w
 
 Node.js 24 is the repository baseline.
 
-`public/run/` contains the standalone Net Speed Run v0.1.1 static source and is copied by Vite to `dist/run/` without entering the homepage React bundle. The Worker-side Run Ticket issue and verification APIs are implemented, but the browser handoff is not connected yet. Its gameplay test selector remains available only on `localhost`, `127.0.0.1`, and `::1`; other hosts redirect `/run/` requests to `/` and do not consume raw `time` or `score` query parameters.
+`public/run/` contains the standalone Net Speed Run v0.1.1 static source and is copied by Vite to `dist/run/` without entering the homepage React bundle. After explicit user action, the browser issues a Run Ticket, stores it in `sessionStorage`, navigates to `/run/`, verifies it through `/api/run-ticket/verify`, and passes the resulting `runTimeSec` to `window.NetSpeedRun.start(runTimeSec)`. Production proceeds from `BOOT` directly to `INTRO` without the gameplay test or title screen and ignores raw `time` or `score` query parameters. The 25/35/45/50-second gameplay test selector remains available only on `localhost`, `127.0.0.1`, and `::1`.
 
 Normal build:
 
