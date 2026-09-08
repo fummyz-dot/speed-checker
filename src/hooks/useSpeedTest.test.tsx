@@ -134,6 +134,29 @@ describe('useSpeedTest', () => {
     expect(result.current.completedResult?.conditionLabel).toBeNull()
   })
 
+  it('Upload開始時のDownload確定値を保持し、完了結果は最終Download値から生成する', () => {
+    const { result } = renderHook(() => useSpeedTest())
+
+    act(() => result.current.start())
+    const engine = instances.at(-1)
+    if (!engine) throw new Error('SpeedTest instance was not created')
+    engine.results.getDownloadBandwidth = () => 170_000_000
+
+    act(() => engine.onPhaseChange?.({ measurement: { type: 'upload' } }))
+    expect(result.current.confirmedDownloadMbps).toBe(170)
+
+    const finalResults = {
+      ...engine.results,
+      getDownloadBandwidth: () => 199_000_000,
+    }
+    act(() => engine.onFinish?.(finalResults))
+
+    expect(result.current.phase).toBe('complete')
+    expect(result.current.confirmedDownloadMbps).toBe(170)
+    expect(result.current.completedResult?.downloadMbps).toBe(199)
+    expect(result.current.metrics.download).toBe(199_000_000)
+  })
+
   it('測定エラーではconditionLabelを含む結果を保存しない', () => {
     const { result } = renderHook(() => useSpeedTest())
 

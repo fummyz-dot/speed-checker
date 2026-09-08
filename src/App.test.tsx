@@ -1,4 +1,4 @@
-import { act, render, screen, waitFor, within } from '@testing-library/react'
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import App from './App'
@@ -92,6 +92,16 @@ describe('App', () => {
   it('ranking有効時はcontext後に動的championを固定し、ランキングcardは測定完了後だけ表示する', async () => {
     const user = userEvent.setup()
     vi.stubEnv('VITE_RANKING_ENABLED', 'true')
+    const submitMeasurement = vi.fn().mockRejectedValue(new Error('stop after capture'))
+    vi.stubGlobal('turnstile', {
+      render: vi.fn((_container: HTMLElement, options: Record<string, unknown>) => {
+        const callback = options.callback as (token: string) => void
+        queueMicrotask(() => callback('turnstile-token'))
+        return 'widget-id'
+      }),
+      execute: vi.fn(),
+      remove: vi.fn(),
+    })
     vi.mocked(createRankingApiService).mockReturnValue({
       getContext: vi.fn().mockResolvedValue({
         ok: true,
@@ -114,12 +124,12 @@ describe('App', () => {
           { rank: 3, scoreTenths: 7110 },
         ],
       }),
-      submitMeasurement: vi.fn(),
+      submitMeasurement,
     })
     const start = vi.fn()
     const completedResult = {
       id: 'ranking-measurement', measuredAt: '2026-08-28T12:00:00.000Z',
-      downloadMbps: 300, uploadMbps: 100, pingMs: 20, jitterMs: 5,
+      downloadMbps: 199, uploadMbps: 100, pingMs: 20, jitterMs: 5,
     }
     let speedTest: ReturnType<typeof useSpeedTest> = {
       metrics: EMPTY_METRICS, phase: 'idle', isRunning: false, error: null, completedResult: null,
@@ -144,7 +154,7 @@ describe('App', () => {
       ...speedTest,
       phase: 'complete',
       completedResult,
-      confirmedDownloadMbps: completedResult.downloadMbps,
+      confirmedDownloadMbps: 170,
     }
     rerender(<App />)
     const rankingResults = document.getElementById('ranking-results')
@@ -166,6 +176,13 @@ describe('App', () => {
     expect(screen.getByRole('button', { name: '全国ランキングに参加して順位を見る', hidden: true })).toBeEnabled()
     expect(within(measurementResults as HTMLElement).queryByText('NET SPEED RUN'))
       .not.toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', {
+      name: '全国ランキングに参加して順位を見る', hidden: true,
+    }))
+    await waitFor(() => {
+      expect(submitMeasurement).toHaveBeenCalledWith(completedResult, 'turnstile-token')
+    })
   })
 
   it('rankingを明示的に無効化した場合は完了後もcardを表示せずserviceを呼ばない', () => {
@@ -524,27 +541,45 @@ describe('App', () => {
     expect(container.querySelector('[data-speed-metric="upload"]')).toHaveAttribute('data-live', 'true')
   })
 
-  it('測定完了後は正式Mbps値を読みやすく丸める', () => {
+  it('Upload開始時と最終値が異なる場合、完了表示・レース・履歴を最終値へ収束させる', async () => {
     const completedResult = {
       id: 'measurement-1',
       measuredAt: '2026-08-05T00:00:00.000Z',
-      downloadMbps: 250.812394,
+      downloadMbps: 199,
       uploadMbps: 80.45,
       pingMs: 12,
     }
-    vi.mocked(useSpeedTest).mockReturnValue({
-      metrics: { ...EMPTY_METRICS, download: 250_812_394, upload: 80_450_000 },
+    let speedTest: ReturnType<typeof useSpeedTest> = {
+      metrics: { ...EMPTY_METRICS, download: 170_000_000, upload: 80_450_000 },
+      phase: 'upload',
+      isRunning: true,
+      error: null,
+      completedResult: null,
+      confirmedDownloadMbps: 170,
+      start: vi.fn(),
+    }
+    vi.mocked(useSpeedTest).mockImplementation(() => speedTest)
+
+    const { container, rerender } = render(<App />)
+    expect(container.querySelector('.speed-display__reading strong')).toHaveTextContent('170')
+    expect(container.querySelector('[data-speed-metric="download"]')).toHaveTextContent('170 Mbps')
+
+    speedTest = {
+      ...speedTest,
+      metrics: { ...speedTest.metrics, download: 199_000_000 },
       phase: 'complete',
       isRunning: false,
-      error: null,
       completedResult,
-      confirmedDownloadMbps: completedResult.downloadMbps,
-      start: vi.fn(),
-    })
+    }
+    rerender(<App />)
 
-    const { container } = render(<App />)
     expect(container.querySelector('.speed-display__reading')).not.toHaveClass('speed-display__reading--live')
-    expect(container.querySelector('.speed-display__reading strong')).toHaveTextContent('251')
-    expect(container.querySelector('.horse-metrics')).toHaveTextContent('下り251 Mbps')
+    expect(container.querySelector('.speed-display__reading strong')).toHaveTextContent('199')
+    expect(container.querySelector('.speed-display__reading strong')).not.toHaveTextContent('170')
+    expect(container.querySelector('.horse-metrics')).toHaveTextContent('下り199 Mbps')
+    await waitFor(() => {
+      const history = JSON.parse(window.localStorage.getItem(MEASUREMENT_STORAGE_KEY) ?? '[]') as Array<{ downloadMbps: number }>
+      expect(history[0]?.downloadMbps).toBe(199)
+    })
   })
 })

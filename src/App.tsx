@@ -55,7 +55,10 @@ function App() {
   const focusReturnTargetRef = useRef<HTMLElement | null>(null)
   const raceFocusExitTimerRef = useRef<number | null>(null)
   const pendingRaceFocusExitRef = useRef<RaceFocusExitRequest | null>(null)
-  const displayedDownload = formatFinalSpeedDisplay(confirmedDownloadMbps)
+  const displayedDownloadMbps = phase === 'complete' && completedResult
+    ? completedResult.downloadMbps
+    : confirmedDownloadMbps
+  const displayedDownload = formatFinalSpeedDisplay(displayedDownloadMbps)
   const hasStarted = phase !== 'idle'
   const buttonLabel = isPreparingContext
     ? '準備中…'
