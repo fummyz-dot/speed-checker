@@ -165,13 +165,45 @@ describe('public static pages', () => {
     expect(parsePage(path).querySelectorAll('.site-pages__related a')).toHaveLength(4)
   })
 
-  it('Loaded Latencyページに現行の表示基準と公式標準ではない旨を含む', () => {
-    const content = parsePage('loaded-latency').body.textContent ?? ''
+  it('PingページにMbpsとは別にidle latencyとJitterを読む説明用の比較例を含む', () => {
+    const page = parsePage('ping')
+    const example = page.getElementById('ping-example-title')?.parentElement
+    const content = example?.textContent ?? ''
+
+    ;['説明用', '520 Mbps', '505 Mbps', '9 ms', '34 ms', 'idle latency', 'Jitter', 'Loaded Latency', 'Cloudflare Edge RTT'].forEach((text) => {
+      expect(content).toContain(text)
+    })
+    expect([...example?.querySelectorAll('tbody tr') ?? []].map((row) =>
+      [...row.children].map((cell) => cell.textContent),
+    )).toEqual([
+      ['測定A', '520 Mbps', '110 Mbps', '9 ms', '2 ms'],
+      ['測定B', '505 Mbps', '108 Mbps', '34 ms', '7 ms'],
+    ])
+    expect(content).toMatch(/原因.{0,16}確定することはできません/)
+    expect(content).toContain('同じ場所・端末・接続方法で複数回')
+  })
+
+  it('Loaded Latencyページに計算例、clamp、現行の表示基準と公式標準ではない旨を含む', () => {
+    const page = parsePage('loaded-latency')
+    const content = page.body.textContent ?? ''
+    const exampleContent = page.getElementById('loaded-example-title')?.parentElement?.textContent ?? ''
 
     expect(content).toContain('0〜20ms')
     expect(content).toContain('20ms超〜100ms')
     expect(content).toContain('100ms超')
     expect(content).toContain('公式標準ではありません')
+    ;[
+      '説明用', '27 - 12 = 15 ms', '91 - 12 = 79 ms', '15 ms → 良好', '79 ms → 注意',
+      'max(0, -4) = 0 ms', '22 ms', '18 ms', '0 ms', '改善量 -4 ms',
+      'idle Pingが低く、increaseも小さい', 'Upload increaseだけ大きい', 'Pingそのもの',
+    ].forEach((text) => expect(exampleContent).toContain(text))
+    expect([...page.querySelectorAll('#loaded-example-title ~ .site-pages__table-wrap tbody tr')].map((row) =>
+      [...row.children].map((cell) => cell.textContent),
+    )).toEqual([
+      ['Download', '27 - 12 = 15 ms', '15 ms → 良好'],
+      ['Upload', '91 - 12 = 79 ms', '79 ms → 注意'],
+    ])
+    expect(exampleContent).toMatch(/原因.{0,40}断定することはできません/)
   })
 
   it('PingとJitterの各ページに区別の説明を含む', () => {
@@ -225,7 +257,9 @@ describe('public static pages', () => {
   })
 
   it('夜間記事に実装と一致する時間帯・中央値・ローカル履歴の説明を含む', () => {
-    const content = parsePage('internet-slow-at-night').body.textContent ?? ''
+    const page = parsePage('internet-slow-at-night')
+    const content = page.body.textContent ?? ''
+    const exampleContent = page.getElementById('night-example-title')?.parentElement?.textContent ?? ''
 
     expect(content).toContain('05:00–10:59')
     expect(content).toContain('11:00–16:59')
@@ -234,6 +268,45 @@ describe('public static pages', () => {
     expect(content).toContain('中央値')
     expect(content).toContain('ブラウザに保存された履歴')
     expect(content).toContain('1〜2件の測定は参考値、3件以上で傾向')
+    ;[
+      '説明用データ', 'リビング 5GHz', '朝の測定3件と中央値', '夜の測定3件と中央値',
+      '510 Mbps', '110 Mbps', '10 ms', '+20 ms', '205 Mbps', '70 Mbps', '29 ms', '+85 ms',
+      '夜という時間帯と結果の変化が一緒に現れた', 'ISPの混雑', 'Wi-Fi', '建物設備', '夜なら必ず遅い',
+    ].forEach((text) => expect(exampleContent).toContain(text))
+    expect([...page.querySelectorAll('#night-example-title ~ .site-pages__table-wrap tbody')].map((body) =>
+      [...body.querySelectorAll('tr')].map((row) => [...row.children].map((cell) => cell.textContent)),
+    )).toEqual([
+      [
+        ['測定1', '510 Mbps', '110 Mbps', '10 ms', '+18 ms'],
+        ['測定2', '530 Mbps', '108 Mbps', '9 ms', '+20 ms'],
+        ['測定3', '500 Mbps', '115 Mbps', '11 ms', '+22 ms'],
+        ['中央値', '510 Mbps', '110 Mbps', '10 ms', '+20 ms'],
+      ],
+      [
+        ['測定1', '210 Mbps', '72 Mbps', '29 ms', '+85 ms'],
+        ['測定2', '190 Mbps', '68 Mbps', '31 ms', '+78 ms'],
+        ['測定3', '205 Mbps', '70 Mbps', '28 ms', '+90 ms'],
+        ['中央値', '205 Mbps', '70 Mbps', '29 ms', '+85 ms'],
+      ],
+    ])
+    expect(exampleContent).toMatch(/原因.{0,16}確定できず/)
+  })
+
+  it.each([
+    { path: 'ping', canonical: 'https://netspeedrace.com/ping/' },
+    { path: 'loaded-latency', canonical: 'https://netspeedrace.com/loaded-latency/' },
+    { path: 'internet-slow-at-night', canonical: 'https://netspeedrace.com/internet-slow-at-night/' },
+  ] as const)('$pathの編集情報、SEO、CTA、信頼性リンク、scriptなしを維持する', ({ path, canonical }) => {
+    const page = parsePage(path)
+    const articleMeta = page.querySelector('.site-pages__article-meta')?.textContent ?? ''
+
+    expect(articleMeta).toContain('運営・編集: Net Speed Race')
+    expect(articleMeta).toContain('最終更新: 2026年9月9日')
+    expect(page.querySelector('link[rel="canonical"]')?.getAttribute('href')).toBe(canonical)
+    expect(page.querySelectorAll('a.site-pages__article-cta[href="/"]')).toHaveLength(2)
+    expect(page.querySelector('a[href="/methodology/"]')).not.toBeNull()
+    expect(page.querySelector('a[href="/about/"]')).not.toBeNull()
+    expect(page.querySelectorAll('script')).toHaveLength(0)
   })
 
   it('Wi-Fi記事に利用者入力の測定条件ラベルと条件別中央値を説明する', () => {

@@ -26,7 +26,7 @@
       <p class="site-pages__eyebrow">TIME-OF-DAY COMPARISON</p>
       <h1>夜だけネットが遅いと感じたら、時間帯で比較する</h1>
       <p class="site-pages__lead">夜にネットが遅いと感じても、ブラウザでの1回の測定から理由を確定することはできません。場所・端末・接続方法をなるべくそろえ、時間だけを変えた結果を比べると、<span class="site-pages__keep-together">どの時間帯に変化を感じやすいかを確認できます。</span></p>
-      <p class="site-pages__article-meta"><span>運営・編集: Net Speed Race</span><span>最終更新: 2026年8月27日</span></p>
+      <p class="site-pages__article-meta"><span>運営・編集: Net Speed Race</span><span>最終更新: 2026年9月9日</span></p>
       <p class="site-pages__note"><a href="/methodology/">測定方法について</a>と<a href="/about/">このサイトについて</a>で、測定の前提と限界を確認できます。</p>
       <a class="site-pages__article-cta" href="/">今の回線品質を測定する</a>
 
@@ -53,6 +53,27 @@
 
       <h2>測定条件ラベルも同じにする</h2>
       <p>時間帯の比較では、測定条件ラベルを「リビング 5GHz」のように同じにしておくと、場所や接続方法の違いを混ぜずに記録しやすくなります。ラベルは利用者が入力するメモで、自動判定ではありません。朝と夜で結果が異なっても、それだけから理由を一つに絞ることはできません。</p>
+
+      <section aria-labelledby="night-example-title">
+        <h2 id="night-example-title">朝と夜を3回ずつ測った例</h2>
+        <p>以下は時間帯別の履歴の読み方を示す説明用データであり、実際の利用者から収集した統計ではありません。同じ場所・端末・接続方法を想定し、6件すべてに測定条件ラベル「リビング 5GHz」を付けた例です。</p>
+
+        <h3>朝の測定3件と中央値</h3>
+        <div class="site-pages__table-wrap"><table class="site-pages__table">
+          <thead><tr><th scope="col">朝</th><th scope="col">Download</th><th scope="col">Upload</th><th scope="col">Ping</th><th scope="col">混雑時の応答性</th></tr></thead>
+          <tbody><tr><th scope="row">測定1</th><td>510 Mbps</td><td>110 Mbps</td><td>10 ms</td><td>+18 ms</td></tr><tr><th scope="row">測定2</th><td>530 Mbps</td><td>108 Mbps</td><td>9 ms</td><td>+20 ms</td></tr><tr><th scope="row">測定3</th><td>500 Mbps</td><td>115 Mbps</td><td>11 ms</td><td>+22 ms</td></tr><tr><th scope="row">中央値</th><td>510 Mbps</td><td>110 Mbps</td><td>10 ms</td><td>+20 ms</td></tr></tbody>
+        </table></div>
+
+        <h3>夜の測定3件と中央値</h3>
+        <div class="site-pages__table-wrap"><table class="site-pages__table">
+          <thead><tr><th scope="col">夜</th><th scope="col">Download</th><th scope="col">Upload</th><th scope="col">Ping</th><th scope="col">混雑時の応答性</th></tr></thead>
+          <tbody><tr><th scope="row">測定1</th><td>210 Mbps</td><td>72 Mbps</td><td>29 ms</td><td>+85 ms</td></tr><tr><th scope="row">測定2</th><td>190 Mbps</td><td>68 Mbps</td><td>31 ms</td><td>+78 ms</td></tr><tr><th scope="row">測定3</th><td>205 Mbps</td><td>70 Mbps</td><td>28 ms</td><td>+90 ms</td></tr><tr><th scope="row">中央値</th><td>205 Mbps</td><td>70 Mbps</td><td>29 ms</td><td>+85 ms</td></tr></tbody>
+        </table></div>
+
+        <h3>この比較から読み取れること</h3>
+        <p>同じ測定条件ラベルで朝と夜に3回ずつ測ったこの例では、夜のDownload中央値が510 Mbpsから205 Mbpsへ下がり、Ping中央値は10 msから29 msへ、混雑時の応答性の中央値は+20 msから+85 msへ大きくなっています。「夜という時間帯と結果の変化が一緒に現れた」ことを確認し、次の比較を考える材料にはなります。</p>
+        <p>ただし、これは時間帯との関連を示す説明用の例にすぎません。ブラウザ測定だけでは、ISPの混雑、Wi-Fi、建物設備のどれが原因かを確定できず、夜なら必ず遅いとも言えません。</p>
+      </section>
 
       <section class="site-pages__related" aria-labelledby="night-related-title"><h2 id="night-related-title">関連ガイド</h2><ul>
         <li><a href="/internet-speed/">回線速度の見方</a></li><li><a href="/ping/">Pingとは</a></li><li><a href="/loaded-latency/">混雑時の応答性とは</a></li><li><a href="/wifi-slow/">Wi-Fiが遅いときの確認方法</a></li>

@@ -19,7 +19,7 @@
     <main class="site-pages__main" id="main-content"><article class="site-pages__article">
       <p class="site-pages__eyebrow">LOADED LATENCY</p><h1>混雑時の応答性とは？Loaded Latencyの見方</h1>
       <p class="site-pages__lead">通信を使っている最中に応答時間がどの程度変わるかを見るのが、Loaded Latencyです。速度が速くても通信中に重く感じる場面を考えるための材料になります。</p>
-      <p class="site-pages__article-meta"><span>運営・編集: Net Speed Race</span><span>最終更新: 2026年8月27日</span></p>
+      <p class="site-pages__article-meta"><span>運営・編集: Net Speed Race</span><span>最終更新: 2026年9月9日</span></p>
       <p class="site-pages__note"><a href="/methodology/">測定方法について</a>と<a href="/about/">このサイトについて</a>で、測定と表示の前提を確認できます。</p>
       <a class="site-pages__article-cta" href="/">今の回線品質を測定する</a>
 
@@ -38,6 +38,26 @@
         <tbody><tr><td>0〜20ms</td><td>良好</td></tr><tr><td>20ms超〜100ms</td><td>注意</td></tr><tr><td>100ms超</td><td>要注意</td></tr></tbody>
       </table></div>
       <p>これはNet Speed Race独自の表示基準であり、Cloudflareや通信業界の公式標準ではありません。測定が一部取得できない場合は、判定できない方向を除いて表示することがあります。</p>
+
+      <section aria-labelledby="loaded-example-title">
+        <h2 id="loaded-example-title">実際の数値で計算してみる</h2>
+        <p>以下は計算と読み方を示す説明用の測定例であり、実際の利用者から収集した統計ではありません。idle latencyが12 ms、download loaded latencyが27 ms、upload loaded latencyが91 msだったとします。</p>
+        <div class="site-pages__table-wrap"><table class="site-pages__table">
+          <thead><tr><th scope="col">通信方向</th><th scope="col">effective increaseの計算</th><th scope="col">表示</th></tr></thead>
+          <tbody><tr><th scope="row">Download</th><td><code>27 - 12 = 15 ms</code></td><td>15 ms → 良好</td></tr><tr><th scope="row">Upload</th><td><code>91 - 12 = 79 ms</code></td><td>79 ms → 注意</td></tr></tbody>
+        </table></div>
+        <p>この例では、Download中の応答時間の増加は小さい一方、Upload中は増加が大きいと読めます。Upload通信中に応答性が変化したことは確認できますが、その原因が上り回線やルーターにあると、この結果だけで断定することはできません。</p>
+
+        <h3><code>max(0, ...)</code>で負の値を0msにする例</h3>
+        <p>別の説明用の例として、idle latencyが22 ms、loaded latencyが18 msなら、差は<code>18 - 22 = -4 ms</code>です。Net Speed Raceでは<code>max(0, -4) = 0 ms</code>として扱います。測定の揺らぎなどでloaded値がidleより小さくなっても、「改善量 -4 ms」とは表示せず、今回確認できた増加量を0 msとします。</p>
+
+        <h3>idle Pingと増加量を組み合わせて読む</h3>
+        <dl>
+          <dt>idle Pingが低く、increaseも小さい</dt><dd>空いている時も通信中も、応答が比較的安定していたと読めます。</dd>
+          <dt>idle Pingは低いが、Upload increaseだけ大きい</dt><dd>Upload通信中に応答性が変化していることを確認できます。</dd>
+          <dt>idle Ping自体が高い</dt><dd>Loaded Latencyの増加量だけではなく、Pingそのものもあわせて確認します。</dd>
+        </dl>
+      </section>
 
       <h2>比較するときの考え方</h2>
       <p>同じ条件で複数回測定したり、時間帯、有線・Wi-Fi、端末の条件を変えたりして、Download・Upload・Pingとあわせて比較してください。通信中の応答の変化を知る手掛かりにはなりますが、<span class="site-pages__keep-together">障害原因を証明するものではありません。</span></p>

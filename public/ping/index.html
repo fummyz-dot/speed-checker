@@ -19,7 +19,7 @@
     <main class="site-pages__main" id="main-content"><article class="site-pages__article">
       <p class="site-pages__eyebrow">PING</p><h1>Pingとは？応答速度の見方</h1>
       <p class="site-pages__lead">Pingは、通信の往復応答にかかる時間を確認するための指標です。回線速度と同じく大切ですが、Mbpsとは別のものです。</p>
-      <p class="site-pages__article-meta"><span>運営・編集: Net Speed Race</span><span>最終更新: 2026年8月27日</span></p>
+      <p class="site-pages__article-meta"><span>運営・編集: Net Speed Race</span><span>最終更新: 2026年9月9日</span></p>
       <p class="site-pages__note"><a href="/methodology/">測定方法について</a>と<a href="/about/">このサイトについて</a>で、測定の範囲を確認できます。</p>
       <a class="site-pages__article-cta" href="/">今の回線品質を測定する</a>
 
@@ -33,6 +33,17 @@
       <p>接続情報に表示されるCloudflare Edge RTTは、Cloudflareが観測するブラウザとCloudflare Edge間のtransport RTTです。通常のPingとは別指標で、速度測定の評価には使いません。双方を同じ意味の数値として比較しないようにしてください。</p>
       <h2>Jitter・Loaded latencyとの違い</h2>
       <p>Jitterは応答時間のばらつき、Loaded latencyは通信中に応答時間がどの程度変わるかを見るための値です。Pingが一度低くても、これらが常に同じ傾向になるわけではありません。複数回、条件を変えて比べると状況を確認しやすくなります。</p>
+
+      <section aria-labelledby="ping-example-title">
+        <h2 id="ping-example-title">測定結果をどう読む？具体例</h2>
+        <p>以下は数値の読み方を示す説明用の測定例であり、実際の利用者から収集した統計ではありません。</p>
+        <div class="site-pages__table-wrap"><table class="site-pages__table">
+          <thead><tr><th scope="col">測定</th><th scope="col">Download</th><th scope="col">Upload</th><th scope="col">Ping</th><th scope="col">Jitter</th></tr></thead>
+          <tbody><tr><th scope="row">測定A</th><td>520 Mbps</td><td>110 Mbps</td><td>9 ms</td><td>2 ms</td></tr><tr><th scope="row">測定B</th><td>505 Mbps</td><td>108 Mbps</td><td>34 ms</td><td>7 ms</td></tr></tbody>
+        </table></div>
+        <p>DownloadとUploadは近い値ですが、idle latencyとして表示されるPingは9 msと34 msで異なります。このように、Mbpsだけを見ても応答性の差は分かりません。Jitterも2 msと7 msなので、応答時間のばらつきを一緒に見ることで安定性の違いも確認できます。</p>
+        <p>この1回ずつの結果だけで、違いが生じた原因を確定することはできません。同じ場所・端末・接続方法で複数回測り、Download、Upload、Ping、Jitter、Loaded Latencyを並べて比較してください。Cloudflare Edge RTTはPingとは別の接続情報なので、この比較のPingとして置き換える値ではありません。</p>
+      </section>
       <section class="site-pages__related" aria-labelledby="ping-related-title"><h2 id="ping-related-title">関連ガイド</h2><ul>
         <li><a href="/jitter/">ジッターとは</a></li><li><a href="/loaded-latency/">混雑時の応答性とは</a></li><li><a href="/internet-speed/">回線速度の見方</a></li><li><a href="/guide/">回線品質ガイド</a></li>
       </ul></section><a class="site-pages__article-cta" href="/">今の回線品質を測定する</a>
