@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto'
 import { existsSync, readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { describe, expect, it } from 'vitest'
@@ -42,6 +43,26 @@ const readProjectFile = (path: string): string =>
 const parsePage = (path: string): Document =>
   new DOMParser().parseFromString(readPublicFile(`${path}/index.html`), 'text/html')
 
+// Protected content fingerprints from add7746: only decorative eyebrows are excluded.
+const editorialContentBaseline: Record<string, string> = {
+  'about': 'b667d3a3f807496bfb7f70ba765a2b9f36cb2f5937351826008c13bfe7233236',
+  'methodology': '13d7e0ba659be6f74a213c0a3906b8147e60d2b0afbce73bc8bdae04801ba7c9',
+  'privacy': '12f625d826cd1806172075a17456ad979b1415bd55a540c556ef8cfd27aee755',
+  'contact': 'b48a14a82c282e18a3c19023c0355ff530f8ac3e2ed13bc437e968d249e369f0',
+  'terms': '8fba8db5d2d0b9b0c1b6e01a48ec680f62fae5046dd934e3bc9f5b777d8e47c2',
+  'guide': '64590b2e36327d9679c8a3132c6b449195614123794f44e54853ec1306b035da',
+  'internet-speed': '78120b5f461ba6f0f7f883ab5128244e871ba5432b5625f8e98a41e08447a755',
+  'ping': '79bea22a949f9564a7e3ca6012a5201d3b71b6e631c435ca17d9dab4592fe1f7',
+  'jitter': 'df5dc8156cfd107cd561d8f79bff35e72fd3cd8171c7d606ebdd0d53eaa7864b',
+  'loaded-latency': '61aa200353b765889090fcc2beeb417ea1ac2a38b12a357d78f118c3a0c352c2',
+  'wifi-slow': '4753ee1da63cb0386928e074211056ae22ff84b0783b64c01bdf7768f039c3da',
+  'gaming': '971f637a431a5a4f48b8737e07fc45320d82c7d7970fbe715b169b919a66b01b',
+  'video-call': '30497748bcb6ac914e2a70ae21d103adaf63e831a5fa60a67d1f7879683b92d6',
+  'internet-slow-at-night': 'd14777a1bef07124bb0fe236f341ae48731cccc1c510ca1b53d5e985aaa2f3e2',
+  'ranking': 'd382f85a6181cd702aea36963f70005c4fe50d7d02d4eeb110e7ce16dff81857',
+  'lab/ping-jitter-14-runs': '13893aab621aaef1e1a33642f4e27cbb7724c35accc98ef4d85ff40f5d141c61',
+}
+
 // Supplied observations only; aggregate values are calculated from these rounded inputs.
 const labMeasurements = [
   ['10:11:33', 436.2, 39.6, 48.9, 11.7, 56.4, 65.2],
@@ -64,6 +85,31 @@ const readLabCsv = (): string[][] =>
   readPublicFile('lab/ping-jitter-14-runs/data.csv').trim().split('\n').map((line) => line.split(','))
 
 describe('public static pages', () => {
+  it.each(staticPages)('$pathのSEO・本文・日付・全リンクをデザイン変更前から維持する', ({ path }) => {
+    const page = parsePage(path)
+    page.querySelectorAll('.site-pages__eyebrow').forEach((element) => element.remove())
+    const protectedContent = {
+      head: page.head.innerHTML.replace(/\s+/g, ' ').trim(),
+      h1: page.querySelector('h1')?.textContent,
+      body: page.body.textContent?.replace(/\s+/g, ' ').trim(),
+      links: [...page.querySelectorAll('a')].map((link) => [
+        link.getAttribute('href'), link.textContent, link.getAttribute('download'),
+      ]),
+    }
+
+    expect(createHash('sha256').update(JSON.stringify(protectedContent)).digest('hex'))
+      .toBe(editorialContentBaseline[path])
+    expect(page.querySelector('meta[name="robots"]')?.getAttribute('content') ?? '')
+      .not.toContain('noindex')
+  })
+
+  it('robotsとsitemapをデザイン変更前から維持する', () => {
+    expect(createHash('sha256').update(readPublicFile('robots.txt')).digest('hex'))
+      .toBe('5a4b5cd4f572b26a0ef137dfe6561f6c15a56f4bca89a094a025fb0f8f134d8e')
+    expect(createHash('sha256').update(readPublicFile('sitemap.xml')).digest('hex'))
+      .toBe('419cceacca2f70726b7b23a9500b2099c5f6b9a3e4f11d47c16d73cbae3c0dc0')
+  })
+
   it('Workers Static Assetsは未一致パスへcustom 404を返す設定を維持する', () => {
     const config = JSON.parse(readProjectFile('wrangler.jsonc')) as {
       assets?: {

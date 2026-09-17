@@ -276,4 +276,4 @@ The browser must never calculate Net Speed Score or contain its coefficients. It
 
 - The homepage combines a stadium scoreboard and editorial layout, using deep green, off-white, salmon accents, system serif headings, and ruled record sections rather than glowing rounded cards.
 - Preserve measurement logic, six-decimal live presentation, completed-result authority, horse assets and animation, race focus behavior, history, and ranking/Run contracts.
-- This design change is limited to the homepage, its results, and its static service/Lab/footer sections. Standalone articles, ranking, and Run pages are unchanged.
+- The theme also covers standalone editorial/trust pages, the ranking scoreboard, and the Lab report through shared static-page CSS. Text, SEO, links, source data/charts, and ranking logic are preserved. Run retains its existing design.
