@@ -266,3 +266,14 @@ The browser must never calculate Net Speed Score or contain its coefficients. It
 - The React application is served at `/`; public subpages are file-backed static assets rather than client-side routes.
 - Workers Static Assets uses `not_found_handling: "404-page"` and serves the custom `404.html` with HTTP 404 for unmatched public paths.
 - `/api/*` remains Worker-first, including the existing JSON response for unknown API routes.
+
+---
+
+## D-019 — Homepage uses a raceboard editorial theme
+
+**Status:** Accepted and implemented locally; not deployed
+**Date:** 2026-09-17
+
+- The homepage combines a stadium scoreboard and editorial layout, using deep green, off-white, salmon accents, system serif headings, and ruled record sections rather than glowing rounded cards.
+- Preserve measurement logic, six-decimal live presentation, completed-result authority, horse assets and animation, race focus behavior, history, and ranking/Run contracts.
+- This design change is limited to the homepage, its results, and its static service/Lab/footer sections. Standalone articles, ranking, and Run pages are unchanged.

@@ -62,7 +62,6 @@ export const PreviousMeasurementComparison = ({
     <section className="result-panel" aria-labelledby="comparison-title">
       <div className="result-panel__heading">
         <div>
-          <span className="result-panel__eyebrow">PREVIOUS RESULT</span>
           <h3 id="comparison-title">前回測定との比較</h3>
         </div>
         <button className="text-button" type="button" onClick={onClear}>履歴を削除</button>

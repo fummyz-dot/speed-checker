@@ -7,7 +7,6 @@ export const ConnectionInfo = () => {
     return (
       <section className="connection-info connection-info--loading" aria-labelledby="connection-title">
         <div>
-          <span className="connection-info__eyebrow">NETWORK</span>
           <h2 id="connection-title">接続情報</h2>
         </div>
         <p className="connection-info__status" role="status" aria-live="polite">
@@ -21,7 +20,6 @@ export const ConnectionInfo = () => {
     return (
       <section className="connection-info" aria-labelledby="connection-title">
         <div>
-          <span className="connection-info__eyebrow">NETWORK</span>
           <h2 id="connection-title">接続情報</h2>
         </div>
         <div className="connection-info__error" role="alert">
@@ -43,7 +41,6 @@ export const ConnectionInfo = () => {
   return (
     <section className="connection-info" aria-labelledby="connection-title">
       <div className="connection-info__heading">
-        <span className="connection-info__eyebrow">NETWORK</span>
         <h2 id="connection-title">接続情報</h2>
       </div>
       <div className="connection-info__primary">

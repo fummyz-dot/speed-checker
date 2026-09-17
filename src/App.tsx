@@ -201,7 +201,7 @@ function App() {
   const measurementControl = (
     <div className="hero__measurement" key="hero-measurement">
       <div className="speed-display" aria-label="ダウンロード速度">
-        <span className="speed-display__label">DOWNLOAD</span>
+        <span className="speed-display__label">ダウンロード</span>
         <div className="speed-display__reading" aria-live="polite">
           <strong>{displayedDownload}</strong>
           <span>Mbps</span>
@@ -251,7 +251,7 @@ function App() {
         inert={isRaceFocused}
       >
         <Brand />
-        <span className="site-header__tag">Network performance test</span>
+        <span className="site-header__tag">回線速度・品質測定</span>
       </header>
 
       <main>
@@ -263,8 +263,7 @@ function App() {
             inert={isRaceFocused}
           >
             <div className="hero__intro-copy">
-              <div className="hero__eyebrow">YOUR CONNECTION</div>
-              <h1 id="page-title">インターネット速度を、シンプルに。</h1>
+              <h1 id="page-title"><span>インターネット速度を、</span><wbr /><span>シンプルに。</span></h1>
               <p className="hero__lead">
                 現在の回線品質をCloudflareの
                 <br className="hero__lead-mobile-break" />
@@ -273,7 +272,7 @@ function App() {
             </div>
             {rankingEnabled && (
               <div className="hero-ranking-promo">
-                <span className="hero-ranking-promo__eyebrow">RANKING</span>
+                <span className="hero-ranking-promo__eyebrow">全国順位表</span>
                 <div className="hero-ranking-promo__copy">
                   <strong>全国ランキング開催中！</strong>
                   <span>あなたの回線は今日何位？ 測って確かめよう。</span>
@@ -336,7 +335,6 @@ function App() {
         >
           <div className="section-heading">
             <div>
-              <span>DETAILS</span>
               <h2 id="results-title" tabIndex={-1}>回線品質の詳細</h2>
             </div>
             <p>

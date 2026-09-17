@@ -232,7 +232,6 @@ export const MeasurementHistoryTrend = ({ history, currentResult }: MeasurementH
     <section className="result-panel measurement-history" aria-labelledby="history-title">
       <div className="result-panel__heading">
         <div>
-          <span className="result-panel__eyebrow">MEASUREMENT HISTORY</span>
           <h3 id="history-title">測定履歴</h3>
         </div>
       </div>

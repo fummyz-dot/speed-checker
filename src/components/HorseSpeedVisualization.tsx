@@ -223,7 +223,6 @@ export const HorseSpeedVisualization = ({
     >
       <div className={`result-panel__heading${showUploadResult ? ' result-panel__heading--with-upload-result' : ''}`}>
         <div className="horse-visualization__title">
-          <span className="result-panel__eyebrow">SPEED RACE</span>
           <h2 id="horse-title">回線速度レース</h2>
         </div>
         {showUploadResult && (
@@ -294,11 +293,14 @@ export const HorseSpeedVisualization = ({
               key={`lane-${lane.id}`}
             />
           ))}
-          {HORSE_RACE_LANES.map((lane) => (
+          {HORSE_RACE_LANES.map((lane, index) => (
             <span
               className={`horse-course__lane-label horse-course__lane-label--${lane.id}`}
               key={`label-${lane.id}`}
             >
+              <span className="horse-course__lane-number" aria-hidden="true">
+                {String(index + 1).padStart(2, '0')}
+              </span>
               {lane.label}
             </span>
           ))}

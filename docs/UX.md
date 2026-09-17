@@ -12,6 +12,8 @@ The interface should feel:
 
 The race is the primary playful element. Do not turn the rest of the product into a game UI without an explicit design decision.
 
+The homepage combines an athletics scoreboard with editorial typography: deep green-black, off-white text, muted rules, and a restrained salmon accent for primary actions and the user's race lane. Sections and record columns use rules and whitespace instead of nested rounded cards. The brand and selected headings use system serif fonts; body text and controls remain system sans-serif, with tabular monospace measurement values. No external fonts are loaded. The compact hero leads directly into measurement, race, and quality details without a viewport-height gap. Homepage ranking and Lab links follow the same style; standalone articles, ranking, and Run pages retain their existing design.
+
 ## Information hierarchy
 
 The user should be able to understand the screen in this order:
@@ -73,7 +75,7 @@ The race should remain:
 
 The optional ranking preview may replace that benchmark for one race with a champion reference resolved before measurement. Its download and upload values feed the existing race-duration and jump-height mappings without changing those mappings. If the context is unavailable, the 700 / 250 benchmark remains exactly as before. The preview-only compact champion note must stay secondary to the race.
 
-Race courseはCSSだけで表現するdark navyとcyan/emeraldの控えめなspeed-race stageとし、馬・レース情報の視認性を優先する。横向き・GOAL正面の表示順は既存の各レーン構造を維持し、あなたのlabelは既存accentを保った小さな強調に留める。
+Race courseはCSSだけで表現する落ち着いた芝色の記録板とし、発光や装飾グラデーションを使わない。横向き・GOAL正面の表示順と馬の画像・動作は既存の各レーン構造を維持する。01〜03はレーン番号であり着順ではない。「あなた」の行だけをサーモン色で強調し、測定前は既存の待機メッセージを表示する。
 
 ## Existing race lifecycle
 
@@ -196,7 +198,7 @@ For the race:
 
 New horse artwork should:
 
-- match the existing restrained dark/teal design;
+- match the restrained dark green scoreboard design;
 - use a small number of assets;
 - avoid licensing ambiguity;
 - be original or have clearly acceptable commercial-use rights;

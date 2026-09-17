@@ -117,7 +117,6 @@ export const LoadedLatencyResponsiveness = ({ result }: LoadedLatencyResponsiven
     <section className={`result-panel loaded-latency loaded-latency--${evaluation.overall}`} aria-labelledby="loaded-latency-title">
       <div className="result-panel__heading">
         <div>
-          <span className="result-panel__eyebrow">LOADED LATENCY</span>
           <h3 id="loaded-latency-title">混雑時の応答性</h3>
         </div>
         <span className={`loaded-latency__badge loaded-latency__badge--${evaluation.overall}`}>{summary.badge}</span>

@@ -49,7 +49,6 @@ export const MeasurementConditionSelector = ({
     <section className="measurement-condition" aria-labelledby="measurement-condition-title">
       <div className="measurement-condition__summary">
         <div className="measurement-condition__summary-copy">
-          <span className="measurement-condition__eyebrow">MEASUREMENT</span>
           <h2 id="measurement-condition-title">測定条件</h2>
           <p>{value ?? '未設定'}</p>
         </div>

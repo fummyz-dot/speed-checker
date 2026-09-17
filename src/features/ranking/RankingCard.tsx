@@ -124,7 +124,6 @@ export const RankingCard = ({
     <section className="ranking-card result-panel" aria-labelledby="ranking-title">
       <div className="ranking-card__heading">
         <div>
-          <span className="result-panel__eyebrow">RANKING</span>
           <h3 id="ranking-title">本日の全国回線品質ランキング</h3>
         </div>
         <span className="ranking-card__score-label">NET SPEED SCORE</span>

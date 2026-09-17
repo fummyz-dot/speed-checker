@@ -89,7 +89,6 @@ export const ShareResultButton = ({ result, evaluations }: ShareResultButtonProp
   return (
     <section className="share-result" aria-labelledby="share-title">
       <div className="share-result__heading">
-        <span className="result-panel__eyebrow">SHARE</span>
         <h3 id="share-title">測定結果をシェア</h3>
         <p>1200×630pxのPNGをブラウザ内で生成します。個人情報は含みません。</p>
       </div>

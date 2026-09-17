@@ -90,7 +90,7 @@ describe('HorseSpeedVisualization runner presentation', () => {
     expect(container.querySelector('.horse-course__lane-label--user')).toHaveTextContent('あなた')
     expect(
       [...container.querySelectorAll('.horse-course__lane-label')].map((label) => label.textContent),
-    ).toEqual(['地方馬', 'あなた', '無敗の三冠馬'])
+    ).toEqual(['01地方馬', '02あなた', '03無敗の三冠馬'])
     expect(
       [...container.querySelectorAll('[data-runner]')].map((runner) => runner.getAttribute('data-runner')),
     ).toEqual(['standard', 'user', 'fast'])
