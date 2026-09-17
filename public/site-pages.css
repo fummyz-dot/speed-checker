@@ -384,6 +384,22 @@ dd {
   margin: 20px 0;
 }
 
+.site-pages__figure {
+  margin: 24px 0;
+}
+
+.site-pages__figure img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.site-pages__figure figcaption {
+  margin-top: 8px;
+  color: #a7b4c4;
+  font-size: 0.88rem;
+}
+
 .site-pages__table {
   width: 100%;
   min-width: 420px;

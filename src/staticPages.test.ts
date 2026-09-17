@@ -1,6 +1,7 @@
 import { existsSync, readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { describe, expect, it } from 'vitest'
+import { evaluateLoadedLatencyResponsiveness } from './lib/loadedLatencyEvaluation'
 
 const trustPages = [
   { path: 'about', canonical: 'https://netspeedrace.com/about/' },
@@ -26,7 +27,11 @@ const rankingPages = [
   { path: 'ranking', canonical: 'https://netspeedrace.com/ranking/' },
 ] as const
 
-const staticPages = [...trustPages, ...guidePages, ...rankingPages]
+const labPages = [
+  { path: 'lab/ping-jitter-14-runs', canonical: 'https://netspeedrace.com/lab/ping-jitter-14-runs/' },
+] as const
+
+const staticPages = [...trustPages, ...guidePages, ...rankingPages, ...labPages]
 
 const readPublicFile = (path: string): string =>
   readFileSync(resolve('public', path), 'utf8')
@@ -36,6 +41,27 @@ const readProjectFile = (path: string): string =>
 
 const parsePage = (path: string): Document =>
   new DOMParser().parseFromString(readPublicFile(`${path}/index.html`), 'text/html')
+
+// Supplied observations only; aggregate values are calculated from these rounded inputs.
+const labMeasurements = [
+  ['10:11:33', 436.2, 39.6, 48.9, 11.7, 56.4, 65.2],
+  ['10:12:23', 541.0, 45.8, 51.5, 15.3, 62.5, 59.0],
+  ['10:13:10', 458.9, 34.2, 52.6, 6.5, 109.5, 61.9],
+  ['10:15:19', 543.7, 56.4, 52.7, 9.9, 102.0, 120.8],
+  ['10:19:44', 567.2, 46.8, 51.7, 17.2, 65.6, 63.0],
+  ['10:20:23', 587.6, 31.4, 55.4, 16.6, 62.5, 60.7],
+  ['10:21:03', 571.8, 37.1, 52.0, 18.5, 62.8, 61.2],
+  ['10:21:37', 552.9, 55.0, 53.8, 6.2, 100.1, 79.1],
+  ['10:22:22', 497.0, 48.1, 58.1, 16.6, 64.3, 71.9],
+  ['10:23:11', 505.0, 44.5, 52.4, 6.4, 141.6, 62.4],
+  ['10:24:53', 509.4, 31.6, 59.2, 9.5, 53.5, 62.4],
+  ['10:25:37', 612.3, 41.3, 52.7, 15.1, 56.8, 63.5],
+  ['10:26:41', 500.7, 32.8, 55.0, 12.2, 65.2, 66.1],
+  ['10:27:34', 568.2, 36.0, 62.1, 14.9, 62.6, 63.4],
+] as const
+
+const readLabCsv = (): string[][] =>
+  readPublicFile('lab/ping-jitter-14-runs/data.csv').trim().split('\n').map((line) => line.split(','))
 
 describe('public static pages', () => {
   it('Workers Static Assetsは未一致パスへcustom 404を返す設定を維持する', () => {
@@ -452,7 +478,157 @@ describe('public static pages', () => {
     expect(script).toContain('renderChampion(overview.champion, getPreviousDayRuns(overview.rankingDay, overview.recentDays))')
   })
 
-  it('sitemapに16個の重複しない公開URLを含む', () => {
+  it('実測記事は固有のSEO情報を持ち、scriptなしで検索対象になる', () => {
+    const page = parsePage(labPages[0].path)
+    const description = page.querySelector('meta[name="description"]')?.getAttribute('content')
+    const otherPages = staticPages.filter(({ path }) => path !== labPages[0].path).map(({ path }) => parsePage(path))
+    const home = new DOMParser().parseFromString(readProjectFile('index.html'), 'text/html')
+
+    expect(page.title).toBe('同じ条件で14回測定｜Ping・Jitter・Loaded Latencyはどれくらい変わる？ | Net Speed Race')
+    expect(page.querySelector('h1')?.textContent).toBe('同じ条件で14回測ったら、Ping・Jitter・Loaded Latencyはどれくらい変わる？')
+    expect(page.querySelector('.site-pages__eyebrow')?.textContent).toBe('NET SPEED RACE LAB')
+    expect(description).toBeTruthy()
+    ;['Net Speed Race', '実測', '14回', 'Ping', 'Jitter', 'Loaded Latency', '実データ比較'].forEach((text) => {
+      expect(description).toContain(text)
+    })
+    ;[home, ...otherPages].forEach((other) => {
+      expect(page.title).not.toBe(other.title)
+      expect(description).not.toBe(other.querySelector('meta[name="description"]')?.getAttribute('content'))
+    })
+    expect(page.querySelector('meta[property="og:title"]')?.getAttribute('content')).toBe(page.title)
+    expect(page.querySelector('meta[property="og:description"]')?.getAttribute('content')).toBe(description)
+    expect(page.querySelector('meta[property="og:url"]')?.getAttribute('content')).toBe(labPages[0].canonical)
+    expect(page.querySelector('meta[name="robots"]')?.getAttribute('content') ?? '').not.toContain('noindex')
+    expect(readPublicFile('robots.txt')).not.toMatch(/Disallow:\s*\/(?:lab|\s*$)/m)
+    expect(readPublicFile('_headers')).not.toMatch(/X-Robots-Tag:.*noindex/i)
+    expect(page.querySelectorAll('script')).toHaveLength(0)
+    expect(page.querySelector('link[href="/site-pages.css"]')).not.toBeNull()
+    expect(page.querySelector('time[datetime="2026-09-17"]')?.textContent).toBe('2026年9月17日')
+  })
+
+  it('実測記事は観測範囲、入力ラベル、独自基準と原因を断定できない旨を明記する', () => {
+    const page = parsePage(labPages[0].path)
+    const content = page.body.textContent ?? ''
+
+    ;[
+      '運営・編集: Net Speed Race', '公開日:', '14回', '実測', '10:11〜10:27 JST',
+      '実測01_リビング6GHz', '利用者入力', '説明用架空データではありません',
+      '原因を断定できない', '公式基準ではない', 'Net Speed Race独自基準',
+      '0〜20 ms', '20 ms超〜100 ms', '100 ms超', 'max(0, loaded latency - idle Ping)',
+      '約16分間', '1環境', '他の家庭や回線', 'Wi-Fi 6GHz一般', 'ISPやルーターが原因か',
+      '時間帯による一般的傾向', '全国平均', 'サービス品質の保証',
+    ].forEach((text) => expect(content).toContain(text))
+    ;['/ping/', '/jitter/', '/loaded-latency/', '/methodology/', '/about/'].forEach((href) => {
+      expect(page.querySelector(`article a[href="${href}"]`)).not.toBeNull()
+    })
+    expect(page.querySelector('a[href="/lab/ping-jitter-14-runs/data.csv"][download]')).not.toBeNull()
+    expect(existsSync(resolve('public/lab/index.html'))).toBe(false)
+  })
+
+  it('CSVとHTML表は指定の14測定だけを時刻順で収録し、現行定義で増加量を計算する', () => {
+    const [header, ...rows] = readLabCsv()
+    const tableRows = [...parsePage(labPages[0].path).querySelectorAll('#measurements tbody tr')]
+
+    expect(header).toEqual([
+      'run', 'measuredAtJst', 'conditionLabel', 'downloadMbps', 'uploadMbps', 'pingMs', 'jitterMs',
+      'downloadLoadedLatencyMs', 'uploadLoadedLatencyMs', 'downloadEffectiveIncreaseMs', 'uploadEffectiveIncreaseMs',
+    ])
+    expect(rows).toHaveLength(14)
+    expect(tableRows).toHaveLength(14)
+    labMeasurements.forEach(([time, download, upload, ping, jitter, downloadLoaded, uploadLoaded], index) => {
+      const evaluation = evaluateLoadedLatencyResponsiveness({
+        idleLatencyMs: ping, downloadLoadedLatencyMs: downloadLoaded, uploadLoadedLatencyMs: uploadLoaded,
+      })
+      const metrics = [download, upload, ping, jitter, downloadLoaded, uploadLoaded].map((value) => value.toFixed(1))
+      const increases = [evaluation.download.increaseMs?.toFixed(1), evaluation.upload.increaseMs?.toFixed(1)]
+
+      expect(rows[index]).toEqual([
+        String(index + 1), `2026-09-17T${time}+09:00`, '実測01_リビング6GHz', ...metrics, ...increases,
+      ])
+      expect([...tableRows[index].children].map((cell) => cell.textContent)).toEqual([
+        rows[index][0], time, ...rows[index].slice(3),
+      ])
+    })
+  })
+
+  it('集計表の平均・中央値・範囲・判定回数が14件のCSVと一致する', () => {
+    const rows = readLabCsv().slice(1)
+    const page = parsePage(labPages[0].path)
+    const summaries = [...page.querySelectorAll('#summary tbody tr')]
+    const increases = [...page.querySelectorAll('#increases tbody tr')]
+    // Integer tenths prevent binary floating-point ties from changing decimal half-up rounding.
+    const columns = Array.from({ length: 8 }, (_, index) => rows.map((row) => Math.round(Number(row[index + 3]) * 10)))
+    const round = (tenths: number): string => (Math.round(tenths) / 10).toFixed(1)
+
+    expect(summaries).toHaveLength(6)
+    expect(increases).toHaveLength(2)
+    columns.forEach((values, index) => {
+      const sorted = [...values].sort((a, b) => a - b)
+      const mean = round(values.reduce((sum, value) => sum + value, 0) / values.length)
+      const median = round((sorted[6] + sorted[7]) / 2)
+      const min = round(sorted[0])
+      const max = round(sorted[13])
+      const summary = index < 6
+        ? [mean, median, min, max]
+        : [mean, median, max, ...[
+          values.filter((value) => value <= 200).length,
+          values.filter((value) => value > 200 && value <= 1000).length,
+          values.filter((value) => value > 1000).length,
+        ].map((count) => `${count} / 14`)]
+      const row = index < 6 ? summaries[index] : increases[index - 6]
+
+      expect([...row.querySelectorAll('td')].map((cell) => cell.textContent)).toEqual(summary)
+    })
+    expect([...summaries[0].querySelectorAll('td')].map((cell) => cell.textContent)).toEqual(['532.3', '542.4', '436.2', '612.3'])
+    expect([...summaries[2].querySelectorAll('td')].map((cell) => cell.textContent)).toEqual(['54.2', '52.7', '48.9', '62.1'])
+    expect([...summaries[3].querySelectorAll('td')].map((cell) => cell.textContent)).toEqual(['12.6', '13.6', '6.2', '18.5'])
+    expect([...increases[0].querySelectorAll('td')].map((cell) => cell.textContent)).toEqual(['22.4', '10.5', '89.2', '10 / 14', '4 / 14', '0 / 14'])
+    expect([...increases[1].querySelectorAll('td')].map((cell) => cell.textContent)).toEqual(['14.5', '10.4', '68.1', '12 / 14', '2 / 14', '0 / 14'])
+  })
+
+  it.each([
+    { file: 'ping-jitter.svg', series: ['Ping', 'Jitter'], columns: [5, 6], unit: 'ms' },
+    { file: 'loaded-latency.svg', series: ['Download effective increase', 'Upload effective increase'], columns: [9, 10], unit: 'ms' },
+    { file: 'throughput.svg', series: ['Download', 'Upload'], columns: [3, 4], unit: 'Mbps' },
+  ])('$fileは説明付きの静的SVGで全14点をCSVと同じ値・位置で描画する', ({ file, series, columns, unit }) => {
+    const page = parsePage(labPages[0].path)
+    const img = page.querySelector(`img[src="/lab/ping-jitter-14-runs/${file}"]`)
+    const svg = new DOMParser().parseFromString(readPublicFile(`${labPages[0].path}/${file}`), 'image/svg+xml')
+    const rows = readLabCsv().slice(1)
+
+    expect(img?.getAttribute('alt')).toBeTruthy()
+    expect(svg.querySelector('parsererror')).toBeNull()
+    expect(svg.querySelector('svg > title')?.textContent).toBeTruthy()
+    expect(svg.querySelector('svg > desc')?.textContent).toBeTruthy()
+    expect(svg.querySelectorAll('script, foreignObject, animate')).toHaveLength(0)
+    series.forEach((name, seriesIndex) => {
+      const group = svg.querySelector(`g[aria-label="${name}"]`)
+      const points = [...group?.querySelectorAll('circle, rect') ?? []]
+      const line = group?.querySelector('polyline')?.getAttribute('points')?.split(' ').map((point) => point.split(',').map(Number))
+      const top = file === 'throughput.svg' ? [120, 438][seriesIndex] : 108
+      const bottom = file === 'throughput.svg' ? [315, 630][seriesIndex] : 355
+      const limit = file === 'throughput.svg' ? [700, 70][seriesIndex] : file === 'ping-jitter.svg' ? 70 : 100
+
+      expect(points).toHaveLength(14)
+      expect(line).toHaveLength(14)
+      points.forEach((point, index) => {
+        expect(point.querySelector('title')?.textContent).toBe(`測定${index + 1}：${name} ${rows[index][columns[seriesIndex]]} ${unit}`)
+        const x = 64 + 656 * index / 13
+        const y = bottom - Number(rows[index][columns[seriesIndex]]) / limit * (bottom - top)
+        const circle = point.tagName === 'circle'
+        expect(Number(point.getAttribute(circle ? 'cx' : 'x')) + (circle ? 0 : 4)).toBeCloseTo(x, 1)
+        expect(Number(point.getAttribute(circle ? 'cy' : 'y')) + (circle ? 0 : 4)).toBeCloseTo(y, 1)
+        expect(line?.[index][0]).toBeCloseTo(x, 1)
+        expect(line?.[index][1]).toBeCloseTo(y, 1)
+      })
+    })
+  })
+
+  it.each(['ping', 'jitter', 'loaded-latency', 'guide'])('%sから実測記事へ1か所案内する', (path) => {
+    expect(parsePage(path).querySelectorAll('article a[href="/lab/ping-jitter-14-runs/"]')).toHaveLength(1)
+  })
+
+  it('sitemapに17個の重複しない公開URLを含む', () => {
     const sitemap = readPublicFile('sitemap.xml')
     const urls = [...sitemap.matchAll(/<loc>(.*?)<\/loc>/g)].map(([, url]) => url)
 
@@ -460,7 +636,7 @@ describe('public static pages', () => {
       'https://netspeedrace.com/',
       ...staticPages.map(({ canonical }) => canonical),
     ])
-    expect(new Set(urls).size).toBe(16)
+    expect(new Set(urls).size).toBe(17)
     expect(sitemap).not.toContain('404.html')
   })
 })

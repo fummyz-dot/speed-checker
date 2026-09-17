@@ -1,0 +1,77 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 460" role="img" aria-labelledby="title desc">
+  <title id="title">通信中の応答時間の増加量</title>
+  <desc id="desc">横軸は測定番号1〜14、縦軸はeffective increase（ms）。max(0, loaded latency - idle Ping)で計算。Downloadの最大は測定10の89.2 ms、Uploadの最大は測定4の68.1 ms。20 msはNet Speed Race独自の良好と注意の境界。</desc>
+  <rect width="760" height="460" rx="12" fill="#0d141e"/>
+  <g font-family="sans-serif" font-size="16" fill="#e2e8f0">
+    <text x="26" y="34" font-size="21" font-weight="700">Loaded Latency：idle Pingからの増加量</text>
+    <path d="M 64 63 h 30" stroke="#75e5c2" stroke-width="3"/>
+    <text x="104" y="68" >Download increase</text>
+    <path d="M 385 63 h 30" stroke="#ffc878" stroke-width="3" stroke-dasharray="8 5"/>
+    <text x="425" y="68" >Upload increase</text>
+    <text x="18" y="96" >ms</text>
+    <path d="M 64 355.00 H 720" stroke="#344454"/>
+    <text x="52" y="360.00" text-anchor="end">0</text>
+    <path d="M 64 305.60 H 720" stroke="#344454"/>
+    <text x="52" y="310.60" text-anchor="end">20</text>
+    <path d="M 64 256.20 H 720" stroke="#344454"/>
+    <text x="52" y="261.20" text-anchor="end">40</text>
+    <path d="M 64 206.80 H 720" stroke="#344454"/>
+    <text x="52" y="211.80" text-anchor="end">60</text>
+    <path d="M 64 157.40 H 720" stroke="#344454"/>
+    <text x="52" y="162.40" text-anchor="end">80</text>
+    <path d="M 64 108.00 H 720" stroke="#344454"/>
+    <text x="52" y="113.00" text-anchor="end">100</text>
+    <path d="M 64 305.60 H 720" stroke="#c6d0dc" stroke-dasharray="4 5"/>
+    <text x="710" y="295.60" text-anchor="end">20 ms：良好 / 注意の境界</text>
+    <text x="64.00" y="380" text-anchor="middle">1</text>
+    <text x="114.46" y="380" text-anchor="middle">2</text>
+    <text x="164.92" y="380" text-anchor="middle">3</text>
+    <text x="215.38" y="380" text-anchor="middle">4</text>
+    <text x="265.85" y="380" text-anchor="middle">5</text>
+    <text x="316.31" y="380" text-anchor="middle">6</text>
+    <text x="366.77" y="380" text-anchor="middle">7</text>
+    <text x="417.23" y="380" text-anchor="middle">8</text>
+    <text x="467.69" y="380" text-anchor="middle">9</text>
+    <text x="518.15" y="380" text-anchor="middle">10</text>
+    <text x="568.62" y="380" text-anchor="middle">11</text>
+    <text x="619.08" y="380" text-anchor="middle">12</text>
+    <text x="669.54" y="380" text-anchor="middle">13</text>
+    <text x="720.00" y="380" text-anchor="middle">14</text>
+    <text x="392" y="408" text-anchor="middle">測定番号（時刻順・時間間隔は不均等）</text>
+    <g aria-label="Download effective increase" stroke="#75e5c2" fill="#75e5c2">
+      <polyline points="64.00,336.48 114.46,327.83 164.92,214.46 215.38,233.23 265.85,320.67 316.31,337.46 366.77,328.32 417.23,240.64 467.69,339.69 518.15,134.68 568.62,355.00 619.08,344.87 669.54,329.81 720.00,353.76" fill="none" stroke-width="3"/>
+      <circle cx="64.00" cy="336.48" r="4"><title>測定1：Download effective increase 7.5 ms</title></circle>
+      <circle cx="114.46" cy="327.83" r="4"><title>測定2：Download effective increase 11.0 ms</title></circle>
+      <circle cx="164.92" cy="214.46" r="4"><title>測定3：Download effective increase 56.9 ms</title></circle>
+      <circle cx="215.38" cy="233.23" r="4"><title>測定4：Download effective increase 49.3 ms</title></circle>
+      <circle cx="265.85" cy="320.67" r="4"><title>測定5：Download effective increase 13.9 ms</title></circle>
+      <circle cx="316.31" cy="337.46" r="4"><title>測定6：Download effective increase 7.1 ms</title></circle>
+      <circle cx="366.77" cy="328.32" r="4"><title>測定7：Download effective increase 10.8 ms</title></circle>
+      <circle cx="417.23" cy="240.64" r="4"><title>測定8：Download effective increase 46.3 ms</title></circle>
+      <circle cx="467.69" cy="339.69" r="4"><title>測定9：Download effective increase 6.2 ms</title></circle>
+      <circle cx="518.15" cy="134.68" r="4"><title>測定10：Download effective increase 89.2 ms</title></circle>
+      <circle cx="568.62" cy="355.00" r="4"><title>測定11：Download effective increase 0.0 ms</title></circle>
+      <circle cx="619.08" cy="344.87" r="4"><title>測定12：Download effective increase 4.1 ms</title></circle>
+      <circle cx="669.54" cy="329.81" r="4"><title>測定13：Download effective increase 10.2 ms</title></circle>
+      <circle cx="720.00" cy="353.76" r="4"><title>測定14：Download effective increase 0.5 ms</title></circle>
+    </g>
+    <g aria-label="Upload effective increase" stroke="#ffc878" fill="#ffc878">
+      <polyline points="64.00,314.74 114.46,336.48 164.92,332.03 215.38,186.79 265.85,327.09 316.31,341.91 366.77,332.28 417.23,292.51 467.69,320.91 518.15,330.30 568.62,347.10 619.08,328.32 669.54,327.58 720.00,351.79" fill="none" stroke-width="3" stroke-dasharray="8 5"/>
+      <rect x="60.00" y="310.74" width="8" height="8"><title>測定1：Upload effective increase 16.3 ms</title></rect>
+      <rect x="110.46" y="332.48" width="8" height="8"><title>測定2：Upload effective increase 7.5 ms</title></rect>
+      <rect x="160.92" y="328.03" width="8" height="8"><title>測定3：Upload effective increase 9.3 ms</title></rect>
+      <rect x="211.38" y="182.79" width="8" height="8"><title>測定4：Upload effective increase 68.1 ms</title></rect>
+      <rect x="261.85" y="323.09" width="8" height="8"><title>測定5：Upload effective increase 11.3 ms</title></rect>
+      <rect x="312.31" y="337.91" width="8" height="8"><title>測定6：Upload effective increase 5.3 ms</title></rect>
+      <rect x="362.77" y="328.28" width="8" height="8"><title>測定7：Upload effective increase 9.2 ms</title></rect>
+      <rect x="413.23" y="288.51" width="8" height="8"><title>測定8：Upload effective increase 25.3 ms</title></rect>
+      <rect x="463.69" y="316.91" width="8" height="8"><title>測定9：Upload effective increase 13.8 ms</title></rect>
+      <rect x="514.15" y="326.30" width="8" height="8"><title>測定10：Upload effective increase 10.0 ms</title></rect>
+      <rect x="564.62" y="343.10" width="8" height="8"><title>測定11：Upload effective increase 3.2 ms</title></rect>
+      <rect x="615.08" y="324.32" width="8" height="8"><title>測定12：Upload effective increase 10.8 ms</title></rect>
+      <rect x="665.54" y="323.58" width="8" height="8"><title>測定13：Upload effective increase 11.1 ms</title></rect>
+      <rect x="716.00" y="347.79" width="8" height="8"><title>測定14：Upload effective increase 1.3 ms</title></rect>
+    </g>
+    <text x="64" y="441" font-size="14">判定境界はNet Speed Race独自の基準です。</text>
+  </g>
+</svg>

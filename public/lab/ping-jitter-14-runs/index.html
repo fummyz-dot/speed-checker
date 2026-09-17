@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>同じ条件で14回測定｜Ping・Jitter・Loaded Latencyはどれくらい変わる？ | Net Speed Race</title>
+    <meta name="description" content="Net Speed Raceで実測した14回のPing・Jitter・Loaded Latencyを実データ比較。2026年9月17日の1環境での観測を、全測定値・静的グラフ・CSVとともに紹介します。" />
+    <link rel="canonical" href="https://netspeedrace.com/lab/ping-jitter-14-runs/" />
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="Net Speed Race" />
+    <meta property="og:title" content="同じ条件で14回測定｜Ping・Jitter・Loaded Latencyはどれくらい変わる？ | Net Speed Race" />
+    <meta property="og:description" content="Net Speed Raceで実測した14回のPing・Jitter・Loaded Latencyを実データ比較。2026年9月17日の1環境での観測を、全測定値・静的グラフ・CSVとともに紹介します。" />
+    <meta property="og:url" content="https://netspeedrace.com/lab/ping-jitter-14-runs/" />
+    <meta property="article:published_time" content="2026-09-17" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="stylesheet" href="/site-pages.css" />
+  </head>
+  <body>
+    <a class="site-pages__skip-link" href="#main-content">本文へ移動</a>
+    <header class="site-pages__header"><div class="site-pages__header-inner"><a class="site-pages__brand" href="/">Net Speed Race</a><nav class="site-pages__nav" aria-label="主要ナビゲーション"><ul>
+        <li><a href="/">速度を測定</a></li><li><a href="/guide/">回線品質ガイド</a></li><li><a href="/about/">このサイトについて</a></li><li><a href="/methodology/">測定方法</a></li><li><a href="/privacy/">プライバシー</a></li><li><a href="/contact/">お問い合わせ</a></li><li><a href="/terms/">利用規約</a></li>
+    </ul></nav></div></header>
+    <main class="site-pages__main" id="main-content"><article class="site-pages__article">
+      <p class="site-pages__eyebrow">NET SPEED RACE LAB</p>
+      <h1>同じ条件で14回測ったら、Ping・Jitter・Loaded Latencyはどれくらい変わる？</h1>
+      <p class="site-pages__lead">1回の測定結果は、次の1回でも同じでしょうか。Net Speed Raceで実際に取得した14回の測定データを並べると、速度・応答時間・通信中の応答時間には、それぞれ違う変動が見られました。</p>
+      <p class="site-pages__article-meta"><span>運営・編集: Net Speed Race</span><span>公開日: <time datetime="2026-09-17">2026年9月17日</time></span></p>
+      <p class="site-pages__note">この記事は実測データに基づき、説明用架空データではありません。結論は1環境・約16分間の14回の観測に限定し、回線品質一般へは一般化しません。</p>
+
+      <h2>なぜ14回測ったのか</h2>
+      <p>「Speed Testは1回の数字だけを見てよいのか？」を実際に確かめるためです。同じ測定条件ラベルで得た14回について、Download・Uploadだけでなく、Ping・Jitter・Loaded Latencyも比較しました。</p>
+      <p>これは特定の製品や回線を評価する比較試験ではなく、同じラベルで繰り返し測ったときに、どの指標がどの程度変わったかを確認する実測レポートです。</p>
+
+      <h2>今回の測定条件</h2>
+      <dl>
+        <dt>測定サービス</dt><dd>Net Speed Race</dd>
+        <dt>測定日</dt><dd>2026年9月17日</dd>
+        <dt>測定時間</dt><dd>10:11〜10:27 JST（10:11:33〜10:27:34）</dd>
+        <dt>正常完了</dt><dd>14回</dd>
+        <dt>測定条件ラベル</dt><dd>実測01_リビング6GHz</dd>
+      </dl>
+      <p>測定条件ラベルとして「実測01_リビング6GHz」を使用しました。このラベルは利用者入力のメモです。「6GHz」の文字列があっても、実際のWi-Fi周波数帯を自動判定・検証した記録ではありません。タイトルの「同じ条件」は、この同じ条件ラベルでの測定を指します。</p>
+      <p>端末型番、ブラウザversion、回線事業者、ルーター型番などは今回の記録に含まれていません。測定中の他の通信など、すべての条件が一定だったかも確認できません。</p>
+      <p>測定指標の前提は<a href="/methodology/">測定方法</a>、運営とサイトの目的は<a href="/about/">このサイトについて</a>で説明しています。</p>
+
+      <h2>14回の測定結果</h2>
+      <p>JSTの時刻順に全14件を掲載します。Download / Uploadの単位はMbps、それ以外はmsです。表の「DL loaded」「UL loaded」は各方向の通信中の応答時間、「DL増加」「UL増加」はidle Pingからのeffective increaseです。</p>
+      <p>増加量は各回で<code>max(0, loaded latency - idle Ping)</code>として計算しています。集計は以下の小数1桁の測定値を元に行い、平均・中央値は小数第2位を四捨五入して小数1桁で表示します。</p>
+      <p id="measurements-help">横に長い表はスクロールして確認できます。</p>
+      <div class="site-pages__table-wrap" role="region" aria-label="14回の測定値" aria-describedby="measurements-help" tabindex="0">
+        <table class="site-pages__table" id="measurements">
+          <caption>2026年9月17日・実測01_リビング6GHz（14回）</caption>
+          <thead><tr><th scope="col">測定</th><th scope="col">時刻 (JST)</th><th scope="col">Download (Mbps)</th><th scope="col">Upload (Mbps)</th><th scope="col">Ping (ms)</th><th scope="col">Jitter (ms)</th><th scope="col">DL loaded (ms)</th><th scope="col">UL loaded (ms)</th><th scope="col">DL増加 (ms)</th><th scope="col">UL増加 (ms)</th></tr></thead>
+          <tbody>
+          <tr><th scope="row">1</th><td>10:11:33</td><td>436.2</td><td>39.6</td><td>48.9</td><td>11.7</td><td>56.4</td><td>65.2</td><td>7.5</td><td>16.3</td></tr>
+          <tr><th scope="row">2</th><td>10:12:23</td><td>541.0</td><td>45.8</td><td>51.5</td><td>15.3</td><td>62.5</td><td>59.0</td><td>11.0</td><td>7.5</td></tr>
+          <tr><th scope="row">3</th><td>10:13:10</td><td>458.9</td><td>34.2</td><td>52.6</td><td>6.5</td><td>109.5</td><td>61.9</td><td>56.9</td><td>9.3</td></tr>
+          <tr><th scope="row">4</th><td>10:15:19</td><td>543.7</td><td>56.4</td><td>52.7</td><td>9.9</td><td>102.0</td><td>120.8</td><td>49.3</td><td>68.1</td></tr>
+          <tr><th scope="row">5</th><td>10:19:44</td><td>567.2</td><td>46.8</td><td>51.7</td><td>17.2</td><td>65.6</td><td>63.0</td><td>13.9</td><td>11.3</td></tr>
+          <tr><th scope="row">6</th><td>10:20:23</td><td>587.6</td><td>31.4</td><td>55.4</td><td>16.6</td><td>62.5</td><td>60.7</td><td>7.1</td><td>5.3</td></tr>
+          <tr><th scope="row">7</th><td>10:21:03</td><td>571.8</td><td>37.1</td><td>52.0</td><td>18.5</td><td>62.8</td><td>61.2</td><td>10.8</td><td>9.2</td></tr>
+          <tr><th scope="row">8</th><td>10:21:37</td><td>552.9</td><td>55.0</td><td>53.8</td><td>6.2</td><td>100.1</td><td>79.1</td><td>46.3</td><td>25.3</td></tr>
+          <tr><th scope="row">9</th><td>10:22:22</td><td>497.0</td><td>48.1</td><td>58.1</td><td>16.6</td><td>64.3</td><td>71.9</td><td>6.2</td><td>13.8</td></tr>
+          <tr><th scope="row">10</th><td>10:23:11</td><td>505.0</td><td>44.5</td><td>52.4</td><td>6.4</td><td>141.6</td><td>62.4</td><td>89.2</td><td>10.0</td></tr>
+          <tr><th scope="row">11</th><td>10:24:53</td><td>509.4</td><td>31.6</td><td>59.2</td><td>9.5</td><td>53.5</td><td>62.4</td><td>0.0</td><td>3.2</td></tr>
+          <tr><th scope="row">12</th><td>10:25:37</td><td>612.3</td><td>41.3</td><td>52.7</td><td>15.1</td><td>56.8</td><td>63.5</td><td>4.1</td><td>10.8</td></tr>
+          <tr><th scope="row">13</th><td>10:26:41</td><td>500.7</td><td>32.8</td><td>55.0</td><td>12.2</td><td>65.2</td><td>66.1</td><td>10.2</td><td>11.1</td></tr>
+          <tr><th scope="row">14</th><td>10:27:34</td><td>568.2</td><td>36.0</td><td>62.1</td><td>14.9</td><td>62.6</td><td>63.4</td><td>0.5</td><td>1.3</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="site-pages__table-wrap" role="region" aria-label="14回の集計" tabindex="0">
+        <table class="site-pages__table" id="summary">
+          <caption>14回の平均・中央値・最小・最大</caption>
+          <thead><tr><th scope="col">指標（単位）</th><th scope="col">平均</th><th scope="col">中央値</th><th scope="col">最小</th><th scope="col">最大</th></tr></thead>
+          <tbody>
+          <tr><th scope="row">Download (Mbps)</th><td>532.3</td><td>542.4</td><td>436.2</td><td>612.3</td></tr>
+          <tr><th scope="row">Upload (Mbps)</th><td>41.5</td><td>40.5</td><td>31.4</td><td>56.4</td></tr>
+          <tr><th scope="row">Ping (ms)</th><td>54.2</td><td>52.7</td><td>48.9</td><td>62.1</td></tr>
+          <tr><th scope="row">Jitter (ms)</th><td>12.6</td><td>13.6</td><td>6.2</td><td>18.5</td></tr>
+          <tr><th scope="row">Download loaded latency (ms)</th><td>76.1</td><td>63.6</td><td>53.5</td><td>141.6</td></tr>
+          <tr><th scope="row">Upload loaded latency (ms)</th><td>68.6</td><td>63.2</td><td>59.0</td><td>120.8</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <h3>実測データを確認する</h3>
+      <p>この記事で使用した14回分の測定値をCSVで公開しています。日時・条件ラベル・各測定値・計算した増加量を収録しています。</p>
+      <p><a href="/lab/ping-jitter-14-runs/data.csv" download>14回の実測データをダウンロード（CSV）</a></p>
+
+      <h2>Download / Uploadの変動</h2>
+      <p>Downloadは436.2〜612.3 Mbps、中央値は542.4 Mbpsでした。最大と最小の差は176.1 Mbpsで、この14回では毎回同じ速度が出たわけではありません。Uploadは31.4〜56.4 Mbps、中央値は40.5 Mbpsでした。</p>
+      <p>以下は測定番号順のグラフです。DownloadとUploadは桁が異なるため上下に分け、縦軸の縮尺を変えています。線の高さを直接比較するのではなく、それぞれの数値と変動を見てください。横軸は測定番号で、実際の測定間隔は均等ではありません。</p>
+      <figure class="site-pages__figure">
+        <img src="/lab/ping-jitter-14-runs/throughput.svg" width="760" height="700" loading="lazy" alt="14回のDownloadは436.2〜612.3 Mbps、Uploadは31.4〜56.4 Mbps。上下2段で縦軸の縮尺を変えて表示。" />
+        <figcaption>上段はDownload（0〜700 Mbps）、下段はUpload（0〜70 Mbps）。</figcaption>
+      </figure>
+      <p>この範囲は今回の14回で観測した値です。他の家庭や回線でも同じ幅で変動する、という結論にはなりません。</p>
+
+      <h2>Pingは比較的狭い範囲だった</h2>
+      <p>Pingは48.9〜62.1 ms、中央値は52.7 msでした。最小から最大までの幅は13.2 msです。最大値を最小値で割ると約1.27倍で、Downloadの約1.40倍と比べ、今回14回の中では相対的な変動幅が小さかったと読めます。</p>
+      <p>ただしPingも一定ではありません。この短時間の観測から「Pingは常に安定する」とは言えません。測定する応答時間の意味は<a href="/ping/">Pingの見方</a>を参照してください。</p>
+      <figure class="site-pages__figure">
+        <img src="/lab/ping-jitter-14-runs/ping-jitter.svg" width="760" height="430" loading="lazy" alt="測定1〜14のPingとJitter。Pingは48.9〜62.1 ms、Jitterは6.2〜18.5 msで推移。" />
+        <figcaption>Pingは実線と丸、Jitterは破線と四角。縦軸は共通のms、横軸は測定番号です。</figcaption>
+      </figure>
+
+      <h2>Jitterは6.2〜18.5 ms</h2>
+      <p>Jitterは最小6.2 ms、最大18.5 ms、中央値13.6 msでした。同じ条件ラベルでも、各回のJitterは同じ値ではありませんでした。</p>
+      <p>Jitter自体は1回の測定内での応答時間のばらつきを表す指標で、このグラフはその指標が14回の間にどう変化したかを示します。Pingの高さと同じ意味ではなく、両方をあわせて見る必要があります。詳しくは<a href="/jitter/">JitterとPingの違い</a>で説明しています。</p>
+
+      <h2>Loaded Latencyが最も興味深かった</h2>
+      <p>今回、通信中の応答時間には一部の測定で大きな増加が見られました。Download loaded latencyは53.5〜141.6 ms、中央値63.6 ms。Upload loaded latencyは59.0〜120.8 ms、中央値63.2 msでした。</p>
+      <h3>測定10：Download中に+89.2 ms</h3>
+      <p>10:23:11の測定10では、Pingは52.4 ms、Download loaded latencyは141.6 msでした。effective increaseは<code>max(0, 141.6 - 52.4) = 89.2 ms</code>です。idle Pingだけでは、Download通信中にここまで応答時間が増えたことは分かりません。</p>
+      <h3>測定4：Upload中に+68.1 ms</h3>
+      <p>10:15:19の測定4では、Pingは52.7 ms、Upload loaded latencyは120.8 msでした。effective increaseは<code>max(0, 120.8 - 52.7) = 68.1 ms</code>です。Upload通信中の応答性も、通常のPingとは分けて確認する必要がある例です。</p>
+      <p>測定11のDownload loaded latencyは53.5 msで、Pingの59.2 msより小さくなっています。増加量は<code>max(0, 53.5 - 59.2) = 0.0 ms</code>とし、マイナスの改善量としては扱いません。</p>
+      <figure class="site-pages__figure">
+        <img src="/lab/ping-jitter-14-runs/loaded-latency.svg" width="760" height="460" loading="lazy" alt="各回のidle Pingからの増加量。Downloadは測定10で最大89.2 ms、Uploadは測定4で最大68.1 ms。20 msの判定境界を表示。" />
+        <figcaption>Loaded Latencyそのものではなく、各回のidle Pingからの増加量を表示しています。</figcaption>
+      </figure>
+      <div class="site-pages__table-wrap" role="region" aria-label="通信中の増加量と判定回数" tabindex="0">
+        <table class="site-pages__table" id="increases">
+          <caption>effective increaseの集計（ms）と判定回数</caption>
+          <thead><tr><th scope="col">方向</th><th scope="col">平均 (ms)</th><th scope="col">中央値 (ms)</th><th scope="col">最大 (ms)</th><th scope="col">良好</th><th scope="col">注意</th><th scope="col">要注意</th></tr></thead>
+          <tbody>
+          <tr><th scope="row">Download</th><td>22.4</td><td>10.5</td><td>89.2</td><td>10 / 14</td><td>4 / 14</td><td>0 / 14</td></tr>
+          <tr><th scope="row">Upload</th><td>14.5</td><td>10.4</td><td>68.1</td><td>12 / 14</td><td>2 / 14</td><td>0 / 14</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>現在の基準は、増加量が0〜20 msなら「良好」、20 ms超〜100 msなら「注意」、100 ms超なら「要注意」です。これはNet Speed Race独自基準であり、通信業界・Cloudflare等の公式基準ではない点に注意してください。「良好」はこの増加量に対する表示であり、接続状態全体の品質保証ではありません。</p>
+      <p>計算と表示の考え方は<a href="/loaded-latency/">Loaded Latencyの見方</a>で確認できます。これらの数値だけでは原因を断定できないため、ISP・ルーター・Wi-Fiなどの特定要因に結び付けることはしません。</p>
+
+      <h2>14回測って分かったこと</h2>
+      <ul>
+        <li>Downloadは毎回同じではなく、436.2〜612.3 Mbpsの範囲でした。</li>
+        <li>Pingも一定ではありませんが、今回のDownloadと比べると相対的には狭い範囲でした。</li>
+        <li>Jitterも変動し、同じ条件ラベルで同じ値になるわけではありませんでした。</li>
+        <li>Loaded Latencyは、一部の測定でidle Pingから大きく増加しました。</li>
+        <li>この14回の違いを見ると、1回だけで接続状態全体を代表させることには慎重であるべきと考えます。</li>
+      </ul>
+      <p>今回の観測から得られる実用的な読み方は、速度と応答性を分け、単発の最大値だけでなく複数回の範囲や中央値も確認することです。</p>
+
+      <h2>この実験では分からないこと</h2>
+      <ul>
+        <li>他の家庭や回線にも同じ傾向があるか。</li>
+        <li>Wi-Fi 6GHz一般の傾向。</li>
+        <li>ISPやルーターが原因か。</li>
+        <li>時間帯による一般的傾向。</li>
+        <li>全国平均との関係。</li>
+        <li>今後のサービス品質の保証。</li>
+      </ul>
+      <p>これは14回・約16分間、1環境での観測結果にすぎません。別の時間帯や接続条件を比較したものではなく、他の環境を代表するデータでもありません。今回分かった変動をそのまま一般化せず、測定した時点の記録として扱います。</p>
+      <a class="site-pages__article-cta" href="/">今の回線品質を測定する</a>
+    </article></main>
+    <footer class="site-pages__footer"><div class="site-pages__footer-inner"><nav class="site-pages__nav" aria-label="フッターナビゲーション"><ul>
+      <li><a href="/">速度を測定</a></li><li><a href="/guide/">回線品質ガイド</a></li><li><a href="/about/">このサイトについて</a></li><li><a href="/methodology/">測定方法</a></li><li><a href="/privacy/">プライバシー</a></li><li><a href="/contact/">お問い合わせ</a></li><li><a href="/terms/">利用規約</a></li><li><a href="https://github.com/fummyz-dot/speed-checker" target="_blank" rel="noreferrer noopener">GitHubでソースコードを見る</a></li>
+    </ul></nav><p class="site-pages__footer-note">© Net Speed Race</p></div></footer>
+  </body>
+</html>

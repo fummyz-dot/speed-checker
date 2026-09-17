@@ -44,6 +44,7 @@
         <p>DownloadとUploadは近い値ですが、idle latencyとして表示されるPingは9 msと34 msで異なります。このように、Mbpsだけを見ても応答性の差は分かりません。Jitterも2 msと7 msなので、応答時間のばらつきを一緒に見ることで安定性の違いも確認できます。</p>
         <p>この1回ずつの結果だけで、違いが生じた原因を確定することはできません。同じ場所・端末・接続方法で複数回測り、Download、Upload、Ping、Jitter、Loaded Latencyを並べて比較してください。Cloudflare Edge RTTはPingとは別の接続情報なので、この比較のPingとして置き換える値ではありません。</p>
       </section>
+      <p>実際の変動は、<a href="/lab/ping-jitter-14-runs/">同じ条件ラベルで14回測った実測レポート</a>で、Ping・Jitter・通信中の応答時間を並べて確認できます。</p>
       <section class="site-pages__related" aria-labelledby="ping-related-title"><h2 id="ping-related-title">関連ガイド</h2><ul>
         <li><a href="/jitter/">ジッターとは</a></li><li><a href="/loaded-latency/">混雑時の応答性とは</a></li><li><a href="/internet-speed/">回線速度の見方</a></li><li><a href="/guide/">回線品質ガイド</a></li>
       </ul></section><a class="site-pages__article-cta" href="/">今の回線品質を測定する</a>

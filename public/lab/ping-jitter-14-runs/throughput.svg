@@ -1,0 +1,99 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 700" role="img" aria-labelledby="title desc">
+  <title id="title">14回のDownloadとUpload</title>
+  <desc id="desc">横軸は測定番号1〜14。上段はDownload（縦軸0〜700 Mbps）、下段はUpload（縦軸0〜70 Mbps）。縦軸の縮尺は異なります。Downloadは436.2〜612.3 Mbps、Uploadは31.4〜56.4 Mbps。</desc>
+  <rect width="760" height="700" rx="12" fill="#0d141e"/>
+  <g font-family="sans-serif" font-size="16" fill="#e2e8f0">
+    <text x="26" y="34" font-size="21" font-weight="700">Download・Upload：14回の実測</text>
+    <text x="26" y="62" font-size="16">上下で縦軸の縮尺が異なります。線の高さを直接比較しないでください。</text>
+    <path d="M 64 89 h 30" stroke="#75e5c2" stroke-width="3"/>
+    <text x="104" y="94" >Download</text>
+    <text x="18" y="108" >Mbps</text>
+    <path d="M 64 315.00 H 720" stroke="#344454"/>
+    <text x="52" y="320.00" text-anchor="end">0</text>
+    <path d="M 64 259.29 H 720" stroke="#344454"/>
+    <text x="52" y="264.29" text-anchor="end">200</text>
+    <path d="M 64 203.57 H 720" stroke="#344454"/>
+    <text x="52" y="208.57" text-anchor="end">400</text>
+    <path d="M 64 147.86 H 720" stroke="#344454"/>
+    <text x="52" y="152.86" text-anchor="end">600</text>
+    <path d="M 64 120.00 H 720" stroke="#344454"/>
+    <text x="52" y="125.00" text-anchor="end">700</text>
+    <text x="64.00" y="340" text-anchor="middle">1</text>
+    <text x="114.46" y="340" text-anchor="middle">2</text>
+    <text x="164.92" y="340" text-anchor="middle">3</text>
+    <text x="215.38" y="340" text-anchor="middle">4</text>
+    <text x="265.85" y="340" text-anchor="middle">5</text>
+    <text x="316.31" y="340" text-anchor="middle">6</text>
+    <text x="366.77" y="340" text-anchor="middle">7</text>
+    <text x="417.23" y="340" text-anchor="middle">8</text>
+    <text x="467.69" y="340" text-anchor="middle">9</text>
+    <text x="518.15" y="340" text-anchor="middle">10</text>
+    <text x="568.62" y="340" text-anchor="middle">11</text>
+    <text x="619.08" y="340" text-anchor="middle">12</text>
+    <text x="669.54" y="340" text-anchor="middle">13</text>
+    <text x="720.00" y="340" text-anchor="middle">14</text>
+    <text x="392" y="368" text-anchor="middle">測定番号（時刻順・時間間隔は不均等）</text>
+    <g aria-label="Download" stroke="#75e5c2" fill="#75e5c2">
+      <polyline points="64.00,193.49 114.46,164.29 164.92,187.16 215.38,163.54 265.85,156.99 316.31,151.31 366.77,155.71 417.23,160.98 467.69,176.55 518.15,174.32 568.62,173.10 619.08,144.43 669.54,175.52 720.00,156.72" fill="none" stroke-width="3"/>
+      <circle cx="64.00" cy="193.49" r="4"><title>測定1：Download 436.2 Mbps</title></circle>
+      <circle cx="114.46" cy="164.29" r="4"><title>測定2：Download 541.0 Mbps</title></circle>
+      <circle cx="164.92" cy="187.16" r="4"><title>測定3：Download 458.9 Mbps</title></circle>
+      <circle cx="215.38" cy="163.54" r="4"><title>測定4：Download 543.7 Mbps</title></circle>
+      <circle cx="265.85" cy="156.99" r="4"><title>測定5：Download 567.2 Mbps</title></circle>
+      <circle cx="316.31" cy="151.31" r="4"><title>測定6：Download 587.6 Mbps</title></circle>
+      <circle cx="366.77" cy="155.71" r="4"><title>測定7：Download 571.8 Mbps</title></circle>
+      <circle cx="417.23" cy="160.98" r="4"><title>測定8：Download 552.9 Mbps</title></circle>
+      <circle cx="467.69" cy="176.55" r="4"><title>測定9：Download 497.0 Mbps</title></circle>
+      <circle cx="518.15" cy="174.32" r="4"><title>測定10：Download 505.0 Mbps</title></circle>
+      <circle cx="568.62" cy="173.10" r="4"><title>測定11：Download 509.4 Mbps</title></circle>
+      <circle cx="619.08" cy="144.43" r="4"><title>測定12：Download 612.3 Mbps</title></circle>
+      <circle cx="669.54" cy="175.52" r="4"><title>測定13：Download 500.7 Mbps</title></circle>
+      <circle cx="720.00" cy="156.72" r="4"><title>測定14：Download 568.2 Mbps</title></circle>
+    </g>
+    <path d="M 64 405 h 30" stroke="#ffc878" stroke-width="3" stroke-dasharray="8 5"/>
+    <text x="104" y="410" >Upload</text>
+    <text x="18" y="426" >Mbps</text>
+    <path d="M 64 630.00 H 720" stroke="#344454"/>
+    <text x="52" y="635.00" text-anchor="end">0</text>
+    <path d="M 64 575.14 H 720" stroke="#344454"/>
+    <text x="52" y="580.14" text-anchor="end">20</text>
+    <path d="M 64 520.29 H 720" stroke="#344454"/>
+    <text x="52" y="525.29" text-anchor="end">40</text>
+    <path d="M 64 465.43 H 720" stroke="#344454"/>
+    <text x="52" y="470.43" text-anchor="end">60</text>
+    <path d="M 64 438.00 H 720" stroke="#344454"/>
+    <text x="52" y="443.00" text-anchor="end">70</text>
+    <text x="64.00" y="655" text-anchor="middle">1</text>
+    <text x="114.46" y="655" text-anchor="middle">2</text>
+    <text x="164.92" y="655" text-anchor="middle">3</text>
+    <text x="215.38" y="655" text-anchor="middle">4</text>
+    <text x="265.85" y="655" text-anchor="middle">5</text>
+    <text x="316.31" y="655" text-anchor="middle">6</text>
+    <text x="366.77" y="655" text-anchor="middle">7</text>
+    <text x="417.23" y="655" text-anchor="middle">8</text>
+    <text x="467.69" y="655" text-anchor="middle">9</text>
+    <text x="518.15" y="655" text-anchor="middle">10</text>
+    <text x="568.62" y="655" text-anchor="middle">11</text>
+    <text x="619.08" y="655" text-anchor="middle">12</text>
+    <text x="669.54" y="655" text-anchor="middle">13</text>
+    <text x="720.00" y="655" text-anchor="middle">14</text>
+    <text x="392" y="683" text-anchor="middle">測定番号（時刻順・時間間隔は不均等）</text>
+    <g aria-label="Upload" stroke="#ffc878" fill="#ffc878">
+      <polyline points="64.00,521.38 114.46,504.38 164.92,536.19 215.38,475.30 265.85,501.63 316.31,543.87 366.77,528.24 417.23,479.14 467.69,498.07 518.15,507.94 568.62,543.33 619.08,516.72 669.54,540.03 720.00,531.26" fill="none" stroke-width="3" stroke-dasharray="8 5"/>
+      <rect x="60.00" y="517.38" width="8" height="8"><title>測定1：Upload 39.6 Mbps</title></rect>
+      <rect x="110.46" y="500.38" width="8" height="8"><title>測定2：Upload 45.8 Mbps</title></rect>
+      <rect x="160.92" y="532.19" width="8" height="8"><title>測定3：Upload 34.2 Mbps</title></rect>
+      <rect x="211.38" y="471.30" width="8" height="8"><title>測定4：Upload 56.4 Mbps</title></rect>
+      <rect x="261.85" y="497.63" width="8" height="8"><title>測定5：Upload 46.8 Mbps</title></rect>
+      <rect x="312.31" y="539.87" width="8" height="8"><title>測定6：Upload 31.4 Mbps</title></rect>
+      <rect x="362.77" y="524.24" width="8" height="8"><title>測定7：Upload 37.1 Mbps</title></rect>
+      <rect x="413.23" y="475.14" width="8" height="8"><title>測定8：Upload 55.0 Mbps</title></rect>
+      <rect x="463.69" y="494.07" width="8" height="8"><title>測定9：Upload 48.1 Mbps</title></rect>
+      <rect x="514.15" y="503.94" width="8" height="8"><title>測定10：Upload 44.5 Mbps</title></rect>
+      <rect x="564.62" y="539.33" width="8" height="8"><title>測定11：Upload 31.6 Mbps</title></rect>
+      <rect x="615.08" y="512.72" width="8" height="8"><title>測定12：Upload 41.3 Mbps</title></rect>
+      <rect x="665.54" y="536.03" width="8" height="8"><title>測定13：Upload 32.8 Mbps</title></rect>
+      <rect x="716.00" y="527.26" width="8" height="8"><title>測定14：Upload 36.0 Mbps</title></rect>
+    </g>
+  </g>
+</svg>

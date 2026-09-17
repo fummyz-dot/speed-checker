@@ -1,0 +1,78 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 430" role="img" aria-labelledby="title desc">
+  <title id="title">14回のPingとJitter</title>
+  <desc id="desc">横軸は測定番号1〜14、縦軸はms。Pingは48.9〜62.1 ms、Jitterは6.2〜18.5 ms。Pingは実線と丸、Jitterは破線と四角。</desc>
+  <rect width="760" height="430" rx="12" fill="#0d141e"/>
+  <g font-family="sans-serif" font-size="16" fill="#e2e8f0">
+    <text x="26" y="34" font-size="21" font-weight="700">Ping・Jitter：14回の実測</text>
+    <path d="M 64 63 h 30" stroke="#75e5c2" stroke-width="3"/>
+    <text x="104" y="68" >Ping</text>
+    <path d="M 300 63 h 30" stroke="#ffc878" stroke-width="3" stroke-dasharray="8 5"/>
+    <text x="340" y="68" >Jitter</text>
+    <text x="18" y="96" >ms</text>
+    <path d="M 64 355.00 H 720" stroke="#344454"/>
+    <text x="52" y="360.00" text-anchor="end">0</text>
+    <path d="M 64 319.71 H 720" stroke="#344454"/>
+    <text x="52" y="324.71" text-anchor="end">10</text>
+    <path d="M 64 284.43 H 720" stroke="#344454"/>
+    <text x="52" y="289.43" text-anchor="end">20</text>
+    <path d="M 64 249.14 H 720" stroke="#344454"/>
+    <text x="52" y="254.14" text-anchor="end">30</text>
+    <path d="M 64 213.86 H 720" stroke="#344454"/>
+    <text x="52" y="218.86" text-anchor="end">40</text>
+    <path d="M 64 178.57 H 720" stroke="#344454"/>
+    <text x="52" y="183.57" text-anchor="end">50</text>
+    <path d="M 64 143.29 H 720" stroke="#344454"/>
+    <text x="52" y="148.29" text-anchor="end">60</text>
+    <path d="M 64 108.00 H 720" stroke="#344454"/>
+    <text x="52" y="113.00" text-anchor="end">70</text>
+    <text x="64.00" y="380" text-anchor="middle">1</text>
+    <text x="114.46" y="380" text-anchor="middle">2</text>
+    <text x="164.92" y="380" text-anchor="middle">3</text>
+    <text x="215.38" y="380" text-anchor="middle">4</text>
+    <text x="265.85" y="380" text-anchor="middle">5</text>
+    <text x="316.31" y="380" text-anchor="middle">6</text>
+    <text x="366.77" y="380" text-anchor="middle">7</text>
+    <text x="417.23" y="380" text-anchor="middle">8</text>
+    <text x="467.69" y="380" text-anchor="middle">9</text>
+    <text x="518.15" y="380" text-anchor="middle">10</text>
+    <text x="568.62" y="380" text-anchor="middle">11</text>
+    <text x="619.08" y="380" text-anchor="middle">12</text>
+    <text x="669.54" y="380" text-anchor="middle">13</text>
+    <text x="720.00" y="380" text-anchor="middle">14</text>
+    <text x="392" y="408" text-anchor="middle">測定番号（時刻順・時間間隔は不均等）</text>
+    <g aria-label="Ping" stroke="#75e5c2" fill="#75e5c2">
+      <polyline points="64.00,182.45 114.46,173.28 164.92,169.40 215.38,169.04 265.85,172.57 316.31,159.52 366.77,171.51 417.23,165.16 467.69,149.99 518.15,170.10 568.62,146.11 619.08,169.04 669.54,160.93 720.00,135.88" fill="none" stroke-width="3"/>
+      <circle cx="64.00" cy="182.45" r="4"><title>測定1：Ping 48.9 ms</title></circle>
+      <circle cx="114.46" cy="173.28" r="4"><title>測定2：Ping 51.5 ms</title></circle>
+      <circle cx="164.92" cy="169.40" r="4"><title>測定3：Ping 52.6 ms</title></circle>
+      <circle cx="215.38" cy="169.04" r="4"><title>測定4：Ping 52.7 ms</title></circle>
+      <circle cx="265.85" cy="172.57" r="4"><title>測定5：Ping 51.7 ms</title></circle>
+      <circle cx="316.31" cy="159.52" r="4"><title>測定6：Ping 55.4 ms</title></circle>
+      <circle cx="366.77" cy="171.51" r="4"><title>測定7：Ping 52.0 ms</title></circle>
+      <circle cx="417.23" cy="165.16" r="4"><title>測定8：Ping 53.8 ms</title></circle>
+      <circle cx="467.69" cy="149.99" r="4"><title>測定9：Ping 58.1 ms</title></circle>
+      <circle cx="518.15" cy="170.10" r="4"><title>測定10：Ping 52.4 ms</title></circle>
+      <circle cx="568.62" cy="146.11" r="4"><title>測定11：Ping 59.2 ms</title></circle>
+      <circle cx="619.08" cy="169.04" r="4"><title>測定12：Ping 52.7 ms</title></circle>
+      <circle cx="669.54" cy="160.93" r="4"><title>測定13：Ping 55.0 ms</title></circle>
+      <circle cx="720.00" cy="135.88" r="4"><title>測定14：Ping 62.1 ms</title></circle>
+    </g>
+    <g aria-label="Jitter" stroke="#ffc878" fill="#ffc878">
+      <polyline points="64.00,313.72 114.46,301.01 164.92,332.06 215.38,320.07 265.85,294.31 316.31,296.43 366.77,289.72 417.23,333.12 467.69,296.43 518.15,332.42 568.62,321.48 619.08,301.72 669.54,311.95 720.00,302.42" fill="none" stroke-width="3" stroke-dasharray="8 5"/>
+      <rect x="60.00" y="309.72" width="8" height="8"><title>測定1：Jitter 11.7 ms</title></rect>
+      <rect x="110.46" y="297.01" width="8" height="8"><title>測定2：Jitter 15.3 ms</title></rect>
+      <rect x="160.92" y="328.06" width="8" height="8"><title>測定3：Jitter 6.5 ms</title></rect>
+      <rect x="211.38" y="316.07" width="8" height="8"><title>測定4：Jitter 9.9 ms</title></rect>
+      <rect x="261.85" y="290.31" width="8" height="8"><title>測定5：Jitter 17.2 ms</title></rect>
+      <rect x="312.31" y="292.43" width="8" height="8"><title>測定6：Jitter 16.6 ms</title></rect>
+      <rect x="362.77" y="285.72" width="8" height="8"><title>測定7：Jitter 18.5 ms</title></rect>
+      <rect x="413.23" y="329.12" width="8" height="8"><title>測定8：Jitter 6.2 ms</title></rect>
+      <rect x="463.69" y="292.43" width="8" height="8"><title>測定9：Jitter 16.6 ms</title></rect>
+      <rect x="514.15" y="328.42" width="8" height="8"><title>測定10：Jitter 6.4 ms</title></rect>
+      <rect x="564.62" y="317.48" width="8" height="8"><title>測定11：Jitter 9.5 ms</title></rect>
+      <rect x="615.08" y="297.72" width="8" height="8"><title>測定12：Jitter 15.1 ms</title></rect>
+      <rect x="665.54" y="307.95" width="8" height="8"><title>測定13：Jitter 12.2 ms</title></rect>
+      <rect x="716.00" y="298.42" width="8" height="8"><title>測定14：Jitter 14.9 ms</title></rect>
+    </g>
+  </g>
+</svg>
