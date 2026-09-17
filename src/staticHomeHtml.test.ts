@@ -2,6 +2,23 @@ import { readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
 
 describe('static homepage HTML', () => {
+  it('links directly to the measurement lab from static content below the service description', () => {
+    const html = readFileSync('index.html', 'utf8')
+    const staticDocument = new DOMParser().parseFromString(html, 'text/html')
+    const lab = staticDocument.querySelector('section[aria-labelledby="home-lab-title"]')
+    const serviceInfo = staticDocument.querySelector('section[aria-labelledby="home-service-info-title"]')
+    const footer = staticDocument.querySelector('footer.site-footer')
+    const link = lab?.querySelector('a')
+
+    expect(lab?.querySelector('h2')?.textContent).toBe('実測Lab')
+    expect(lab?.textContent).toContain('Net Speed Raceで実際に測定したデータを公開')
+    expect(lab?.textContent).toContain('14回の実測・生データCSV公開・グラフと集計付き。')
+    expect(link?.getAttribute('href')).toBe('/lab/ping-jitter-14-runs/')
+    expect(link?.hasAttribute('onclick')).toBe(false)
+    expect(serviceInfo?.compareDocumentPosition(lab as Node)).toBe(Node.DOCUMENT_POSITION_FOLLOWING)
+    expect(lab?.compareDocumentPosition(footer as Node)).toBe(Node.DOCUMENT_POSITION_FOLLOWING)
+  })
+
   it('includes crawlable service content after the React root', () => {
     const html = readFileSync('index.html', 'utf8')
     const staticDocument = new DOMParser().parseFromString(html, 'text/html')
