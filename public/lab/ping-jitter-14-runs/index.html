@@ -45,7 +45,7 @@
 
       <h2>14回の測定結果</h2>
       <p>JSTの時刻順に全14件を掲載します。Download / Uploadの単位はMbps、それ以外はmsです。表の「DL loaded」「UL loaded」は各方向の通信中の応答時間、「DL増加」「UL増加」はidle Pingからのeffective increaseです。</p>
-      <p>増加量は各回で<code>max(0, loaded latency - idle Ping)</code>として計算しています。集計は以下の小数1桁の測定値を元に行い、平均・中央値は小数第2位を四捨五入して小数1桁で表示します。</p>
+      <p>増加量は各回で<code>max(0, loaded latency - idle Ping)</code>として計算しています。掲載している集計値と増加量は、CSVで公開している小数1桁の測定値のみを基に算出し、平均・中央値は小数第2位を四捨五入して小数1桁で表示しています。</p>
       <p id="measurements-help">横に長い表はスクロールして確認できます。</p>
       <div class="site-pages__table-wrap" role="region" aria-label="14回の測定値" aria-describedby="measurements-help" tabindex="0">
         <table class="site-pages__table" id="measurements">
