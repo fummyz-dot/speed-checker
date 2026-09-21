@@ -4,6 +4,7 @@ import type { SpeedMeasurementResult } from '../../types/measurement'
 import { RankingCard } from './RankingCard'
 import type { RankingContext, RankingService, RankingSubmissionResult } from './types'
 import { requestRankingTurnstileToken } from './turnstile'
+import { readFileSync } from 'node:fs'
 
 vi.mock('./turnstile', () => ({ requestRankingTurnstileToken: vi.fn() }))
 
@@ -70,6 +71,7 @@ describe('RankingCard', () => {
     expect(screen.getByRole('button', { name: '全国ランキングに参加して順位を見る' })).toHaveClass('ranking-card__submit--attention')
     expect(screen.getByRole('button', { name: '全国ランキングに参加して順位を見る' })).toBeEnabled()
     expect(screen.queryByRole('button', { name: 'GO TO RUN!' })).not.toBeInTheDocument()
+    expect(screen.queryByText('CONGRATULATIONS')).not.toBeInTheDocument()
     expect(screen.getByText(/一つの指標だけが突出していても高得点になりにくい/)).toBeVisible()
     expect(document.body.textContent).not.toMatch(/log\(|係数|Sref|Ping\/Jitter補正式/)
   })
@@ -264,5 +266,43 @@ describe('RankingCard', () => {
     expect(await screen.findByText('1524.7')).toBeVisible()
     expect(screen.queryByRole('button', { name: 'GO TO RUN!' })).not.toBeInTheDocument()
     expect(screen.getByText('現在Net Speed Runを利用できません。測定結果とランキング結果には影響ありません。')).toBeVisible()
+  })
+})
+
+describe('ranking celebration styles', () => {
+  it('keeps the original entrance, glow, and non-interactive shine animations wired to defined keyframes', () => {
+    // DOM-only assertions passed when the redesign removed all three animations.
+    const stylesheet = document.createElement('style')
+    stylesheet.textContent = readFileSync('src/styles.css', 'utf8')
+    document.head.append(stylesheet)
+    try {
+      const rules = Array.from(stylesheet.sheet!.cssRules)
+      const ruleFor = (selector: string) => rules.find(
+        (rule) => 'selectorText' in rule && rule.selectorText === selector,
+      ) as CSSStyleRule
+      const celebration = ruleFor('.ranking-card__celebration')
+      const shine = ruleFor('.ranking-card__celebration::after')
+      expect(celebration.style.getPropertyValue('animation')).toMatch(/ranking-celebration-enter 680ms/)
+      expect(celebration.style.getPropertyValue('animation')).toMatch(/ranking-celebration-glow 2\.2s ease-out/)
+      expect(shine.style.getPropertyValue('animation')).toBe('ranking-celebration-shine 1.15s 180ms ease-out both')
+      expect(shine.style.getPropertyValue('pointer-events')).toBe('none')
+      expect(shine.style.getPropertyValue('position')).toBe('absolute')
+      expect(celebration.style.getPropertyValue('overflow')).toBe('hidden')
+      for (const name of ['enter', 'glow', 'shine']) {
+        const keyframes = rules.find((rule) => 'name' in rule && rule.name === `ranking-celebration-${name}`) as CSSKeyframesRule
+        expect(keyframes?.cssRules.length).toBeGreaterThanOrEqual(2)
+      }
+      const reducedMotion = rules.find(
+        (rule) => 'conditionText' in rule && rule.conditionText === '(prefers-reduced-motion: reduce)',
+      ) as CSSMediaRule
+      const reducedCelebration = Array.from(reducedMotion.cssRules).find(
+        (rule) => 'selectorText' in rule && typeof rule.selectorText === 'string'
+          && rule.selectorText.replace(/\s+/g, ' ') === '.ranking-card__celebration, .ranking-card__celebration::after',
+      ) as CSSStyleRule
+      expect(reducedCelebration.style.getPropertyValue('animation')).toBe('none')
+      expect(reducedCelebration.style.getPropertyPriority('animation')).toBe('important')
+    } finally {
+      stylesheet.remove()
+    }
   })
 })
