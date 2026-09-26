@@ -1,6 +1,8 @@
 import { createHash } from 'node:crypto'
 import { existsSync, readFileSync } from 'node:fs'
+import { execFileSync } from 'node:child_process'
 import { resolve } from 'node:path'
+import { pathToFileURL } from 'node:url'
 import { describe, expect, it } from 'vitest'
 import { evaluateLoadedLatencyResponsiveness } from './lib/loadedLatencyEvaluation'
 
@@ -59,7 +61,7 @@ const editorialContentBaseline: Record<string, string> = {
   'gaming': '971f637a431a5a4f48b8737e07fc45320d82c7d7970fbe715b169b919a66b01b',
   'video-call': '30497748bcb6ac914e2a70ae21d103adaf63e831a5fa60a67d1f7879683b92d6',
   'internet-slow-at-night': 'd14777a1bef07124bb0fe236f341ae48731cccc1c510ca1b53d5e985aaa2f3e2',
-  'ranking': 'd382f85a6181cd702aea36963f70005c4fe50d7d02d4eeb110e7ce16dff81857',
+  'ranking': '1d4473adee602288aca6462613d9871678bfe9b5f04d5e182a3c7686d1a11729',
   'lab/ping-jitter-14-runs': '13893aab621aaef1e1a33642f4e27cbb7724c35accc98ef4d85ff40f5d141c61',
 }
 
@@ -481,6 +483,50 @@ describe('public static pages', () => {
       'ranking-retry',
     ].forEach((id) => expect(page.getElementById(id)).not.toBeNull())
   })
+
+  it('Net Speed Scoreの実装値、v1の扱い、用途別評価との違いを説明する', () => {
+    const page = parsePage('ranking')
+    const section = page.getElementById('score-title')?.closest('section')
+    const content = section?.textContent ?? ''
+    expect(content).toContain('Net Speed Race独自の参考スコア')
+    expect(content).toContain('Download、Upload、Ping、Jitter')
+    expect(content).toContain('0.1単位')
+    expect(content).toContain('算出方法 v1')
+    expect(content).toContain('0.7乗・0.3乗')
+    expect(content).toContain('0〜1.60')
+    expect(content).toContain('0.55〜1.15')
+    expect(content).toContain('0.60〜1.12')
+    expect(content).toContain('負荷時の遅延はこのスコアには含めません')
+    expect(content).toContain('用途別評価とスコアは同じ判定ではありません')
+    expect(content).toContain('不調の原因や契約回線の品質は断定できません')
+    expect(section?.querySelectorAll('tbody tr')).toHaveLength(3)
+    expect(section?.querySelector('.site-pages__table-wrap')).not.toBeNull()
+  })
+
+  it('Net Speed Scoreの計算例を記載値と結びつける', () => {
+    const example = parsePage('ranking').getElementById('score-example')
+    expect(example?.dataset).toMatchObject({
+      downloadTenths: '3000', uploadTenths: '1000', pingTenths: '200', jitterTenths: '50', scoreTenths: '10000',
+    })
+    expect(example?.querySelector('strong')?.textContent).toBe((Number(example?.dataset.scoreTenths) / 10).toFixed(1))
+  })
+
+  const privateScoreFile = resolve('../netspeedrace-internal/services/ranking-worker/src/score.ts')
+  if (existsSync(privateScoreFile)) {
+    it('Net Speed Scoreの計算例は非公開ランキングWorkerの本番関数と一致する', () => {
+      const example = parsePage('ranking').getElementById('score-example')
+      if (!example) throw new Error('score example is missing')
+      const measurement = {
+        downloadTenths: Number(example.dataset.downloadTenths),
+        uploadTenths: Number(example.dataset.uploadTenths),
+        pingTenths: Number(example.dataset.pingTenths),
+        jitterTenths: Number(example.dataset.jitterTenths),
+      }
+      const program = `import { calculateScoreTenths } from ${JSON.stringify(pathToFileURL(privateScoreFile).href)}; console.log(calculateScoreTenths(${JSON.stringify(measurement)}))`
+      const actual = execFileSync(process.execPath, ['--experimental-strip-types', '--input-type=module', '-e', program], { encoding: 'utf8' })
+      expect(Number(actual.trim())).toBe(Number(example.dataset.scoreTenths))
+    })
+  }
 
   it('trust/guideページはscriptなしを維持し、rankingページは同一originのdefer scriptだけを含む', () => {
     ;[...trustPages, ...guidePages].forEach(({ path }) => {

@@ -38,7 +38,7 @@ const responsivenessMessage = (
   if (overall === 'good') {
     return {
       badge: '良好',
-      title: '負荷がかかっても安定しています',
+      title: '負荷による遅延増加は小さいです',
       message: '負荷がかかっても応答時間の増加は小さく、今回の測定では負荷による遅延の悪化は目立ちません。',
     }
   }
@@ -46,7 +46,7 @@ const responsivenessMessage = (
   if (overall === 'unknown') {
     return {
       badge: '判定不可',
-      title: '混雑時の応答性を判定できませんでした',
+      title: '負荷による遅延増加を判定できませんでした',
       message: '比較に必要な応答時間を取得できなかったため、今回の測定では判定できませんでした。時間を置いて再測定してください。',
     }
   }
@@ -117,11 +117,11 @@ export const LoadedLatencyResponsiveness = ({ result }: LoadedLatencyResponsiven
     <section className={`result-panel loaded-latency loaded-latency--${evaluation.overall}`} aria-labelledby="loaded-latency-title">
       <div className="result-panel__heading">
         <div>
-          <h3 id="loaded-latency-title">混雑時の応答性</h3>
+          <h3 id="loaded-latency-title">負荷による遅延増加</h3>
         </div>
         <span className={`loaded-latency__badge loaded-latency__badge--${evaluation.overall}`}>{summary.badge}</span>
       </div>
-      <p className="loaded-latency__lead">回線使用中に応答時間がどれだけ増えるかを確認します</p>
+      <p className="loaded-latency__lead">この判定は通信負荷による増加量です。基本の遅延（Ping）自体の長さは含みません。</p>
 
       <table className="loaded-latency__table">
         <thead>
@@ -133,7 +133,7 @@ export const LoadedLatencyResponsiveness = ({ result }: LoadedLatencyResponsiven
           </tr>
         </thead>
         <tbody>
-          <LatencyRow label="アイドル時" loadedLatencyMs={toValidMetric(result.pingMs)} increaseMs={null} />
+          <LatencyRow label="基本の遅延（Ping）" loadedLatencyMs={toValidMetric(result.pingMs)} increaseMs={null} />
           <LatencyRow
             label="ダウンロード中"
             loadedLatencyMs={evaluation.download.loadedLatencyMs}
@@ -157,8 +157,9 @@ export const LoadedLatencyResponsiveness = ({ result }: LoadedLatencyResponsiven
         <p className="loaded-latency__partial">一部の測定値を取得できなかったため、取得できた値のみで判定しています。</p>
       )}
       {evaluation.overall !== 'unknown' && (
-        <p className="result-note">ネットワークの状態は時間帯や同時通信によって変動します。気になる場合は、同じ条件で2〜3回測定して傾向を確認してください。</p>
+        <p className="result-note">ネットワークの状態は時間帯や同時通信によって変動します。</p>
       )}
+      <a className="result-guide-link" href="/loaded-latency/">負荷時遅延の判定基準を見る</a>
     </section>
   )
 }

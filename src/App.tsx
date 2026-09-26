@@ -230,7 +230,7 @@ function App() {
         </button>
         <p className="button-hint" id="test-button-hint">
           {isConditionEditing
-            ? '測定条件を確定またはキャンセルしてください'
+            ? '比較条件を確定またはキャンセルしてください'
             : hasStarted
             ? 'Wi-Fiや回線の状態により、結果は変動します'
             : '測定には数十秒かかる場合があります'}
@@ -269,16 +269,29 @@ function App() {
                 <br className="hero__lead-mobile-break" />
                 エッジネットワークで測定します。
               </p>
+              <p className="hero__value">
+                速度だけでなく、会議・ゲーム中の応答性もチェック。
+              </p>
             </div>
-            {rankingEnabled && (
-              <div className="hero-ranking-promo">
-                <span className="hero-ranking-promo__eyebrow">全国順位表</span>
-                <div className="hero-ranking-promo__copy">
-                  <strong>全国ランキング開催中！</strong>
-                  <span>あなたの回線は今日何位？ 測って確かめよう。</span>
+            <div className="hero__intro-aside">
+              {rankingEnabled && (
+                <div className="hero-ranking-promo">
+                  <span className="hero-ranking-promo__eyebrow">全国順位表</span>
+                  <div className="hero-ranking-promo__copy">
+                    <strong>全国ランキング開催中！</strong>
+                    <span>あなたの回線は今日何位？ 測って確かめよう。</span>
+                  </div>
                 </div>
+              )}
+              <div className="hero__summary" aria-label="測定でわかること">
+                <strong>測定でわかること</strong>
+                <ul>
+                  <li><b>速度</b> ダウンロード・アップロード</li>
+                  <li><b>応答性</b> Ping・Jitter・負荷時の遅延</li>
+                  <li><b>比較</b> Wi-Fi／有線・部屋・時間帯別</li>
+                </ul>
               </div>
-            )}
+            </div>
           </div>
 
           <div className="hero__dashboard">

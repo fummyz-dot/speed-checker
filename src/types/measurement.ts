@@ -18,4 +18,5 @@ export interface UseCaseEvaluationResult {
   label: string
   level: EvaluationLevel
   detail: string
+  reason?: string
 }

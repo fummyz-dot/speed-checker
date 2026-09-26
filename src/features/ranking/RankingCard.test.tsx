@@ -73,6 +73,7 @@ describe('RankingCard', () => {
     expect(screen.queryByRole('button', { name: 'GO TO RUN!' })).not.toBeInTheDocument()
     expect(screen.queryByText('CONGRATULATIONS')).not.toBeInTheDocument()
     expect(screen.getByText(/一つの指標だけが突出していても高得点になりにくい/)).toBeVisible()
+    expect(screen.getByRole('link', { name: 'Net Speed Scoreの算出方法と計算例を見る' })).toHaveAttribute('href', '/ranking/#score-title')
     expect(document.body.textContent).not.toMatch(/log\(|係数|Sref|Ping\/Jitter補正式/)
   })
 
@@ -106,6 +107,7 @@ describe('RankingCard', () => {
     fireEvent.click(screen.getByRole('button', { name: '全国ランキングに参加して順位を見る' }))
 
     expect(await screen.findByText('1524.7')).toBeVisible()
+    expect(screen.getByRole('link', { name: 'スコアの算出方法を見る' })).toHaveAttribute('href', '/ranking/#score-title')
     expect(screen.getByText('128位')).toBeVisible()
     expect(screen.getByText('上位4.5%')).toBeVisible()
     expect(screen.getByRole('heading', { name: "TODAY'S TOP 3" })).toBeVisible()

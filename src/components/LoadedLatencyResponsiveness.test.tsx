@@ -20,9 +20,26 @@ describe('LoadedLatencyResponsiveness', () => {
     })} />)
 
     expect(screen.getByText('良好')).toBeVisible()
-    expect(screen.getByRole('heading', { name: '負荷がかかっても安定しています' })).toBeVisible()
+    expect(screen.getByRole('heading', { name: '負荷による遅延増加は小さいです' })).toBeVisible()
     expect(screen.getByText('+10 ms')).toBeVisible()
     expect(screen.getByText('+15 ms')).toBeVisible()
+    expect(screen.getByRole('link', { name: '負荷時遅延の判定基準を見る' })).toHaveAttribute('href', '/loaded-latency/')
+  })
+
+  it('基本の遅延が長くても増加が小さければ増加量だけを良好とする', () => {
+    render(<LoadedLatencyResponsiveness result={result({
+      pingMs: 215,
+      downloadLoadedLatencyMs: 220,
+      uploadLoadedLatencyMs: 221,
+    })} />)
+
+    expect(screen.getByRole('heading', { name: '負荷による遅延増加' })).toBeVisible()
+    expect(screen.getByText('良好')).toBeVisible()
+    expect(screen.getByText('この判定は通信負荷による増加量です。基本の遅延（Ping）自体の長さは含みません。')).toBeVisible()
+    expect(screen.getByRole('rowheader', { name: '基本の遅延（Ping）' })).toBeVisible()
+    expect(screen.getByText('215 ms')).toBeVisible()
+    expect(screen.getByText('+5 ms')).toBeVisible()
+    expect(screen.getByText('+6 ms')).toBeVisible()
   })
 
   it('noticeではDownload側の影響を説明する', () => {
@@ -73,7 +90,7 @@ describe('LoadedLatencyResponsiveness', () => {
       uploadLoadedLatencyMs: 40,
     })} />)
 
-    expect(screen.getByRole('heading', { name: '混雑時の応答性を判定できませんでした' })).toBeVisible()
+    expect(screen.getByRole('heading', { name: '負荷による遅延増加を判定できませんでした' })).toBeVisible()
     expect(screen.getByText('比較に必要な応答時間を取得できなかったため、今回の測定では判定できませんでした。時間を置いて再測定してください。')).toBeVisible()
   })
 })

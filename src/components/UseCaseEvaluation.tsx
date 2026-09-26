@@ -25,7 +25,13 @@ export const UseCaseEvaluation = ({ evaluations }: UseCaseEvaluationProps) => (
           <span className="evaluation-card__symbol" aria-hidden="true">{levelSymbols[evaluation.level]}</span>
           <h4>{evaluation.label}</h4>
           <strong>{EVALUATION_LABELS[evaluation.level]}</strong>
-          <p>{evaluation.detail}</p>
+          <p>{evaluation.reason ?? evaluation.detail}</p>
+          {evaluation.id === 'meeting' && (
+            <a className="result-guide-link" href="/video-call/">Web会議の判定基準を見る</a>
+          )}
+          {evaluation.id === 'gaming' && (
+            <a className="result-guide-link" href="/gaming/">ゲーム向けの判定基準を見る</a>
+          )}
         </article>
       ))}
     </div>

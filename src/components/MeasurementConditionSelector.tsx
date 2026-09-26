@@ -22,6 +22,7 @@ export const MeasurementConditionSelector = ({
   const isDraftEmpty = draft.trim().length === 0
   const isDraftInvalid = !isDraftEmpty && normalizedDraft === null
   const validationMessageId = 'measurement-condition-validation'
+  const hintId = 'measurement-condition-hint'
 
   const closeEditor = () => {
     setIsEditing(false)
@@ -49,10 +50,11 @@ export const MeasurementConditionSelector = ({
     <section className="measurement-condition" aria-labelledby="measurement-condition-title">
       <div className="measurement-condition__summary">
         <div className="measurement-condition__summary-copy">
-          <h2 id="measurement-condition-title">測定条件</h2>
-          <p>{value ?? '未設定'}</p>
+          <h2 id="measurement-condition-title">比較条件（任意）</h2>
+          <p>{value ?? '未入力'}</p>
         </div>
         <button
+          id="measurement-condition-edit"
           type="button"
           className="measurement-condition__edit-button"
           onClick={openEditor}
@@ -60,13 +62,16 @@ export const MeasurementConditionSelector = ({
           aria-expanded={isEditing}
           aria-controls="measurement-condition-editor"
         >
-          {value ? '変更' : '設定'}
+          {value ? '変更' : '入力'}
         </button>
       </div>
+      <p className="measurement-condition__description">
+        Wi-Fi／有線、部屋、時間帯などをメモして測定を重ねると、条件別の中央値を比較できます。
+      </p>
 
       {isEditing && (
         <div className="measurement-condition__editor" id="measurement-condition-editor">
-          <label htmlFor="measurement-condition-input">条件名</label>
+          <label htmlFor="measurement-condition-input">比較条件のメモ</label>
           <input
             id="measurement-condition-input"
             type="text"
@@ -77,11 +82,11 @@ export const MeasurementConditionSelector = ({
               event.preventDefault()
               applyDraft()
             }}
-            placeholder="例：リビング 5GHz"
+            placeholder="例：Wi-Fi・リビング・夜"
             aria-invalid={isDraftInvalid}
-            aria-describedby={isDraftInvalid ? validationMessageId : undefined}
+            aria-describedby={isDraftInvalid ? `${hintId} ${validationMessageId}` : hintId}
           />
-          <p className="measurement-condition__hint">場所や接続方法などを自由に設定できます（24文字以内）</p>
+          <p className="measurement-condition__hint" id={hintId}>入力した内容は比較用メモとして保存されます（24文字以内）。</p>
           {isDraftInvalid && (
             <p className="measurement-condition__validation" id={validationMessageId} role="alert">
               24文字以内で入力してください
@@ -118,7 +123,7 @@ export const MeasurementConditionSelector = ({
                   closeEditor()
                 }}
               >
-                設定しない
+                条件を外す
               </button>
             )}
             <div className="measurement-condition__primary-actions">

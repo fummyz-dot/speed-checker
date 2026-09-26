@@ -118,7 +118,7 @@ export const createShareImageBlob = async (
   })
   context.fillStyle = '#929bab'
   context.font = '600 19px system-ui, sans-serif'
-  context.fillText(`混雑時の応答性 ${RESPONSIVENESS_LABELS[responsiveness.overall]}`, 102, 486)
+  context.fillText(`負荷による遅延増加 ${RESPONSIVENESS_LABELS[responsiveness.overall]}`, 102, 486)
 
   context.fillStyle = '#929bab'
   context.font = '19px system-ui, sans-serif'

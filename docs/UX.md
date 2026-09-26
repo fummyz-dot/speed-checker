@@ -29,11 +29,19 @@ The user should be able to understand the screen in this order:
 
 Do not bury the primary measurement action under secondary content.
 
+The first screen summarizes speed, responsiveness, and condition-based comparison beside the ranking introduction on desktop. On mobile, the short value message precedes a compact connection preview, condition control, and start button; the detailed summary and connection details follow the button. The result's repeated-measurement advice links directly to the existing 14-run Lab report. The ranking page explains Score v1 from the private ranking Worker's calculation while keeping scoring out of the browser.
+
+## Result interpretation
+
+The loaded-latency badge describes only the increase from idle Ping during download/upload load; a small increase does not imply that the idle Ping itself is short. Use-case cards show a concise reason from the same measured inputs and reference thresholds as their existing status, with direct links to matching guides for gaming and video calls. The loaded-latency card links to its own criteria guide. These evaluations remain separate from the optional Net Speed Score and the race presentation.
+
+After a completed measurement, guide the user to repeat under the same condition before changing one user-entered comparison condition. The result link returns to the existing condition control; comparison wording must not claim a network root cause.
+
 ## Measurement condition label
 
 The optional measurement-condition label is a compact, secondary control placed before the primary measurement action. It is user-entered only and may describe a location or connection setup; it must never imply an automatic connection-type detection. The inline editor supports a 24-character label, explicit unset, and up to five recent labels from browser-local history. While editing, measurement start is unavailable to avoid applying an unconfirmed draft; while measuring, the condition cannot be changed.
 
-When a valid label is used, the completed result shows it as compact metadata. The local-history confirmation is shown only after the result is present in the updated browser-local history; a label is never added to sharing output. On narrow mobile screens, the hero's DOM order prioritizes the condition control and primary measurement action before connection information, while desktop keeps connection information first.
+When a valid label is used, the completed result shows it as compact metadata. The local-history confirmation is shown only after the result is present in the updated browser-local history; a label is never added to sharing output. On narrow mobile screens, a compact connection preview appears before the condition control and primary measurement action, while connection details follow the action. Desktop keeps the full connection information before the condition control.
 
 After measurement, labeled history can be summarized by condition in the analysis area. Present the median values and metric-specific sample counts without ranking conditions or implying a cause. Labels with one or two valid samples are reference values; three or more are trends. The responsive layout should show a compact table-like comparison on desktop and a two-by-two metric card per condition on narrow screens.
 

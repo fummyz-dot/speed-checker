@@ -4,6 +4,8 @@ import type {
   UseCaseEvaluationResult,
 } from '../types/measurement'
 import { toValidMetric } from './measurementValidation'
+import { formatFinalSpeedDisplay } from './speedValue'
+import { formatMilliseconds } from '../utils/formatMetric'
 
 export const EVALUATION_THRESHOLDS = {
   browsing: { comfortableDownload: 5, availableDownload: 1 },
@@ -44,6 +46,37 @@ const basicLevel = (
   if (value >= comfortable) return 'comfortable'
   if (value >= available) return 'available'
   return 'difficult'
+}
+
+interface ReasonFactor {
+  label: 'Download' | 'Upload' | 'Ping'
+  value: number
+  unit: 'Mbps' | 'ms'
+  comfortable: number
+  available: number
+  maximum?: boolean
+}
+
+const describeFactor = ({ label, value, unit }: ReasonFactor, limit?: number): string => {
+  const rounded = unit === 'Mbps' ? formatFinalSpeedDisplay(value) : formatMilliseconds(value)
+  const displayed = limit !== undefined && Number(rounded.replaceAll(',', '')) === limit && value !== limit
+    ? value.toString()
+    : rounded
+  return `${label} ${displayed} ${unit}`
+}
+
+const reasonForLevel = (level: EvaluationLevel, factors: ReasonFactor[]): string | undefined => {
+  if (level === 'unknown') return undefined
+  const target = level === 'difficult' ? 'available' : 'comfortable'
+  const limitingFactor = factors.find((factor) => factor.maximum
+    ? factor.value > factor[target]
+    : factor.value < factor[target])
+  if (!limitingFactor) {
+    return level === 'comfortable'
+      ? `${factors.map(describeFactor).join('・')} は快適の参考目安を満たしています。`
+      : undefined
+  }
+  return `${describeFactor(limitingFactor, limitingFactor[target])} が${target === 'comfortable' ? '快適' : '利用可能'}の参考目安（${limitingFactor[target]} ${limitingFactor.unit}${limitingFactor.maximum ? '以下' : '以上'}）を${limitingFactor.maximum ? '超えています' : '下回っています'}。`
 }
 
 export const evaluateUseCases = (
@@ -106,25 +139,71 @@ export const evaluateUseCases = (
       EVALUATION_THRESHOLDS.fileUpload.availableUpload,
     )
 
+  const pingFactor = (comfortable: number, available: number): ReasonFactor[] => ping === null ? [] : [{
+    label: 'Ping', value: ping, unit: 'ms', comfortable, available, maximum: true,
+  }]
+  const browsingReason = browsingLevel === null || download === null ? undefined : reasonForLevel(browsingLevel, [{
+    label: 'Download', value: download, unit: 'Mbps',
+    comfortable: EVALUATION_THRESHOLDS.browsing.comfortableDownload,
+    available: EVALUATION_THRESHOLDS.browsing.availableDownload,
+  }])
+  const videoReason = videoLevel === null || download === null ? undefined : reasonForLevel(videoLevel, [{
+    label: 'Download', value: download, unit: 'Mbps',
+    comfortable: EVALUATION_THRESHOLDS.video.comfortableDownload,
+    available: EVALUATION_THRESHOLDS.video.availableDownload,
+  }])
+  const fileReason = fileLevel === null || upload === null ? undefined : reasonForLevel(fileLevel, [{
+    label: 'Upload', value: upload, unit: 'Mbps',
+    comfortable: EVALUATION_THRESHOLDS.fileUpload.comfortableUpload,
+    available: EVALUATION_THRESHOLDS.fileUpload.availableUpload,
+  }])
+  const meetingReason = meetingLevel === null || download === null || upload === null ? undefined : reasonForLevel(meetingLevel, [
+    ...pingFactor(EVALUATION_THRESHOLDS.meeting.comfortablePing, EVALUATION_THRESHOLDS.meeting.availablePing),
+    {
+      label: 'Download', value: download, unit: 'Mbps',
+      comfortable: EVALUATION_THRESHOLDS.meeting.comfortableDownload,
+      available: EVALUATION_THRESHOLDS.meeting.availableDownload,
+    },
+    {
+      label: 'Upload', value: upload, unit: 'Mbps',
+      comfortable: EVALUATION_THRESHOLDS.meeting.comfortableUpload,
+      available: EVALUATION_THRESHOLDS.meeting.availableUpload,
+    },
+  ])
+  const gamingReason = gamingLevel === null || download === null || upload === null ? undefined : reasonForLevel(gamingLevel, [
+    ...pingFactor(EVALUATION_THRESHOLDS.gaming.comfortablePing, EVALUATION_THRESHOLDS.gaming.availablePing),
+    {
+      label: 'Download', value: download, unit: 'Mbps',
+      comfortable: EVALUATION_THRESHOLDS.gaming.comfortableDownload,
+      available: EVALUATION_THRESHOLDS.gaming.availableDownload,
+    },
+    {
+      label: 'Upload', value: upload, unit: 'Mbps',
+      comfortable: EVALUATION_THRESHOLDS.gaming.comfortableUpload,
+      available: EVALUATION_THRESHOLDS.gaming.availableUpload,
+    },
+  ])
+  const noPingNote = ping === null ? ' Ping未取得のため速度のみの参考評価です。' : ''
+
   return [
     browsingLevel === null ? unavailable('browsing', 'Web閲覧・SNS') : {
-      id: 'browsing', label: 'Web閲覧・SNS', level: browsingLevel,
+      id: 'browsing', label: 'Web閲覧・SNS', level: browsingLevel, reason: browsingReason,
       detail: browsingLevel === 'difficult' ? '画像の多いページでは待つ可能性があります' : '日常的な閲覧の目安',
     },
     videoLevel === null ? unavailable('video', '動画視聴') : {
-      id: 'video', label: '動画視聴', level: videoLevel,
+      id: 'video', label: '動画視聴', level: videoLevel, reason: videoReason,
       detail: videoLevel === 'available' ? '画質によっては利用可能' : '動画再生の目安',
     },
     meetingLevel === null ? unavailable('meeting', 'Web会議') : {
-      id: 'meeting', label: 'Web会議', level: meetingLevel,
+      id: 'meeting', label: 'Web会議', level: meetingLevel, reason: meetingReason === undefined ? undefined : meetingReason + noPingNote,
       detail: ping === null ? '速度を基にした参考評価' : '送受信速度と応答時間の目安',
     },
     gamingLevel === null ? unavailable('gaming', 'オンラインゲーム') : {
-      id: 'gaming', label: 'オンラインゲーム', level: gamingLevel,
+      id: 'gaming', label: 'オンラインゲーム', level: gamingLevel, reason: gamingReason === undefined ? undefined : gamingReason + noPingNote,
       detail: ping === null ? '速度のみの参考評価' : '速度と応答時間の目安',
     },
     fileLevel === null ? unavailable('file-upload', '大容量ファイル送信') : {
-      id: 'file-upload', label: '大容量ファイル送信', level: fileLevel,
+      id: 'file-upload', label: '大容量ファイル送信', level: fileLevel, reason: fileReason,
       detail: 'アップロード速度を基にした目安',
     },
   ]

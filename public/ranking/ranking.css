@@ -252,4 +252,15 @@
     grid-column: 1 / -1;
     margin: 0;
   }
+
+  .ranking-score-table {
+    min-width: 0;
+    table-layout: fixed;
+  }
+
+  .ranking-score-table th:first-child {
+    width: 38%;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
 }

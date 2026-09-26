@@ -27,7 +27,7 @@
     <main class="site-pages__main" id="main-content"><article class="site-pages__article site-pages__article--scoreboard">
       <h1>全国回線品質ランキング</h1>
       <p class="site-pages__lead">Net Speed Raceで測定後に任意参加された結果を、1回の参加＝1出走として集計しています。Download・Uploadだけでなく、PingとJitterも含むNet Speed Scoreで、その日の参加測定を比べます。</p>
-      <p class="site-pages__article-meta"><span>運営・集計: Net Speed Race</span><span>ページ内容更新: 2026年9月4日</span></p>
+      <p class="site-pages__article-meta"><span>運営・集計: Net Speed Race</span><span>ページ内容更新: 2026年9月26日</span></p>
       <p class="site-pages__note">ランキングは日本からの測定を対象にした任意参加データです。利用者数・契約回線数・ISP別シェアを表す統計ではありません。</p>
       <a class="site-pages__article-cta" href="/">今の回線品質を測定する</a>
 
@@ -62,8 +62,24 @@
 
       <section aria-labelledby="score-title">
         <h2 id="score-title">Net Speed Scoreとは</h2>
-        <p>Net Speed Scoreは、Download、Upload、Ping、Jitterを組み合わせたNet Speed Race独自の参考指標です。単純な下り速度ランキングではなく、送受信速度と応答性・安定性をまとめて比較するために使用します。</p>
-        <p>Net Speed Scoreは、公的機関、通信事業者、Cloudflareなどが定める公式の回線評価指標ではありません。数値はNet Speed Race内で測定結果を比較するための参考値です。</p>
+        <p>Net Speed Scoreは、Download、Upload、Ping、Jitterを組み合わせ、速度と応答性を一つの値で比較するNet Speed Race独自の参考スコアです。ランキングに任意参加した測定の比較に使用します。</p>
+        <p>算出方法 v1では、4つの測定値をそれぞれ0.1単位に丸めてから計算します。PingまたはJitterを取得できなかった測定はスコアを算出せず、ランキングに参加できません。</p>
+        <div class="site-pages__table-wrap">
+          <table class="site-pages__table ranking-score-table">
+            <caption>Net Speed Score v1 に使う測定値</caption>
+            <thead><tr><th scope="col">項目</th><th scope="col">スコアへの扱い</th></tr></thead>
+            <tbody>
+              <tr><th scope="row">Download・Upload</th><td>それぞれ0.7乗・0.3乗して掛け合わせた速度値を、300 Mbps・100 Mbpsを基準に対数で正規化します。速度係数の範囲は0〜1.60です。</td></tr>
+              <tr><th scope="row">Ping</th><td>20 msを基準に、短いほど係数が高くなります。計算上は最低5 msとして扱い、係数を0.55〜1.15に制限します。</td></tr>
+              <tr><th scope="row">Jitter</th><td>5 msを基準に、短いほど係数が高くなります。計算上は最低0.5 msとして扱い、係数を0.60〜1.12に制限します。</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>3つの係数を掛け合わせ、1000倍した値がスコアです。速度には対数を使い、PingとJitterは乗算の係数として効くため、一つの測定値だけが高くても他の値の影響を受けます。最終値を小数第1位に丸めて表示します。v1の理論上の範囲は0.0〜2060.8です。負荷時の遅延はこのスコアには含めません。</p>
+        <h3>計算例</h3>
+        <p id="score-example" data-download-tenths="3000" data-upload-tenths="1000" data-ping-tenths="200" data-jitter-tenths="50" data-score-tenths="10000">Download 300 Mbps、Upload 100 Mbps、Ping 20 ms、Jitter 5 msなら、速度・Ping・Jitterの係数はいずれも1で、Net Speed Scoreは <strong>1000.0</strong> です。</p>
+        <p>測定値そのものは「生の数値」、ゲーム・Web会議などの用途別評価は各用途の参考目安との比較、Net Speed Scoreは4値をまとめたランキング用の参考スコアです。回線速度レースは測定結果を見せるための表現で、別の品質判定ではありません。用途別評価とスコアは同じ判定ではありません。</p>
+        <p>公式の業界標準ではなく、1回の測定やスコアだけで不調の原因や契約回線の品質は断定できません。通信状況は変動し、用途によって重視する測定値も異なります。上の「Score version」は現在の集計に使う版を示します。</p>
       </section>
 
       <section aria-labelledby="how-to-read-title">

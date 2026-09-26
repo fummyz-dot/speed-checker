@@ -182,6 +182,7 @@ export const RankingCard = ({
           </p>
           <small>ランキングへの参加は任意です。参加しない場合、測定結果はこれまでどおりブラウザ内だけで扱います。</small>
           <small>Net Speed ScoreはNet Speed Race独自の参考指標であり、Cloudflareその他の事業者が定める公式なネットワーク品質基準ではありません。</small>
+          <a href="/ranking/#score-title">Net Speed Scoreの算出方法と計算例を見る</a>
         </div>
       )}
 
@@ -220,6 +221,7 @@ export const RankingCard = ({
           <div className="ranking-card__result">
             <span>NET SPEED SCORE</span>
             <strong>{formatScore(submission.entry.scoreTenths)}</strong>
+            <a href="/ranking/#score-title">スコアの算出方法を見る</a>
             <p>
               本日 {submission.entry.totalRuns.toLocaleString('ja-JP')}走中
               <b>{submission.entry.tieCount > 1 ? `同率${submission.entry.rank}位` : `${submission.entry.rank}位`}</b>

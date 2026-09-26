@@ -87,6 +87,17 @@ describe('App', () => {
     const { container } = render(<App />)
 
     expect(screen.getByRole('button', { name: '測定開始' })).toBeVisible()
+    expect(screen.getByText('速度だけでなく、会議・ゲーム中の応答性もチェック。')).toBeVisible()
+    const summary = screen.getByLabelText('測定でわかること')
+    expect(summary).toHaveTextContent('速度')
+    expect(summary).toHaveTextContent('ダウンロード・アップロード')
+    expect(summary).toHaveTextContent('応答性')
+    expect(summary).toHaveTextContent('Ping・Jitter・負荷時の遅延')
+    expect(summary).toHaveTextContent('比較')
+    expect(summary).toHaveTextContent('Wi-Fi／有線・部屋・時間帯別')
+    expect(screen.getByRole('heading', { name: '比較条件（任意）' })).toBeVisible()
+    expect(document.getElementById('measurement-condition-edit')).toBe(screen.getByRole('button', { name: '入力' }))
+    expect(screen.getByText('Wi-Fi／有線、部屋、時間帯などをメモして測定を重ねると、条件別の中央値を比較できます。')).toBeVisible()
     expect(screen.getByRole('heading', { name: '回線速度レース' })).toBeVisible()
     expect(container.querySelector('.horse-course')).toHaveAttribute('data-animation-state', 'idle')
     expect(screen.queryByRole('heading', { name: '本日の全国回線品質ランキング' })).not.toBeInTheDocument()
@@ -180,6 +191,9 @@ describe('App', () => {
     expect(screen.getByRole('button', { name: '全国ランキングに参加して順位を見る', hidden: true })).toBeEnabled()
     expect(within(measurementResults as HTMLElement).queryByText('NET SPEED RUN'))
       .not.toBeInTheDocument()
+    expect(within(measurementResults as HTMLElement).getByRole('heading', { name: '次に試すこと', hidden: true })).toBeInTheDocument()
+    expect(within(measurementResults as HTMLElement).getByRole('link', { name: '実測14回でPing・Jitterの変動を見る', hidden: true }))
+      .toHaveAttribute('href', '/lab/ping-jitter-14-runs/')
 
     fireEvent.click(screen.getByRole('button', {
       name: '全国ランキングに参加して順位を見る', hidden: true,
@@ -332,8 +346,8 @@ describe('App', () => {
     const matchMedia = installMatchMedia(false)
     const { container, unmount } = render(<App />)
 
-    await user.click(screen.getByRole('button', { name: '設定' }))
-    const input = screen.getByRole('textbox', { name: '条件名' })
+    await user.click(screen.getByRole('button', { name: '入力' }))
+    const input = screen.getByRole('textbox', { name: '比較条件のメモ' })
     await user.type(input, 'リビング 5GHz')
     expect(screen.getByRole('button', { name: '測定開始' })).toBeDisabled()
 
@@ -341,7 +355,7 @@ describe('App', () => {
     await waitFor(() => {
       expect(getHeroControlOrder(container)).toEqual(['condition', 'measurement', 'connection'])
     })
-    expect(screen.getByRole('textbox', { name: '条件名' })).toHaveValue('リビング 5GHz')
+    expect(screen.getByRole('textbox', { name: '比較条件のメモ' })).toHaveValue('リビング 5GHz')
     expect(screen.getByRole('button', { name: '測定開始' })).toBeDisabled()
 
     unmount()
@@ -358,8 +372,8 @@ describe('App', () => {
     })
 
     render(<App />)
-    await user.click(screen.getByRole('button', { name: '設定' }))
-    await user.type(screen.getByRole('textbox', { name: '条件名' }), '有線LAN')
+    await user.click(screen.getByRole('button', { name: '入力' }))
+    await user.type(screen.getByRole('textbox', { name: '比較条件のメモ' }), '有線LAN')
     expect(screen.getByRole('button', { name: '測定開始' })).toBeDisabled()
     expect(start).not.toHaveBeenCalled()
 
@@ -424,7 +438,7 @@ describe('App', () => {
     ]))
 
     render(<App />)
-    expect(screen.getByText('未設定')).toBeVisible()
+    expect(screen.getByText('未入力')).toBeVisible()
   })
 
   it('最新履歴の測定条件を測定開始時にuseSpeedTestへ渡す', async () => {
@@ -455,10 +469,10 @@ describe('App', () => {
     })
 
     render(<App />)
-    await user.click(screen.getByRole('button', { name: '設定' }))
+    await user.click(screen.getByRole('button', { name: '入力' }))
 
     expect(screen.getByRole('button', { name: '測定開始' })).toBeDisabled()
-    expect(screen.getByText('測定条件を確定またはキャンセルしてください')).toBeVisible()
+    expect(screen.getByText('比較条件を確定またはキャンセルしてください')).toBeVisible()
     expect(start).not.toHaveBeenCalled()
     expect(screen.queryByRole('dialog', { name: '回線速度レース' })).not.toBeInTheDocument()
   })
@@ -579,7 +593,7 @@ describe('App', () => {
     })
 
     render(<App />)
-    expect(screen.getByRole('button', { name: '設定' })).toBeDisabled()
+    expect(screen.getByRole('button', { name: '入力' })).toBeDisabled()
   })
 
   it('測定エラーをalertで表示する', () => {

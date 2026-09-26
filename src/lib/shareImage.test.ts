@@ -85,7 +85,7 @@ describe('shareImage', () => {
 
     await createShareImageBlob(result(), [])
 
-    expect(context.fillText).toHaveBeenCalledWith('混雑時の応答性 要注意', 102, 486)
+    expect(context.fillText).toHaveBeenCalledWith('負荷による遅延増加 要注意', 102, 486)
   })
 
   it('馬アセットの読込みが失敗してもPNGを生成する', async () => {

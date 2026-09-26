@@ -46,14 +46,62 @@ describe('evaluateUseCases', () => {
     expect(evaluateUseCases(result(100, upload, 20))[4].level).toBe(level)
   })
 
+  it('ゲームと会議の警告理由は既存のPing参考目安から選ぶ', () => {
+    const evaluations = evaluateUseCases(result(100, 100, 215))
+    expect(evaluations[2]).toMatchObject({
+      level: 'difficult',
+      reason: 'Ping 215 ms が利用可能の参考目安（150 ms以下）を超えています。',
+    })
+    expect(evaluations[3]).toMatchObject({
+      level: 'difficult',
+      reason: 'Ping 215 ms が利用可能の参考目安（100 ms以下）を超えています。',
+    })
+  })
+
+  it('利用可能の理由と速度不足の理由も同じ閾値から示す', () => {
+    expect(evaluateUseCases(result(100, 100, 90))[2]).toMatchObject({
+      level: 'available',
+      reason: 'Ping 90 ms が快適の参考目安（80 ms以下）を超えています。',
+    })
+    expect(evaluateUseCases(result(2, 100, 20))[3]).toMatchObject({
+      level: 'difficult',
+      reason: 'Download 2.0 Mbps が利用可能の参考目安（3 Mbps以上）を下回っています。',
+    })
+    expect(evaluateUseCases(result(100, 2, 20))[2]).toMatchObject({
+      level: 'difficult',
+      reason: 'Upload 2.0 Mbps が利用可能の参考目安（3 Mbps以上）を下回っています。',
+    })
+  })
+
+  it('目安の近くでも丸めた値と警告理由が矛盾しない', () => {
+    expect(evaluateUseCases(result(100, 100, 100.0001))[3]).toMatchObject({
+      level: 'difficult',
+      reason: 'Ping 100.0001 ms が利用可能の参考目安（100 ms以下）を超えています。',
+    })
+    expect(evaluateUseCases(result(4.99, 100, 20))[3]).toMatchObject({
+      level: 'available',
+      reason: 'Download 4.99 Mbps が快適の参考目安（5 Mbps以上）を下回っています。',
+    })
+  })
+
+  it('すべての判定可能な用途に測定値由来の理由を付ける', () => {
+    const evaluations = evaluateUseCases(result(100, 100, 20))
+    expect(evaluations.every((evaluation) => evaluation.reason?.includes('参考目安'))).toBe(true)
+    expect(evaluations.map(({ level }) => level)).toEqual([
+      'comfortable', 'comfortable', 'comfortable', 'comfortable', 'comfortable',
+    ])
+  })
+
   it('Pingなしでは速度だけの参考評価にする', () => {
     const evaluations = evaluateUseCases(result(100, 100, null))
     expect(evaluations[3]).toMatchObject({ level: 'comfortable', detail: '速度のみの参考評価' })
+    expect(evaluations[3].reason).toContain('Ping未取得のため速度のみの参考評価です。')
   })
 
   it('必要な測定値がない場合は判定不可にする', () => {
     const evaluations = evaluateUseCases({ pingMs: null })
     expect(evaluations.every((evaluation) => evaluation.level === 'unknown')).toBe(true)
+    expect(evaluations.every((evaluation) => evaluation.reason === undefined)).toBe(true)
   })
 })
 
