@@ -20,6 +20,7 @@ interface RankingCardProps {
   saveRunAccess?: (issued: IssuedRunTicket) => unknown
   saveRunReturn?: (measurementId: string) => unknown
   navigateToRun?: () => void
+  onSubmitted?: (submission: RankingSubmissionResult) => void
 }
 
 const formatScore = (scoreTenths: number): string => (scoreTenths / 10).toFixed(1)
@@ -38,6 +39,7 @@ export const RankingCard = ({
   saveRunAccess = saveRunTicket,
   saveRunReturn = saveRunReturnContext,
   navigateToRun = defaultNavigateToRun,
+  onSubmitted,
 }: RankingCardProps) => {
   const [state, setState] = useState<RankingSubmitState>(() => initialState(context))
   const [submission, setSubmission] = useState<RankingSubmissionResult | null>(null)
@@ -94,6 +96,7 @@ export const RankingCard = ({
       const nextSubmission = await service.submitMeasurement(measurement, turnstileToken)
       setSubmission(nextSubmission)
       setState('success')
+      onSubmitted?.(nextSubmission)
     } catch {
       setState('error')
     }

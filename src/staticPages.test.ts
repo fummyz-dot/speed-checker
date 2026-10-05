@@ -90,6 +90,9 @@ describe('public static pages', () => {
   it.each(staticPages)('$pathのSEO・本文・日付・全リンクをデザイン変更前から維持する', ({ path }) => {
     const page = parsePage(path)
     page.querySelectorAll('.site-pages__eyebrow').forEach((element) => element.remove())
+    // Share-card tags were added after the baseline; they are verified separately below.
+    page.head.querySelectorAll('meta[property^="og:image"], meta[name="twitter:card"]')
+      .forEach((element) => element.remove())
     const protectedContent = {
       head: page.head.innerHTML.replace(/\s+/g, ' ').trim(),
       h1: page.querySelector('h1')?.textContent,
@@ -103,6 +106,25 @@ describe('public static pages', () => {
       .toBe(editorialContentBaseline[path])
     expect(page.querySelector('meta[name="robots"]')?.getAttribute('content') ?? '')
       .not.toContain('noindex')
+  })
+
+  it.each(staticPages)('$pathはXなどで大きな画像付きカードとして表示される', ({ path }) => {
+    const head = parsePage(path).head
+    const meta = (selector: string) => head.querySelector(selector)?.getAttribute('content')
+
+    expect(meta('meta[property="og:image"]')).toBe('https://netspeedrace.com/og-image.png')
+    expect(meta('meta[property="og:image:width"]')).toBe('1200')
+    expect(meta('meta[property="og:image:height"]')).toBe('630')
+    expect(meta('meta[property="og:image:alt"]')).toBeTruthy()
+    expect(meta('meta[name="twitter:card"]')).toBe('summary_large_image')
+  })
+
+  it('OGP画像が1200×630pxのPNGとして存在する', () => {
+    const png = readFileSync(resolve('public', 'og-image.png'))
+
+    expect(png.subarray(1, 4).toString('ascii')).toBe('PNG')
+    expect(png.readUInt32BE(16)).toBe(1200)
+    expect(png.readUInt32BE(20)).toBe(630)
   })
 
   it('robotsとsitemapをデザイン変更前から維持する', () => {

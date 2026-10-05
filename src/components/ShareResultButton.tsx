@@ -5,14 +5,15 @@ import {
   createShareImageBlob,
   downloadBlob,
 } from '../lib/shareImage'
-import { createSharePostText, createXIntentUrl } from '../lib/sharePost'
+import { createSharePostText, createXIntentUrl, type ShareRankingSummary } from '../lib/sharePost'
 
 interface ShareResultButtonProps {
   result: SpeedMeasurementResult
   evaluations: UseCaseEvaluationResult[]
+  ranking?: ShareRankingSummary | null
 }
 
-export const ShareResultButton = ({ result, evaluations }: ShareResultButtonProps) => {
+export const ShareResultButton = ({ result, evaluations, ranking = null }: ShareResultButtonProps) => {
   const [isCopyingImage, setIsCopyingImage] = useState(false)
   const [isDownloading, setIsDownloading] = useState(false)
   const [isCopyingText, setIsCopyingText] = useState(false)
@@ -71,7 +72,7 @@ export const ShareResultButton = ({ result, evaluations }: ShareResultButtonProp
 
     setIsCopyingText(true)
     try {
-      await navigator.clipboard.writeText(createSharePostText(result, window.location.href))
+      await navigator.clipboard.writeText(createSharePostText(result, window.location.href, ranking))
       setMessage('投稿文をコピーしました。')
     } catch {
       setMessage('投稿文をコピーできませんでした。')
@@ -82,7 +83,7 @@ export const ShareResultButton = ({ result, evaluations }: ShareResultButtonProp
 
   const postToX = () => {
     setMessage(null)
-    const postText = createSharePostText(result, window.location.href)
+    const postText = createSharePostText(result, window.location.href, ranking)
     window.open(createXIntentUrl(postText), '_blank', 'noopener,noreferrer')
   }
 
