@@ -19,6 +19,8 @@ import {
 } from './lib/speedValue'
 import { loadMeasurements, measurementResultToMetrics } from './lib/measurementStorage'
 import type { SpeedMeasurementResult } from './types/measurement'
+import type { RankingSubmissionResult } from './features/ranking/types'
+import type { ShareRankingSummary } from './lib/sharePost'
 import { normalizeConditionLabel } from './lib/measurementValidation'
 
 const getInitialConditionLabel = (): string | null =>
@@ -54,6 +56,7 @@ function App() {
   const [isRaceFocused, setIsRaceFocused] = useState(false)
   const [isRaceFocusExiting, setIsRaceFocusExiting] = useState(false)
   const [restoredResult, setRestoredResult] = useState<SpeedMeasurementResult | null>(null)
+  const [shareRanking, setShareRanking] = useState<ShareRankingSummary | null>(null)
   const hasConsumedRunReturnRef = useRef(false)
   const focusReturnTargetRef = useRef<HTMLElement | null>(null)
   const raceFocusExitTimerRef = useRef<number | null>(null)
@@ -333,6 +336,13 @@ function App() {
                 context={rankingContext}
                 service={rankingService}
                 measurement={completedResult}
+                onSubmitted={(submission: RankingSubmissionResult) => setShareRanking({
+                  measurementId: completedResult.id,
+                  rank: submission.entry.rank,
+                  tieCount: submission.entry.tieCount,
+                  totalRuns: submission.entry.totalRuns,
+                  scoreTenths: submission.entry.scoreTenths,
+                })}
               />
             </div>
           )}
@@ -358,7 +368,7 @@ function App() {
           </div>
           <MetricsGrid metrics={displayedMetrics} />
           {phase === 'complete' && completedResult && (
-            <CompletedMeasurement result={completedResult} />
+            <CompletedMeasurement result={completedResult} ranking={shareRanking} />
           )}
           {restoredResult && (
             <CompletedMeasurement result={restoredResult} persistResult={false} />

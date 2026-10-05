@@ -116,6 +116,14 @@ describe('RankingCard', () => {
     expect(document.body.textContent).not.toContain('private-ticket-not-rendered')
   })
 
+  it('notifies the submission result so the share post can include the rank', async () => {
+    const onSubmitted = vi.fn()
+    render(<RankingCard context={eligibleContext} service={service()} measurement={measurement} onSubmitted={onSubmitted} />)
+    fireEvent.click(screen.getByRole('button', { name: '全国ランキングに参加して順位を見る' }))
+
+    await waitFor(() => expect(onSubmitted).toHaveBeenCalledWith(successfulSubmission))
+  })
+
   it('disables the opt-in button while the optional ranking submission is pending', async () => {
     let completeSubmission: ((value: RankingSubmissionResult) => void) | undefined
     const submitMeasurement = vi.fn(() => new Promise<RankingSubmissionResult>((resolve) => {

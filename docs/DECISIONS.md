@@ -277,3 +277,15 @@ The browser must never calculate Net Speed Score or contain its coefficients. It
 - The homepage combines a stadium scoreboard and editorial layout, using deep green, off-white, salmon accents, system serif headings, and ruled record sections rather than glowing rounded cards.
 - Preserve measurement logic, six-decimal live presentation, completed-result authority, horse assets and animation, race focus behavior, history, and ranking/Run contracts.
 - The theme also covers standalone editorial/trust pages, the ranking scoreboard, and the Lab report through shared static-page CSS. Text, SEO, links, source data/charts, and ranking logic are preserved. Run retains its existing design.
+
+---
+
+## D-020 — Social share card and ranking-aware share text
+
+**Status:** Accepted and implemented locally; not deployed
+**Date:** 2026-10-06
+
+- The homepage and every indexed static page declare a shared static `og:image` (`/og-image.png`, 1200 × 630) and `twitter:card` = `summary_large_image`, so links render as a large image card on X and other services. The noindex Run page is excluded.
+- The X post text keeps the measured Download/Upload/Ping and adds the call to action 「あなたの回線は何着？」.
+- When the user has opted into today's anonymous ranking for the same completed measurement, the post text also includes the rank (with 「同率」 for ties), the day's total runs, and the Net Speed Score. Without participation, no rank is shown. No IP, network name, or condition label is added.
+- Per-result dynamic OG images are not implemented; they would require a Worker image-rendering path and are a separate decision.

@@ -1,7 +1,12 @@
 import { describe, expect, it } from 'vitest'
 import type { SpeedMeasurementResult } from '../types/measurement'
 import { PUBLIC_SITE_URL } from './publicSite'
-import { createSharePostText, createXIntentUrl, getSharePageUrl } from './sharePost'
+import {
+  createSharePostText,
+  createXIntentUrl,
+  getSharePageUrl,
+  type ShareRankingSummary,
+} from './sharePost'
 
 const result = (overrides: Partial<SpeedMeasurementResult> = {}): SpeedMeasurementResult => ({
   id: 'measurement-1',
@@ -50,5 +55,47 @@ describe('sharePost', () => {
 
   it('URLとして解釈できない値でもcanonical URLを使う', () => {
     expect(getSharePageUrl('not a url')).toBe(PUBLIC_SITE_URL)
+  })
+
+  it('参加を促す一言を含める', () => {
+    expect(createSharePostText(result(), 'https://example.com/')).toContain('あなたの回線は何着？')
+  })
+
+  describe('ランキング参加時', () => {
+    const ranking = (overrides: Partial<ShareRankingSummary> = {}): ShareRankingSummary => ({
+      measurementId: 'measurement-1',
+      rank: 5,
+      tieCount: 1,
+      totalRuns: 37,
+      scoreTenths: 724,
+      ...overrides,
+    })
+
+    it('本日の順位、出走数、Net Speed Scoreを含める', () => {
+      const text = createSharePostText(result(), 'https://example.com/', ranking())
+
+      expect(text).toContain('本日の全国ランキング 5位 / 37頭（Net Speed Score 72.4）')
+    })
+
+    it('同率の場合は同率と表示する', () => {
+      const text = createSharePostText(result(), 'https://example.com/', ranking({ tieCount: 2 }))
+
+      expect(text).toContain('同率5位 / 37頭')
+    })
+
+    it('別の測定の順位は含めない', () => {
+      const text = createSharePostText(result(), 'https://example.com/', ranking({ measurementId: 'other' }))
+
+      expect(text).not.toContain('ランキング')
+    })
+
+    it('不正な順位は含めない', () => {
+      expect(createSharePostText(result(), 'https://example.com/', ranking({ rank: 0 }))).not.toContain('ランキング')
+      expect(createSharePostText(result(), 'https://example.com/', ranking({ rank: 40 }))).not.toContain('ランキング')
+    })
+
+    it('未参加の場合は順位行を省略する', () => {
+      expect(createSharePostText(result(), 'https://example.com/')).not.toContain('ランキング')
+    })
   })
 })

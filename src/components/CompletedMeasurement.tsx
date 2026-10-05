@@ -3,6 +3,7 @@ import type { SpeedMeasurementResult } from '../types/measurement'
 import { evaluateUseCases, generateMeasurementComment } from '../lib/measurementEvaluation'
 import { clearMeasurements, loadMeasurements, saveMeasurement } from '../lib/measurementStorage'
 import { normalizeConditionLabel } from '../lib/measurementValidation'
+import type { ShareRankingSummary } from '../lib/sharePost'
 import { MeasurementComment } from './MeasurementComment'
 import { LoadedLatencyResponsiveness } from './LoadedLatencyResponsiveness'
 import { MeasurementHistoryTrend } from './MeasurementHistoryTrend'
@@ -13,9 +14,10 @@ import { UseCaseEvaluation } from './UseCaseEvaluation'
 interface CompletedMeasurementProps {
   result: SpeedMeasurementResult
   persistResult?: boolean
+  ranking?: ShareRankingSummary | null
 }
 
-export const CompletedMeasurement = ({ result, persistResult = true }: CompletedMeasurementProps) => {
+export const CompletedMeasurement = ({ result, persistResult = true, ranking = null }: CompletedMeasurementProps) => {
   const [previous, setPrevious] = useState<SpeedMeasurementResult | null>(null)
   const [history, setHistory] = useState<SpeedMeasurementResult[]>([])
   const [savedResultId, setSavedResultId] = useState<string | null>(null)
@@ -55,7 +57,7 @@ export const CompletedMeasurement = ({ result, persistResult = true }: Completed
       <MeasurementComment comment={comment} />
       <PreviousMeasurementComparison current={result} previous={previous} onClear={clearHistory} />
       <MeasurementHistoryTrend history={history} currentResult={result} />
-      <ShareResultButton result={result} evaluations={evaluations} />
+      <ShareResultButton result={result} evaluations={evaluations} ranking={ranking} />
     </div>
   )
 }
