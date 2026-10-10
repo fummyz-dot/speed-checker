@@ -17,20 +17,20 @@ import { formatFinalSpeedDisplay } from './speedValue'
 export const SHARE_IMAGE_WIDTH = 1200
 export const SHARE_IMAGE_HEIGHT = 630
 
-// styles.css の raceboard トークンに合わせた配色。
+// styles.css のナイター競馬トークンに合わせた配色。
 const COLORS = {
-  background: '#151c17',
-  raceSurface: '#24372b',
-  line: 'rgba(127, 143, 123, 0.38)',
-  rule: '#7f8f7b',
-  text: '#f2f0e8',
-  muted: '#b8b9ad',
-  accent: '#f2a077',
+  background: '#0b1431',
+  raceSurface: '#a47a52',
+  line: 'rgba(163, 174, 210, 0.3)',
+  rule: '#f4f2ea',
+  text: '#edf0f8',
+  muted: '#a7b1d4',
+  accent: '#ffb020',
 } as const
 
-const FONT_SANS = "system-ui, -apple-system, 'Segoe UI', 'Hiragino Sans', 'Yu Gothic UI', Meiryo, sans-serif"
-const FONT_EDITORIAL = "Georgia, 'Times New Roman', 'Yu Mincho', 'Hiragino Mincho ProN', serif"
-const FONT_RECORD = 'ui-monospace, SFMono-Regular, Consolas, monospace'
+const FONT_SANS = "'Hiragino Sans', 'Noto Sans JP', 'Noto Sans CJK JP', 'Yu Gothic UI', Meiryo, system-ui, sans-serif"
+const FONT_EDITORIAL = FONT_SANS
+const FONT_RECORD = FONT_SANS
 
 const RACE_PANEL = { x: 700, y: 62, width: 424, height: 140 } as const
 

@@ -9,8 +9,9 @@
 
 .ranking-live {
   margin-top: 42px;
-  padding-top: 24px;
-  border-top: 3px double var(--rule);
+  padding: 24px;
+  border-top: 0;
+  background: #060914;
 }
 
 .ranking-live__heading {
@@ -85,12 +86,11 @@
 
 .ranking-summary-card p {
   margin: 8px 0 0;
-  color: var(--text);
-  font-family: var(--font-record);
-  font-size: clamp(1.6rem, 3vw, 2.35rem);
-  font-variant-numeric: tabular-nums;
+  color: var(--led);
+  font-family: var(--font-led);
+  font-size: clamp(1.5rem, 2.8vw, 2.2rem);
   font-weight: 700;
-  letter-spacing: -0.04em;
+  letter-spacing: 0.02em;
 }
 
 .ranking-summary-card small {
@@ -121,7 +121,8 @@
 }
 
 .ranking-top3 li span:last-child {
-  color: var(--text);
+  color: var(--led);
+  font-family: var(--font-led);
   font-size: 1.8rem;
   font-weight: 700;
 }
@@ -179,8 +180,8 @@
   border: 0;
   border-radius: 0;
   background: var(--surface);
-  color: var(--rule);
-  accent-color: var(--rule);
+  color: var(--led);
+  accent-color: var(--led);
 }
 
 .ranking-recent progress::-webkit-progress-bar {
@@ -188,11 +189,11 @@
 }
 
 .ranking-recent progress::-webkit-progress-value {
-  background: var(--rule);
+  background: var(--led);
 }
 
 .ranking-recent progress::-moz-progress-bar {
-  background: var(--rule);
+  background: var(--led);
 }
 
 .ranking-retry {
@@ -202,7 +203,7 @@
   border: 1px solid var(--accent);
   border-radius: 4px;
   background: var(--accent);
-  color: var(--background);
+  color: #1a1204;
   cursor: pointer;
   font: inherit;
   font-weight: 750;
@@ -262,5 +263,12 @@
     width: 38%;
     white-space: normal;
     overflow-wrap: anywhere;
+  }
+}
+
+@media (max-width: 720px) {
+  .ranking-live {
+    margin-inline: -16px;
+    padding: 20px 16px;
   }
 }
