@@ -48,6 +48,7 @@
 - Worker API (`GET /api/connection`)
 - Vitest / React Testing Library
 - Node.js 24 / npm
+- 測定値の表示フォント: DSEG7 Classic Bold（SIL Open Font License 1.1、`public/fonts/` に同梱）
 
 ## ローカル開発
 

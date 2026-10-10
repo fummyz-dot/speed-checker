@@ -78,7 +78,7 @@ describe('App', () => {
   it('h1を1件だけ正しい文言で表示する', () => {
     const { container } = render(<App />)
     expect(screen.getAllByRole('heading', { level: 1 })).toHaveLength(1)
-    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('インターネット速度を、シンプルに。')
+    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('回線速度を、競馬で測る。')
     expect(document.getElementById('measurement-results')).toHaveAttribute('aria-labelledby', 'results-title')
     expect(container.querySelector('.hero__lead-mobile-break')).toBeInTheDocument()
   })
@@ -87,14 +87,14 @@ describe('App', () => {
     const { container } = render(<App />)
 
     expect(screen.getByRole('button', { name: '測定開始' })).toBeVisible()
-    expect(screen.getByText('速度だけでなく、会議・ゲーム中の応答性もチェック。')).toBeVisible()
+    expect(screen.getByText(/相手は地方馬と無敗の三冠馬。/)).toBeVisible()
     const summary = screen.getByLabelText('測定でわかること')
     expect(summary).toHaveTextContent('速度')
-    expect(summary).toHaveTextContent('ダウンロード・アップロード')
+    expect(summary).toHaveTextContent('ダウンロードとアップロード')
     expect(summary).toHaveTextContent('応答性')
-    expect(summary).toHaveTextContent('Ping・Jitter・負荷時の遅延')
+    expect(summary).toHaveTextContent('Ping、Jitter、通信中の遅延')
     expect(summary).toHaveTextContent('比較')
-    expect(summary).toHaveTextContent('Wi-Fi／有線・部屋・時間帯別')
+    expect(summary).toHaveTextContent('Wi-Fiと有線、部屋、時間帯の違い')
     expect(screen.getByRole('heading', { name: '比較条件（任意）' })).toBeVisible()
     expect(document.getElementById('measurement-condition-edit')).toBe(screen.getByRole('button', { name: '入力' }))
     expect(screen.getByText('Wi-Fi／有線、部屋、時間帯などをメモして測定を重ねると、条件別の中央値を比較できます。')).toBeVisible()
@@ -154,8 +154,8 @@ describe('App', () => {
     vi.mocked(useSpeedTest).mockImplementation(() => speedTest)
 
     const { rerender } = render(<App />)
-    expect(screen.getByText('全国ランキング開催中！')).toBeVisible()
-    expect(screen.getByText('あなたの回線は今日何位？ 測って確かめよう。')).toBeVisible()
+    expect(screen.getByText('全国ランキング開催中')).toBeVisible()
+    expect(screen.getByText('測定後に参加すると、今日の順位がわかります。')).toBeVisible()
     expect(document.querySelector('.hero__intro--with-ranking')).toBeInTheDocument()
     expect(document.querySelector('.hero__intro-copy')).toBeInTheDocument()
     expect(document.querySelectorAll('.hero-ranking-promo')).toHaveLength(1)
@@ -324,20 +324,20 @@ describe('App', () => {
     expect(screen.queryByText('今回の測定条件')).not.toBeInTheDocument()
   })
 
-  it('desktopとmobileでhero controlsのDOM順を切り替え、viewport変更にも追従する', async () => {
+  it('hero controlsはviewportに関係なく測定・条件・接続の順を保つ', async () => {
     const matchMedia = installMatchMedia(false)
     const { container } = render(<App />)
 
-    expect(getHeroControlOrder(container)).toEqual(['connection', 'condition', 'measurement'])
+    expect(getHeroControlOrder(container)).toEqual(['measurement', 'condition', 'connection'])
 
     act(() => matchMedia.setMatches(true))
     await waitFor(() => {
-      expect(getHeroControlOrder(container)).toEqual(['condition', 'measurement', 'connection'])
+      expect(getHeroControlOrder(container)).toEqual(['measurement', 'condition', 'connection'])
     })
 
     act(() => matchMedia.setMatches(false))
     await waitFor(() => {
-      expect(getHeroControlOrder(container)).toEqual(['connection', 'condition', 'measurement'])
+      expect(getHeroControlOrder(container)).toEqual(['measurement', 'condition', 'connection'])
     })
   })
 
@@ -353,7 +353,7 @@ describe('App', () => {
 
     act(() => matchMedia.setMatches(true))
     await waitFor(() => {
-      expect(getHeroControlOrder(container)).toEqual(['condition', 'measurement', 'connection'])
+      expect(getHeroControlOrder(container)).toEqual(['measurement', 'condition', 'connection'])
     })
     expect(screen.getByRole('textbox', { name: '比較条件のメモ' })).toHaveValue('リビング 5GHz')
     expect(screen.getByRole('button', { name: '測定開始' })).toBeDisabled()

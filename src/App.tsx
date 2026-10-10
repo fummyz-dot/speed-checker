@@ -204,7 +204,7 @@ function App() {
   const measurementControl = (
     <div className="hero__measurement" key="hero-measurement">
       <div className="speed-display" aria-label="ダウンロード速度">
-        <span className="speed-display__label">ダウンロード</span>
+        <span className="speed-display__label">下り</span>
         <div className="speed-display__reading" aria-live="polite">
           <strong>{displayedDownload}</strong>
           <span>Mbps</span>
@@ -212,15 +212,6 @@ function App() {
       </div>
 
       <div className="measurement-actions">
-        <MeasurementStatus phase={phase} isRunning={isRunning} />
-
-        {error && (
-          <div className="error-message" role="alert">
-            <strong>エラー</strong>
-            <span>{error}</span>
-          </div>
-        )}
-
         <button
           className="test-button"
           type="button"
@@ -228,9 +219,9 @@ function App() {
           disabled={isRunning || isPreparingContext || isConditionEditing}
           aria-describedby="test-button-hint"
         >
-          <span>{buttonLabel}</span>
-          {!isRunning && <span aria-hidden="true">→</span>}
+          {buttonLabel}
         </button>
+        <MeasurementStatus phase={phase} isRunning={isRunning} />
         <p className="button-hint" id="test-button-hint">
           {isConditionEditing
             ? '比較条件を確定またはキャンセルしてください'
@@ -238,12 +229,17 @@ function App() {
             ? 'Wi-Fiや回線の状態により、結果は変動します'
             : '測定には数十秒かかる場合があります'}
         </p>
+
+        {error && (
+          <div className="error-message" role="alert">
+            <strong>エラー</strong>
+            <span>{error}</span>
+          </div>
+        )}
       </div>
     </div>
   )
-  const heroControls = isMobileLayout
-    ? [conditionSelector, measurementControl, connectionInfo]
-    : [connectionInfo, conditionSelector, measurementControl]
+  const heroControls = [measurementControl, conditionSelector, connectionInfo]
 
   return (
     <div className={`site-shell${isRaceFocused ? ' site-shell--race-focused' : ''}`}>
@@ -254,7 +250,11 @@ function App() {
         inert={isRaceFocused}
       >
         <Brand />
-        <span className="site-header__tag">回線速度・品質測定</span>
+        <nav className="site-header__nav" aria-label="主要ナビゲーション">
+          <a href="/ranking/">全国ランキング</a>
+          <a href="/guide/">回線品質ガイド</a>
+          <a href="/methodology/">測定方法</a>
+        </nav>
       </header>
 
       <main>
@@ -266,47 +266,35 @@ function App() {
             inert={isRaceFocused}
           >
             <div className="hero__intro-copy">
-              <h1 id="page-title"><span>インターネット速度を、</span><wbr /><span>シンプルに。</span></h1>
+              <p className="hero__racecard"><span>本日のメインレース</span><span>回線速度ステークス</span><span>3頭立て</span></p>
+              <h1 id="page-title"><span>回線速度を、</span><span>競馬で測る。</span></h1>
               <p className="hero__lead">
-                現在の回線品質をCloudflareの
+                あなたの回線が、下りの速さで走り、上りの速さで跳びます。
                 <br className="hero__lead-mobile-break" />
-                エッジネットワークで測定します。
-              </p>
-              <p className="hero__value">
-                速度だけでなく、会議・ゲーム中の応答性もチェック。
+                相手は地方馬と無敗の三冠馬。何着に入れるか確かめましょう。
               </p>
             </div>
             <div className="hero__intro-aside">
               {rankingEnabled && (
                 <div className="hero-ranking-promo">
-                  <span className="hero-ranking-promo__eyebrow">全国順位表</span>
                   <div className="hero-ranking-promo__copy">
-                    <strong>全国ランキング開催中！</strong>
-                    <span>あなたの回線は今日何位？ 測って確かめよう。</span>
+                    <strong>全国ランキング開催中</strong>
+                    <span>測定後に参加すると、今日の順位がわかります。</span>
                   </div>
                 </div>
               )}
               <div className="hero__summary" aria-label="測定でわかること">
                 <strong>測定でわかること</strong>
                 <ul>
-                  <li><b>速度</b> ダウンロード・アップロード</li>
-                  <li><b>応答性</b> Ping・Jitter・負荷時の遅延</li>
-                  <li><b>比較</b> Wi-Fi／有線・部屋・時間帯別</li>
+                  <li><b>速度</b>ダウンロードとアップロード</li>
+                  <li><b>応答性</b>Ping、Jitter、通信中の遅延</li>
+                  <li><b>比較</b>Wi-Fiと有線、部屋、時間帯の違い</li>
                 </ul>
               </div>
             </div>
           </div>
 
           <div className="hero__dashboard">
-            <div
-              className="hero__controls"
-              data-race-focus-background
-              aria-hidden={isRaceFocused || undefined}
-              inert={isRaceFocused}
-            >
-              {heroControls}
-            </div>
-
             <HorseSpeedVisualization
               downloadMbps={bandwidthBitsToMbps(metrics.download)}
               uploadMbps={bandwidthBitsToMbps(metrics.upload)}
@@ -322,6 +310,15 @@ function App() {
               onRequestExitFocus={exitRaceFocus}
               onShowDetails={showMeasurementDetails}
             />
+
+            <div
+              className="hero__controls"
+              data-race-focus-background
+              aria-hidden={isRaceFocused || undefined}
+              inert={isRaceFocused}
+            >
+              {heroControls}
+            </div>
           </div>
           {phase === 'complete' && completedResult && rankingEnabled && (
             <div
@@ -349,7 +346,7 @@ function App() {
         </section>
 
         <section
-          className="results"
+          className={`results${hasStarted ? '' : ' results--idle'}`}
           id="measurement-results"
           aria-labelledby="results-title"
           data-race-focus-background

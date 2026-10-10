@@ -1,19 +1,34 @@
 :root {
   color-scheme: dark;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI',
-    'Hiragino Sans', 'Yu Gothic UI', 'Yu Gothic', Meiryo, sans-serif;
-  --background: #151c17;
-  --surface: #1b241e;
-  --line: rgba(127, 143, 123, 0.38);
-  --text: #f2f0e8;
-  --muted: #b8b9ad;
-  --accent: #f2a077;
-  --accent-strong: #e88b60;
-  --rule: #7f8f7b;
-  --font-editorial: Georgia, 'Times New Roman', 'Yu Mincho', 'Hiragino Mincho ProN', serif;
-  --font-record: ui-monospace, SFMono-Regular, Consolas, 'Liberation Mono', monospace;
+  font-family: 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Noto Sans JP', 'Noto Sans CJK JP',
+    'Yu Gothic UI', 'Yu Gothic', Meiryo, system-ui, sans-serif;
+  font-feature-settings: 'palt' 1;
+  /* Night racecourse palette, shared with the home page. */
+  --night: #0b1431;
+  --stand: #142048;
+  --rail: #f4f2ea;
+  --led: #ffb020;
+  --background: var(--night);
+  --surface: var(--stand);
+  --line: rgba(163, 174, 210, 0.24);
+  --text: #edf0f8;
+  --muted: #a7b1d4;
+  --accent: var(--led);
+  --accent-strong: #ffc14d;
+  --rule: rgba(163, 174, 210, 0.4);
+  --font-editorial: inherit;
+  --font-record: inherit;
+  --font-led: 'Tote LED', ui-monospace, monospace;
   background: var(--background);
   color: var(--text);
+}
+
+@font-face {
+  font-family: 'Tote LED';
+  src: url('/fonts/DSEG7Classic-Bold.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
 }
 
 * {
@@ -603,4 +618,162 @@ dd {
   .site-pages__related ul {
     grid-template-columns: 1fr;
   }
+}
+
+/* ==========================================================================
+   Night race theme for article, trust, ranking and lab pages.
+   Content and structure are unchanged; only presentation lives here.
+   ========================================================================== */
+
+a:hover {
+  color: var(--text);
+  text-decoration-color: var(--led);
+}
+
+.site-pages__header {
+  border-bottom: 0;
+}
+
+.site-pages__header-inner {
+  min-height: 72px;
+  padding: 14px 0;
+}
+
+.site-pages__brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 1.2rem;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+}
+
+/* Same floodlight mark as the home page. */
+.site-pages__brand::before {
+  width: 24px;
+  height: 24px;
+  border-radius: 3px;
+  background:
+    radial-gradient(circle at 30% 30%, #fff8e1 0 2.5px, transparent 3px),
+    radial-gradient(circle at 70% 30%, #fff8e1 0 2.5px, transparent 3px),
+    radial-gradient(circle at 30% 70%, #fff8e1 0 2.5px, transparent 3px),
+    radial-gradient(circle at 70% 70%, #fff8e1 0 2.5px, transparent 3px),
+    #1c2a59;
+  box-shadow: 0 0 18px rgba(255, 240, 200, 0.35);
+  content: '';
+}
+
+.site-pages__nav a {
+  font-weight: 500;
+}
+
+.site-pages__nav a:hover,
+.site-pages__nav a[aria-current="page"] {
+  color: var(--text);
+  text-decoration: underline;
+  text-decoration-color: var(--led);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 6px;
+}
+
+.site-pages__article {
+  padding-top: 0;
+  border-top: 0;
+}
+
+.site-pages__eyebrow {
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+h1 {
+  font-size: clamp(1.9rem, 3.8vw, 2.8rem);
+  font-weight: 900;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+}
+
+h2 {
+  margin: 56px 0 14px;
+  padding-top: 0;
+  border-top: 0;
+  font-size: clamp(1.3rem, 2.4vw, 1.65rem);
+  font-weight: 800;
+  line-height: 1.45;
+}
+
+h3 {
+  font-weight: 800;
+}
+
+.site-pages__article p,
+.site-pages__article li,
+.site-pages__article dd {
+  line-height: 1.95;
+}
+
+.site-pages__lead {
+  font-size: 1.05rem;
+}
+
+.site-pages__note {
+  border-left: 4px solid var(--led);
+  background: var(--stand);
+}
+
+.site-pages__article-meta {
+  border-block: 0;
+  padding: 0;
+}
+
+.site-pages__article-cta {
+  min-height: 48px;
+  padding: 10px 20px;
+  border: 0;
+  background: var(--led);
+  color: #1a1204;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+}
+
+.site-pages__article-cta:hover {
+  background: var(--accent-strong);
+  color: #1a1204;
+}
+
+.site-pages__card strong {
+  text-decoration-color: rgba(244, 242, 234, 0.35);
+}
+
+.site-pages__card:hover strong {
+  color: var(--text);
+  text-decoration-color: var(--led);
+}
+
+/* Steps are real sequences, so they get saddle-cloth style numbers. */
+.site-pages__step-list li::before {
+  border-radius: 2px;
+  background: var(--rail);
+  color: #17171c;
+  font-family: inherit;
+}
+
+.site-pages__table thead {
+  border-top: 0;
+  background: var(--stand);
+}
+
+.site-pages__article--report .site-pages__table td {
+  font-family: inherit;
+  font-variant-numeric: tabular-nums;
+}
+
+.site-pages__updated {
+  border-top: 0;
+}
+
+.site-pages__footer {
+  margin-top: 24px;
+  border-top: 6px solid var(--rail);
 }

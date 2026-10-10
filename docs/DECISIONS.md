@@ -271,7 +271,7 @@ The browser must never calculate Net Speed Score or contain its coefficients. It
 
 ## D-019 — Homepage uses a raceboard editorial theme
 
-**Status:** Accepted and implemented locally; not deployed
+**Status:** Superseded by D-023
 **Date:** 2026-09-17
 
 - The homepage combines a stadium scoreboard and editorial layout, using deep green, off-white, salmon accents, system serif headings, and ruled record sections rather than glowing rounded cards.
@@ -285,7 +285,7 @@ The browser must never calculate Net Speed Score or contain its coefficients. It
 **Status:** Accepted and implemented locally; not deployed
 **Date:** 2026-10-06
 
-- The homepage and every indexed static page declare a shared static `og:image` (`/og-image.png`, 1200 × 630; renamed to `/og-image-v2.png` in D-022) and `twitter:card` = `summary_large_image`, so links render as a large image card on X and other services. The noindex Run page is excluded.
+- The homepage and every indexed static page declare a shared static `og:image` (`/og-image.png`, 1200 × 630; renamed to `/og-image-v2.png` in D-022 and `/og-image-v3.png` in D-023) and `twitter:card` = `summary_large_image`, so links render as a large image card on X and other services. The noindex Run page is excluded.
 - The X post text keeps the measured Download/Upload/Ping and adds the call to action 「あなたの回線は何着？」.
 - When the user has opted into today's anonymous ranking for the same completed measurement, the post text also includes the rank (with 「同率」 for ties), the day's total runs, and the Net Speed Score. Without participation, no rank is shown. No IP, network name, or condition label is added.
 - Per-result dynamic OG images are not implemented; they would require a Worker image-rendering path and are a separate decision.
@@ -317,3 +317,19 @@ The browser must never calculate Net Speed Score or contain its coefficients. It
 - The ranking card offers a 「順位をXでシェア」 button using the same post text.
 - The downloadable share PNG follows the raceboard palette, includes the horse sprite, and adds rank/score only when the user joined today's ranking. It still contains no IP, network, or condition-label data.
 - The Run result screen offers an X share link with the result (remaining seconds at CLEAR or meters to GOAL at TIME UP), `#NetSpeedRace`, and the share URL. It never includes the raw score or the mapped Run time.
+
+---
+
+## D-023 — Night race theme replaces the raceboard editorial theme
+
+**Status:** Accepted and implemented locally; not deployed
+**Date:** 2026-10-10
+
+- The site uses a floodlit night meeting as its visual identity: deep navy sky (`#0b1431`), grandstand panels (`#142048`), lit dirt course (`#a47a52`), white rail (`#f4f2ea`) and tote-board amber LED (`#ffb020`). It replaces D-019's green-black, salmon accent, serif headings and hairline rules, which read as a generic template.
+- On the homepage the race course is the hero. The course has a white rail above and below, gate-colour saddle numbers (1 white, 2 black, 3 red) and a goal post. The measurement button, LED download readout, condition memo and connection summary sit directly under the course, so the button is in the first view on phones.
+- Measured numbers use a self-hosted 7-segment font (DSEG7 Classic Bold, SIL OFL 1.1, `public/fonts/`). Units and Japanese text stay in the system Japanese sans-serif. No external font service is used.
+- Technical connection details (AS number, Cloudflare colo, protocol, Edge RTT) fold into 「詳しい接続情報」; the provider stays visible. The empty results section is hidden until a measurement starts.
+- Arrow glyphs on buttons and links, all-caps eyebrow labels on the homepage, monospace labels and Georgia headings are removed. Feature names that are part of the ranking contract (NET SPEED SCORE, TODAY'S TOP 3, GO TO RUN!) keep their text.
+- Static pages, the ranking scoreboard, the share PNG and the OG image (`/og-image-v3.png`) follow the same palette. Page text, SEO metadata, links and Lab source charts are unchanged. Run keeps its own design.
+- Measurement logic, six-decimal live readout, race timing, horse assets, focus mode, history, ranking and Run contracts are unchanged.
+

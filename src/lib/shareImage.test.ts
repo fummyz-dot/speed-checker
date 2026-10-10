@@ -92,8 +92,8 @@ describe('shareImage', () => {
 
     await createShareImageBlob(result(), [])
 
-    expect(fillStyles[0]).toBe('#151c17')
-    expect(fillStyles).toEqual(expect.arrayContaining(['#f2f0e8', '#f2a077', '#24372b']))
+    expect(fillStyles[0]).toBe('#0b1431')
+    expect(fillStyles).toEqual(expect.arrayContaining(['#edf0f8', '#ffb020', '#a47a52']))
   })
 
   it('既存の応答性評価に基づくラベルを描画する', async () => {

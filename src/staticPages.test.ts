@@ -112,7 +112,7 @@ describe('public static pages', () => {
     const head = parsePage(path).head
     const meta = (selector: string) => head.querySelector(selector)?.getAttribute('content')
 
-    expect(meta('meta[property="og:image"]')).toBe('https://netspeedrace.com/og-image-v2.png')
+    expect(meta('meta[property="og:image"]')).toBe('https://netspeedrace.com/og-image-v3.png')
     expect(meta('meta[property="og:image:width"]')).toBe('1200')
     expect(meta('meta[property="og:image:height"]')).toBe('630')
     expect(meta('meta[property="og:image:alt"]')).toBeTruthy()
@@ -120,7 +120,7 @@ describe('public static pages', () => {
   })
 
   it('OGP画像が1200×630pxのPNGとして存在する', () => {
-    const png = readFileSync(resolve('public', 'og-image-v2.png'))
+    const png = readFileSync(resolve('public', 'og-image-v3.png'))
 
     expect(png.subarray(1, 4).toString('ascii')).toBe('PNG')
     expect(png.readUInt32BE(16)).toBe(1200)
