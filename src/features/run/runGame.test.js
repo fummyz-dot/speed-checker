@@ -43,7 +43,7 @@ describe("Net Speed Run game audio integration", () => {
         <canvas id="gameCanvas"></canvas>
         <section id="bootPanel"></section>
         <section id="titlePanel"><button class="time-button" data-time="25">25</button></section>
-        <section id="resultPanel"><p id="resultKicker"></p><h2 id="resultTitle"></h2><div id="resultDetail"></div><button id="retryButton">RETRY</button><button id="changeTimeButton">CHANGE TIME</button></section>
+        <section id="resultPanel"><p id="resultKicker"></p><h2 id="resultTitle"></h2><div id="resultDetail"></div><button id="retryButton">RETRY</button><button id="changeTimeButton">CHANGE TIME</button><a id="shareResultLink" href="https://x.com/intent/post">結果をXでシェア</a></section>
         <section id="pausePanel"><button id="resumeButton">RESUME</button></section>
         <button id="soundToggle">SOUND: ON</button>
         <div id="liveRegion"></div>
@@ -109,6 +109,8 @@ describe("Net Speed Run game audio integration", () => {
     runFrame(100_000);
     expect(document.getElementById("gameFrame")).toHaveAttribute("data-state", "TIME_UP");
     expect(audio.stopBgm).toHaveBeenCalledWith({ fadeMs: 180 });
+    const timeUpPost = new URL(document.getElementById("shareResultLink").href).searchParams.get("text");
+    expect(timeUpPost).toMatch(/GOALまであと\d+m/);
 
     document.getElementById("retryButton").click();
     expect(audio.restartBgm).toHaveBeenCalledTimes(1);
@@ -135,6 +137,20 @@ describe("Net Speed Run game audio integration", () => {
 
     expect(document.getElementById("gameFrame")).toHaveAttribute("data-state", "CLEAR");
     expect(audio.stopBgm).toHaveBeenCalledWith({ fadeMs: 180 });
+  });
+
+  it("shares the CLEAR result on X with the hashtag and share URL but no raw score", () => {
+    runFrame(202_300);
+    runFrame(203_600);
+
+    const link = document.getElementById("shareResultLink");
+    const intentUrl = new URL(link.href);
+    const text = intentUrl.searchParams.get("text");
+    expect(intentUrl.origin + intentUrl.pathname).toBe("https://x.com/intent/post");
+    expect(text).toMatch(/残り\d+\.\d秒でクリア/);
+    expect(text).toContain("#NetSpeedRace");
+    expect(text).toContain("https://netspeedrace.com/?s=x");
+    expect(text).not.toMatch(/score|スコア/i);
   });
 
 });

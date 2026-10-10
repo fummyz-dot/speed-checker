@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest'
 import type { SpeedMeasurementResult } from '../types/measurement'
-import { PUBLIC_SITE_URL } from './publicSite'
 import {
   createSharePostText,
   createXIntentUrl,
   getSharePageUrl,
+  SHARE_PAGE_URL,
   type ShareRankingSummary,
 } from './sharePost'
 
@@ -18,7 +18,7 @@ const result = (overrides: Partial<SpeedMeasurementResult> = {}): SpeedMeasureme
 })
 
 describe('sharePost', () => {
-  it('投稿文にブランド、Download、Upload、Ping、ハッシュタグとcanonical URLを含める', () => {
+  it('投稿文にブランド、Download、Upload、Ping、ハッシュタグとシェア用URLを含める', () => {
     const text = createSharePostText(result(), 'http://localhost:5173/result?source=share#result')
 
     expect(text).toContain('Net Speed Raceで回線を測定しました')
@@ -26,7 +26,7 @@ describe('sharePost', () => {
     expect(text).toContain('↑ 49.6 Mbps')
     expect(text).toContain('Ping 59 ms')
     expect(text).toContain('#NetSpeedRace')
-    expect(text).toContain(PUBLIC_SITE_URL)
+    expect(text).toContain('https://netspeedrace.com/?s=x')
     expect(text).not.toContain('source=share')
     expect(text).not.toContain('localhost')
     expect(text).not.toContain('workers.dev')
@@ -53,8 +53,9 @@ describe('sharePost', () => {
     expect(intentUrl.searchParams.get('text')).toBe(postText)
   })
 
-  it('URLとして解釈できない値でもcanonical URLを使う', () => {
-    expect(getSharePageUrl('not a url')).toBe(PUBLIC_SITE_URL)
+  it('URLとして解釈できない値でもシェア用URLを使う', () => {
+    expect(getSharePageUrl('not a url')).toBe(SHARE_PAGE_URL)
+    expect(SHARE_PAGE_URL).toBe('https://netspeedrace.com/?s=x')
   })
 
   it('参加を促す一言を含める', () => {
@@ -71,10 +72,24 @@ describe('sharePost', () => {
       ...overrides,
     })
 
-    it('本日の順位、出走数、Net Speed Scoreを含める', () => {
+    it('本日の順位、出走数、スコアを1行で含める', () => {
       const text = createSharePostText(result(), 'https://example.com/', ranking())
 
-      expect(text).toContain('本日の全国ランキング 5位 / 37頭（Net Speed Score 72.4）')
+      expect(text).toContain('本日の全国ランキング 5位 / 37頭（スコア 72.4）')
+      expect(text).not.toContain('Net Speed Score')
+    })
+
+    it('出走数が10未満のときは出走数を含めない', () => {
+      const text = createSharePostText(result(), 'https://example.com/', ranking({ rank: 2, totalRuns: 9, scoreTenths: 7899 }))
+
+      expect(text).toContain('本日の全国ランキング 2位（スコア 789.9）')
+      expect(text).not.toContain('頭')
+    })
+
+    it('出走数がちょうど10のときは出走数を含める', () => {
+      const text = createSharePostText(result(), 'https://example.com/', ranking({ totalRuns: 10 }))
+
+      expect(text).toContain('5位 / 10頭')
     })
 
     it('同率の場合は同率と表示する', () => {

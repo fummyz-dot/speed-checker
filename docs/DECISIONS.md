@@ -285,7 +285,35 @@ The browser must never calculate Net Speed Score or contain its coefficients. It
 **Status:** Accepted and implemented locally; not deployed
 **Date:** 2026-10-06
 
-- The homepage and every indexed static page declare a shared static `og:image` (`/og-image.png`, 1200 × 630) and `twitter:card` = `summary_large_image`, so links render as a large image card on X and other services. The noindex Run page is excluded.
+- The homepage and every indexed static page declare a shared static `og:image` (`/og-image.png`, 1200 × 630; renamed to `/og-image-v2.png` in D-022) and `twitter:card` = `summary_large_image`, so links render as a large image card on X and other services. The noindex Run page is excluded.
 - The X post text keeps the measured Download/Upload/Ping and adds the call to action 「あなたの回線は何着？」.
 - When the user has opted into today's anonymous ranking for the same completed measurement, the post text also includes the rank (with 「同率」 for ties), the day's total runs, and the Net Speed Score. Without participation, no rank is shown. No IP, network name, or condition label is added.
 - Per-result dynamic OG images are not implemented; they would require a Worker image-rendering path and are a separate decision.
+
+---
+
+## D-021 — Cloudflare Web Analytics for aggregate site usage
+
+**Status:** Accepted and implemented locally; not deployed
+**Date:** 2026-10-10
+
+- Cloudflare Web Analytics may be enabled for aggregate page views, referrers, browser/OS/device type, country/region, and page performance. Cloudflare states that it does not collect or use visitors' personal data for this product.
+- The CSP allows `https://static.cloudflareinsights.com` in `script-src` and `https://cloudflareinsights.com` in `connect-src` for the manual snippet; the automatic injection reports via the same-origin `/cdn-cgi/rum`.
+- Measurement results, measurement history, and condition labels are never sent to Web Analytics. No custom events are added.
+- Advertising (AdSense) is not implemented at this time. The AdSense account meta tag, `ads.txt`, and privacy policy section 8 are kept for a possible future re-application. Google's ad domains are added to the CSP only after approval.
+- The privacy policy section 「7. Analytics」 describes this.
+
+---
+
+## D-022 — Share URL and ranking line wording
+
+**Status:** Accepted and implemented locally; not deployed
+**Date:** 2026-10-10
+
+- The X share URL is `https://netspeedrace.com/?s=x` so X fetches a fresh card instead of a stale cached one. Canonical URLs are unchanged.
+- The ranking line uses 「スコア」 instead of 「Net Speed Score」 to fit one line. When the day has fewer than 10 runs, the run count is omitted (e.g. 「本日の全国ランキング 2位（スコア 789.9）」), matching the ranking screen, which does not show top-percent figures below 10 runs.
+- The static OG image keeps the bottom ~15% as plain background because X overlays the page title there; the race and text sit above it, with larger horses whose lanes match the race (地方馬 / あなた / 無敗の三冠馬).
+- X caches card images by URL, so a redesigned OG image gets a new versioned filename (`/og-image-v2.png`) and every page's `og:image` is updated rather than replacing the file in place.
+- The ranking card offers a 「順位をXでシェア」 button using the same post text.
+- The downloadable share PNG follows the raceboard palette, includes the horse sprite, and adds rank/score only when the user joined today's ranking. It still contains no IP, network, or condition-label data.
+- The Run result screen offers an X share link with the result (remaining seconds at CLEAR or meters to GOAL at TIME UP), `#NetSpeedRace`, and the share URL. It never includes the raw score or the mapped Run time.

@@ -37,7 +37,7 @@ export const ShareResultButton = ({ result, evaluations, ranking = null }: Share
 
     setIsCopyingImage(true)
     try {
-      const blob = await createShareImageBlob(result, evaluations)
+      const blob = await createShareImageBlob(result, evaluations, ranking)
       await navigator.clipboard.write([
         new ClipboardItemConstructor({ 'image/png': blob }),
       ])
@@ -53,7 +53,7 @@ export const ShareResultButton = ({ result, evaluations, ranking = null }: Share
     setIsDownloading(true)
     setMessage(null)
     try {
-      const blob = await createShareImageBlob(result, evaluations)
+      const blob = await createShareImageBlob(result, evaluations, ranking)
       downloadBlob(blob, createShareFilename(result.measuredAt))
       setMessage('PNG画像を保存しました。')
     } catch {

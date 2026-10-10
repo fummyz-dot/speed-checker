@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { SpeedMeasurementResult } from '../types/measurement'
 import { PUBLIC_SITE_URL } from './publicSite'
 import { createShareFilename, createShareImageBlob } from './shareImage'
+import type { ShareRankingSummary } from './sharePost'
 
 const result = (overrides: Partial<SpeedMeasurementResult> = {}): SpeedMeasurementResult => ({
   id: 'measurement-1',
@@ -65,7 +66,7 @@ describe('shareImage', () => {
     vi.unstubAllGlobals()
   })
 
-  it('旧Canvas馬のprimitiveを使わず、承認済みidle馬アセット3頭を描画する', async () => {
+  it('旧Canvas馬のprimitiveを使わず、レース画面と同じidle馬アセット3頭を描画し、あなたの馬を最も大きく描く', async () => {
     const sources = installImageMock(false)
 
     await expect(createShareImageBlob(result(), [])).resolves.toBe(pngBlob)
@@ -76,8 +77,23 @@ describe('shareImage', () => {
       '/assets/horse/horse-fast-idle.webp',
     ])
     expect(context.drawImage).toHaveBeenCalledTimes(3)
-    expect(context.drawImage).toHaveBeenCalledWith(expect.anything(), 950, 48, 98, 83)
+    expect(context.drawImage).toHaveBeenLastCalledWith(expect.anything(), 930, 64, 160, 135)
     expect(context.fillText).toHaveBeenCalledWith('NET SPEED RACE', 76, 94)
+  })
+
+  it('現行デザインのraceboard配色で背景を塗る', async () => {
+    installImageMock(false)
+    const fillStyles: string[] = []
+    let current = ''
+    Object.defineProperty(context, 'fillStyle', {
+      get: () => current,
+      set: (value: string) => { current = value; fillStyles.push(value) },
+    })
+
+    await createShareImageBlob(result(), [])
+
+    expect(fillStyles[0]).toBe('#151c17')
+    expect(fillStyles).toEqual(expect.arrayContaining(['#f2f0e8', '#f2a077', '#24372b']))
   })
 
   it('既存の応答性評価に基づくラベルを描画する', async () => {
@@ -85,7 +101,7 @@ describe('shareImage', () => {
 
     await createShareImageBlob(result(), [])
 
-    expect(context.fillText).toHaveBeenCalledWith('負荷による遅延増加 要注意', 102, 486)
+    expect(context.fillText).toHaveBeenCalledWith('負荷による遅延増加 要注意', 76, 432)
   })
 
   it('馬アセットの読込みが失敗してもPNGを生成する', async () => {
@@ -113,6 +129,44 @@ describe('shareImage', () => {
 
     const drawnText = (context.fillText as ReturnType<typeof vi.fn>).mock.calls.map(([text]) => text)
     expect(drawnText).not.toContain('リビング 5GHz')
+  })
+
+  describe('ランキング参加時', () => {
+    const ranking = (overrides: Partial<ShareRankingSummary> = {}): ShareRankingSummary => ({
+      measurementId: 'measurement-1',
+      rank: 2,
+      tieCount: 1,
+      totalRuns: 37,
+      scoreTenths: 7899,
+      ...overrides,
+    })
+    const drawnText = () => (context.fillText as ReturnType<typeof vi.fn>).mock.calls.map(([text]) => text)
+
+    it('同じ測定の順位、出走数、スコアを描画する', async () => {
+      installImageMock(false)
+
+      await createShareImageBlob(result(), [], ranking())
+
+      expect(drawnText()).toEqual(expect.arrayContaining(['本日の全国ランキング', '2位', '/ 37頭', '789.9', 'NET SPEED SCORE']))
+    })
+
+    it('出走数が10未満なら出走数を描画しない', async () => {
+      installImageMock(false)
+
+      await createShareImageBlob(result(), [], ranking({ totalRuns: 9 }))
+
+      expect(drawnText()).toContain('2位')
+      expect(drawnText().join('\n')).not.toContain('頭')
+    })
+
+    it('未参加または別の測定の順位は描画しない', async () => {
+      installImageMock(false)
+
+      await createShareImageBlob(result(), [], ranking({ measurementId: 'other' }))
+      await createShareImageBlob(result(), [])
+
+      expect(drawnText()).not.toContain('本日の全国ランキング')
+    })
   })
 
   it('ダウンロード用のファイル名に公開ブランドを使う', () => {

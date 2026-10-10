@@ -124,6 +124,21 @@ describe('RankingCard', () => {
     await waitFor(() => expect(onSubmitted).toHaveBeenCalledWith(successfulSubmission))
   })
 
+  it('shares the rank and score on X right after the ranking result', async () => {
+    const open = vi.spyOn(window, 'open').mockImplementation(() => null)
+    render(<RankingCard context={eligibleContext} service={service()} measurement={measurement} />)
+    fireEvent.click(screen.getByRole('button', { name: '全国ランキングに参加して順位を見る' }))
+    fireEvent.click(await screen.findByRole('button', { name: '順位をXでシェア' }))
+
+    expect(open).toHaveBeenCalledTimes(1)
+    const intentUrl = new URL(open.mock.calls[0][0] as string)
+    expect(intentUrl.origin).toBe('https://x.com')
+    const text = intentUrl.searchParams.get('text')
+    expect(text).toContain('本日の全国ランキング 128位 / 2847頭（スコア 1524.7）')
+    expect(text).toContain('https://netspeedrace.com/?s=x')
+    open.mockRestore()
+  })
+
   it('disables the opt-in button while the optional ranking submission is pending', async () => {
     let completeSubmission: ((value: RankingSubmissionResult) => void) | undefined
     const submitMeasurement = vi.fn(() => new Promise<RankingSubmissionResult>((resolve) => {
