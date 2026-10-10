@@ -3895,6 +3895,10 @@ a:focus-visible {
   font-size: 0.9rem;
 }
 
+.ranking-card__share {
+  margin-top: 14px;
+}
+
 .ranking-card__top3 {
   min-width: 0;
   padding: 16px 0;

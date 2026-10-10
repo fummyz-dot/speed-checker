@@ -3,6 +3,7 @@ import { saveRunTicket } from '../run/runTicketStorage'
 import { saveRunReturnContext } from '../run/runReturnContext'
 import type { IssuedRunTicket } from '../run/types'
 import type { SpeedMeasurementResult } from '../../types/measurement'
+import { createSharePostText, createXIntentUrl } from '../../lib/sharePost'
 import { requestRankingTurnstileToken } from './turnstile'
 import type {
   RankingContext,
@@ -111,6 +112,18 @@ export const RankingCard = ({
     || submission?.entry.rank === 3
     ? submission.entry.rank
     : null
+
+  const shareRankOnX = () => {
+    if (!submission) return
+    const postText = createSharePostText(measurement, window.location.href, {
+      measurementId: measurement.id,
+      rank: submission.entry.rank,
+      tieCount: submission.entry.tieCount,
+      totalRuns: submission.entry.totalRuns,
+      scoreTenths: submission.entry.scoreTenths,
+    })
+    window.open(createXIntentUrl(postText), '_blank', 'noopener,noreferrer')
+  }
 
   const launchRun = () => {
     if (!submission?.run.available) return
@@ -232,6 +245,9 @@ export const RankingCard = ({
             {submission.entry.topPercentTenths !== null && (
               <p>上位{(submission.entry.topPercentTenths / 10).toFixed(1)}%</p>
             )}
+            <button className="share-button ranking-card__share" type="button" onClick={shareRankOnX}>
+              順位をXでシェア
+            </button>
           </div>
 
           <section className="ranking-card__top3" aria-labelledby="ranking-top3-title">

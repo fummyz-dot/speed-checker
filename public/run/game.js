@@ -36,6 +36,10 @@
     testRunTimes: Object.freeze([25, 35, 45, 50]),
   });
 
+  // Matches SHARE_PAGE_URL in src/lib/sharePost.ts. Run shares never include the raw score.
+  const SHARE_PAGE_URL = "https://netspeedrace.com/?s=x";
+  const SHARE_HASHTAG = "#NetSpeedRace";
+
   const BASE_SPEED_MPS = CONFIG.courseLength / CONFIG.idealClearTimeSec;
 
   const STATES = Object.freeze({
@@ -116,6 +120,7 @@
   const resultDetail = document.getElementById("resultDetail");
   const retryButton = document.getElementById("retryButton");
   const changeTimeButton = document.getElementById("changeTimeButton");
+  const shareResultLink = document.getElementById("shareResultLink");
   const resumeButton = document.getElementById("resumeButton");
   const soundToggle = document.getElementById("soundToggle");
   const liveRegion = document.getElementById("liveRegion");
@@ -253,7 +258,20 @@
     soundToggle.setAttribute("aria-pressed", String(enabled));
   }
 
+  function createRunSharePostText(state) {
+    const lines = state === STATES.CLEAR
+      ? ["Net Speed RunでGOALしました！", `残り${game.run.clearRemainingSec.toFixed(1)}秒でクリア`]
+      : ["Net Speed Runに挑戦しました", `GOALまであと${getGoalMeters()}m`];
+    return [...lines, "", "あなたの回線は何着？", SHARE_HASHTAG, SHARE_PAGE_URL].join("\n");
+  }
+
+  function updateShareLink(state) {
+    if (!shareResultLink) return;
+    shareResultLink.href = `https://x.com/intent/post?text=${encodeURIComponent(createRunSharePostText(state))}`;
+  }
+
   function renderResult(state) {
+    updateShareLink(state);
     if (state === STATES.CLEAR) {
       resultPanel.dataset.result = "clear";
       resultKicker.textContent = "COURSE COMPLETE";

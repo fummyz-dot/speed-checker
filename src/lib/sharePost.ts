@@ -12,9 +12,15 @@ export interface ShareRankingSummary {
   scoreTenths: number
 }
 
+/** Xのカードキャッシュを避けるため、canonicalとは別にシェア元パラメータを付ける。 */
+export const SHARE_PAGE_URL = `${PUBLIC_SITE_URL}?s=x`
+
+/** ランキング画面で上位%を出す最小出走数。これ未満では投稿文にも出走数を出さない。 */
+export const MIN_RUNS_FOR_RUN_COUNT = 10
+
 export const getSharePageUrl = (currentUrl: string): string => {
   void currentUrl
-  return PUBLIC_SITE_URL
+  return SHARE_PAGE_URL
 }
 
 const isValidRanking = (ranking: ShareRankingSummary): boolean =>
@@ -25,10 +31,25 @@ const isValidRanking = (ranking: ShareRankingSummary): boolean =>
   && Number.isFinite(ranking.scoreTenths)
 
 export const formatShareRankingLine = (ranking: ShareRankingSummary): string => {
-  const rankLabel = ranking.tieCount > 1 ? `同率${ranking.rank}位` : `${ranking.rank}位`
-  const score = (ranking.scoreTenths / 10).toFixed(1)
-  return `本日の全国ランキング ${rankLabel} / ${ranking.totalRuns}頭（Net Speed Score ${score}）`
+  const runCount = formatShareRunCount(ranking)
+  return `本日の全国ランキング ${formatShareRankLabel(ranking)}${runCount ? ` / ${runCount}` : ''}（スコア ${formatShareScore(ranking)}）`
 }
+
+/** 同じ測定の妥当な順位だけを返す。投稿文と共有PNGで同じ判定を使う。 */
+export const getShareRankingFor = (
+  result: SpeedMeasurementResult,
+  ranking: ShareRankingSummary | null,
+): ShareRankingSummary | null =>
+  ranking && ranking.measurementId === result.id && isValidRanking(ranking) ? ranking : null
+
+export const formatShareRankLabel = (ranking: ShareRankingSummary): string =>
+  ranking.tieCount > 1 ? `同率${ranking.rank}位` : `${ranking.rank}位`
+
+export const formatShareRunCount = (ranking: ShareRankingSummary): string | null =>
+  ranking.totalRuns >= MIN_RUNS_FOR_RUN_COUNT ? `${ranking.totalRuns}頭` : null
+
+export const formatShareScore = (ranking: ShareRankingSummary): string =>
+  (ranking.scoreTenths / 10).toFixed(1)
 
 export const createSharePostText = (
   result: SpeedMeasurementResult,
@@ -37,9 +58,8 @@ export const createSharePostText = (
 ): string => {
   const lines = ['Net Speed Raceで回線を測定しました']
 
-  if (ranking && ranking.measurementId === result.id && isValidRanking(ranking)) {
-    lines.push(formatShareRankingLine(ranking))
-  }
+  const validRanking = getShareRankingFor(result, ranking)
+  if (validRanking) lines.push(formatShareRankingLine(validRanking))
 
   lines.push(
     '',

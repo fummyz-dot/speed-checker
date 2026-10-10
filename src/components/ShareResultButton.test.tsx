@@ -83,7 +83,7 @@ describe('ShareResultButton', () => {
     fireEvent.click(screen.getByRole('button', { name: '画像をコピー' }))
 
     expect(await screen.findByRole('status')).toHaveTextContent('結果画像をコピーしました。')
-    expect(shareImageMocks.createShareImageBlob).toHaveBeenCalledWith(result, [])
+    expect(shareImageMocks.createShareImageBlob).toHaveBeenCalledWith(result, [], null)
     expect(write).toHaveBeenCalledTimes(1)
     expect(ClipboardItemMock.supports).toHaveBeenCalledWith('image/png')
     const item = write.mock.calls[0][0][0] as ClipboardItemMock
@@ -122,7 +122,7 @@ describe('ShareResultButton', () => {
     fireEvent.click(screen.getByRole('button', { name: 'PNGを保存' }))
 
     expect(await screen.findByRole('status')).toHaveTextContent('PNG画像を保存しました。')
-    expect(shareImageMocks.createShareImageBlob).toHaveBeenCalledWith(result, [])
+    expect(shareImageMocks.createShareImageBlob).toHaveBeenCalledWith(result, [], null)
     expect(shareImageMocks.createShareFilename).toHaveBeenCalledWith(result.measuredAt)
     expect(shareImageMocks.downloadBlob).toHaveBeenCalledWith(blob, 'net-speed-race-20260820-1200.png')
   })

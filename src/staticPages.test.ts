@@ -45,11 +45,11 @@ const readProjectFile = (path: string): string =>
 const parsePage = (path: string): Document =>
   new DOMParser().parseFromString(readPublicFile(`${path}/index.html`), 'text/html')
 
-// Protected content fingerprints from add7746: only decorative eyebrows are excluded.
+// Protected content fingerprints from add7746 (privacy updated for Web Analytics in D-021): only decorative eyebrows are excluded.
 const editorialContentBaseline: Record<string, string> = {
   'about': 'b667d3a3f807496bfb7f70ba765a2b9f36cb2f5937351826008c13bfe7233236',
   'methodology': '13d7e0ba659be6f74a213c0a3906b8147e60d2b0afbce73bc8bdae04801ba7c9',
-  'privacy': '12f625d826cd1806172075a17456ad979b1415bd55a540c556ef8cfd27aee755',
+  'privacy': '74a7fdc0fbd3a2fae3529ebe0b8ea8ed94c122675ffa706ba3779c6a0845bb48',
   'contact': 'b48a14a82c282e18a3c19023c0355ff530f8ac3e2ed13bc437e968d249e369f0',
   'terms': '8fba8db5d2d0b9b0c1b6e01a48ec680f62fae5046dd934e3bc9f5b777d8e47c2',
   'guide': '64590b2e36327d9679c8a3132c6b449195614123794f44e54853ec1306b035da',
@@ -112,7 +112,7 @@ describe('public static pages', () => {
     const head = parsePage(path).head
     const meta = (selector: string) => head.querySelector(selector)?.getAttribute('content')
 
-    expect(meta('meta[property="og:image"]')).toBe('https://netspeedrace.com/og-image.png')
+    expect(meta('meta[property="og:image"]')).toBe('https://netspeedrace.com/og-image-v2.png')
     expect(meta('meta[property="og:image:width"]')).toBe('1200')
     expect(meta('meta[property="og:image:height"]')).toBe('630')
     expect(meta('meta[property="og:image:alt"]')).toBeTruthy()
@@ -120,7 +120,7 @@ describe('public static pages', () => {
   })
 
   it('OGP画像が1200×630pxのPNGとして存在する', () => {
-    const png = readFileSync(resolve('public', 'og-image.png'))
+    const png = readFileSync(resolve('public', 'og-image-v2.png'))
 
     expect(png.subarray(1, 4).toString('ascii')).toBe('PNG')
     expect(png.readUInt32BE(16)).toBe(1200)
@@ -180,12 +180,12 @@ describe('public static pages', () => {
     publicAssets.forEach((path) => expect(existsSync(resolve('public', path)), path).toBe(true))
   })
 
-  it('TurnstileのscriptとframeだけをCSPで許可する', () => {
+  it('TurnstileとCloudflare Web AnalyticsだけをCSPで許可する', () => {
     const headers = readPublicFile('_headers')
 
-    expect(headers).toContain("script-src 'self' https://challenges.cloudflare.com")
-    expect(headers).toContain('frame-src https://challenges.cloudflare.com')
-    expect(headers).toContain("connect-src 'self' https://speed.cloudflare.com")
+    expect(headers).toContain("script-src 'self' https://challenges.cloudflare.com https://static.cloudflareinsights.com;")
+    expect(headers).toContain('frame-src https://challenges.cloudflare.com;')
+    expect(headers).toContain("connect-src 'self' https://speed.cloudflare.com https://cloudflareinsights.com;")
   })
 
   it.each(staticPages)('$pathページに1件のh1、固有canonical、titleを含む', ({ path, canonical }) => {

@@ -135,11 +135,11 @@ Condition-level trends are also derived in the browser from this existing histor
 
 ## Share image
 
-The share image is generated in the browser using Canvas APIs. It uses the approved race idle-horse assets when available and falls back to an image without horses if they cannot load.
+The share image is generated in the browser using Canvas APIs with the raceboard palette. It uses the same race idle-horse assets as the race lanes when available and falls back to an image without horses if they cannot load.
 
 It should not silently include connection metadata or historical records that the user did not intend to share.
 
-Users explicitly choose whether to copy the PNG image, save it, open an X post with generated text, or copy that text. The application does not open an OS-native sharing menu. Images, generated post text, and measurement history remain browser-local unless the user takes one of those explicit actions. The share image and post text use the canonical public URL, `https://netspeedrace.com/`, so sharing from a local or Workers development hostname never exposes a non-production URL.
+Users explicitly choose whether to copy the PNG image, save it, open an X post with generated text, or copy that text. The application does not open an OS-native sharing menu. Images, generated post text, and measurement history remain browser-local unless the user takes one of those explicit actions. The share image shows the canonical public URL, `https://netspeedrace.com/`; the post text links to `https://netspeedrace.com/?s=x` so X fetches a fresh card (canonical tags are unchanged). Neither ever exposes a local or Workers development hostname. When the user joined today's ranking for the same measurement, the image and post text add the rank and score (run count only from 10 runs). The ranking card and the Run result screen each offer an X post link; Run posts include only the result, never the raw score (D-022).
 
 ## Build and deploy
 
@@ -175,6 +175,7 @@ npm run deploy:dry-run
 
 - Avoid introducing a backend database for a feature that can remain browser-local.
 - Avoid third-party network/geolocation APIs unless there is a concrete product need.
+- Cloudflare Web Analytics (aggregate page usage/performance) is the only analytics allowed by the CSP. Never send measurement results, history, or condition labels to it (see D-021).
 - Avoid coupling presentation components to Cloudflare-specific API internals.
 - Runtime-validate external/Worker response data.
 - Prefer pure functions for scoring, formatting, normalization, and visualization mappings.
