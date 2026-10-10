@@ -41,6 +41,8 @@
   --font-editorial: inherit;
   --font-record: inherit;
   --font-led: 'Tote LED', ui-monospace, monospace;
+  --font-sans: 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Noto Sans JP', 'Noto Sans CJK JP',
+    'Yu Gothic UI', 'Yu Gothic', Meiryo, system-ui, sans-serif;
 }
 
 * {
@@ -4391,6 +4393,13 @@ body {
   font-family: var(--font-led);
   color: var(--led);
   font-weight: 700;
+}
+
+/* The label inside the leader score is text, not digits. */
+.ranking-card__leader-score span {
+  font-family: var(--font-sans);
+  font-weight: 700;
+  letter-spacing: 0.04em;
 }
 
 .ranking-card__score-label,
