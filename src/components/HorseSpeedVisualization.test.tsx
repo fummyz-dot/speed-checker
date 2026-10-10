@@ -82,15 +82,15 @@ describe('HorseSpeedVisualization runner presentation', () => {
       <HorseSpeedVisualization downloadMbps={null} uploadMbps={null} phase="idle" result={null} />,
     )
 
-    expect(container.querySelector('.horse-course__start')).toHaveTextContent('START')
-    expect(container.querySelector('.horse-course__finish')).toHaveTextContent('GOAL')
+    expect(container.querySelector('.horse-course__start')).toHaveTextContent('スタート')
+    expect(container.querySelector('.horse-course__finish')).toHaveTextContent('ゴール')
     expect(screen.getAllByRole('img')).toHaveLength(3)
     expect(container.querySelector('.horse-course__lane-label--standard')).toHaveTextContent('地方馬')
     expect(container.querySelector('.horse-course__lane-label--fast')).toHaveTextContent('無敗の三冠馬')
     expect(container.querySelector('.horse-course__lane-label--user')).toHaveTextContent('あなた')
     expect(
       [...container.querySelectorAll('.horse-course__lane-label')].map((label) => label.textContent),
-    ).toEqual(['01地方馬', '02あなた', '03無敗の三冠馬'])
+    ).toEqual(['1地方馬', '2あなた', '3無敗の三冠馬'])
     expect(
       [...container.querySelectorAll('[data-runner]')].map((runner) => runner.getAttribute('data-runner')),
     ).toEqual(['standard', 'user', 'fast'])
@@ -392,11 +392,11 @@ describe('HorseSpeedVisualization runner presentation', () => {
     act(() => vi.advanceTimersByTime(FRONT_VIEW_TRANSITION_DURATION_MS))
     expect(course()).toHaveAttribute('data-animation-state', 'groupJumpFrontView')
     expect(screen.queryByRole('link', { name: '詳しい測定結果を見る' })).not.toBeInTheDocument()
-    expect(container.querySelector('[data-final-upload-result]')).toHaveTextContent('UPLOAD80.0Mbps')
+    expect(container.querySelector('[data-final-upload-result]')).toHaveTextContent('上り80.0Mbps')
     expect(container.querySelectorAll('.front-jockey-image')).toHaveLength(3)
     act(() => vi.advanceTimersByTime(GROUP_JUMP_DURATION_MS))
     expect(course()).toHaveAttribute('data-animation-state', 'finished')
-    expect(container.querySelector('[data-final-upload-result]')).toHaveTextContent('UPLOAD80.0Mbps')
+    expect(container.querySelector('[data-final-upload-result]')).toHaveTextContent('上り80.0Mbps')
     expect(screen.getByRole('link', { name: '詳しい測定結果を見る' })).toHaveAttribute('href', '#measurement-results')
   })
 
@@ -504,7 +504,7 @@ describe('HorseSpeedVisualization runner presentation', () => {
     expect(course()).toHaveAttribute('data-animation-state', 'finished')
     expect(screen.queryByRole('button', { name: 'レースを拡大' })).not.toBeInTheDocument()
     expect(container.querySelector('.result-panel__heading')).toHaveClass('result-panel__heading--with-upload-result')
-    expect(container.querySelector('[data-final-upload-result]')).toHaveTextContent('UPLOAD80.0Mbps')
+    expect(container.querySelector('[data-final-upload-result]')).toHaveTextContent('上り80.0Mbps')
 
     const replayButton = screen.getByRole('button', { name: 'もう一度見る' })
     expect(replayButton).toBeEnabled()

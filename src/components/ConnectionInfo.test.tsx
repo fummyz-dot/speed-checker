@@ -33,7 +33,7 @@ describe('ConnectionInfo', () => {
     expect(screen.getByText('Example Network')).toBeInTheDocument()
     expect(screen.getByText('AS12345')).toBeInTheDocument()
     expect(screen.getByText('Cloudflare Edge RTT')).toBeInTheDocument()
-    expect(screen.getByText('22 ms · QUIC')).toBeInTheDocument()
+    expect(screen.getByText('22 ms (QUIC)')).toBeInTheDocument()
     expect(screen.getByText('Cloudflare観測値。速度測定のPingとは別です。')).toBeInTheDocument()
     expect(container).not.toHaveTextContent(/\b(?:\d{1,3}\.){3}\d{1,3}\b/)
   })

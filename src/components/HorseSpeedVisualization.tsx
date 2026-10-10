@@ -232,7 +232,7 @@ export const HorseSpeedVisualization = ({
             key={`upload-${raceSequence}`}
             style={{ animationDelay: `-${groupJumpElapsedMs.toFixed(0)}ms` }}
           >
-            <span>UPLOAD</span>
+            <span>上り</span>
             <strong>{formatFinalSpeedDisplay(result.uploadMbps)}</strong>
             <small>Mbps</small>
           </div>
@@ -284,8 +284,8 @@ export const HorseSpeedVisualization = ({
           {getHelperText(state, Boolean(result))}
         </span>
         <div className="horse-course__track" aria-hidden={frontViewIsActive}>
-          <span className="horse-course__start">START</span>
-          <span className="horse-course__finish">GOAL</span>
+          <span className="horse-course__start">スタート</span>
+          <span className="horse-course__finish">ゴール</span>
           {HORSE_RACE_LANES.map((lane) => (
             <div
               className={`horse-course__lane horse-course__lane--${lane.id}`}
@@ -299,9 +299,9 @@ export const HorseSpeedVisualization = ({
               key={`label-${lane.id}`}
             >
               <span className="horse-course__lane-number" aria-hidden="true">
-                {String(index + 1).padStart(2, '0')}
+                {index + 1}
               </span>
-              {lane.label}
+              <span className="horse-course__lane-name">{lane.label}</span>
             </span>
           ))}
 
@@ -340,7 +340,7 @@ export const HorseSpeedVisualization = ({
             data-live={isLiveDownload}
             data-speed-metric="download"
           >
-            {formattedDownload} Mbps
+            <span className="horse-metrics__value">{formattedDownload}</span> Mbps
           </dd>
         </div>
         <div>
@@ -350,14 +350,13 @@ export const HorseSpeedVisualization = ({
             data-live={isLiveUpload}
             data-speed-metric="upload"
           >
-            {formattedUpload} Mbps
+            <span className="horse-metrics__value">{formattedUpload}</span> Mbps
           </dd>
         </div>
       </dl>
       {state === 'finished' && (
         <a className="race-results-cta" href="#measurement-results" onClick={handleShowDetails}>
           <span>詳しい測定結果を見る</span>
-          <span className="race-results-cta__arrow" aria-hidden="true">↓</span>
         </a>
       )}
     </section>
