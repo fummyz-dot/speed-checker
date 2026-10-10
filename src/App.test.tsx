@@ -155,7 +155,7 @@ describe('App', () => {
 
     const { rerender } = render(<App />)
     expect(screen.getByText('全国ランキング開催中')).toBeVisible()
-    expect(screen.getByText('測定後に参加すると、今日の順位がわかります。')).toBeVisible()
+    expect(screen.getByText(/ミニゲーム「Net Speed Run」にも挑戦できます。/)).toBeVisible()
     expect(document.querySelector('.hero__intro--with-ranking')).toBeInTheDocument()
     expect(document.querySelector('.hero__intro-copy')).toBeInTheDocument()
     expect(document.querySelectorAll('.hero-ranking-promo')).toHaveLength(1)
@@ -220,7 +220,7 @@ describe('App', () => {
     expect(document.getElementById('ranking-results')).toBeNull()
     expect(document.querySelector('.hero__intro--with-ranking')).not.toBeInTheDocument()
     expect(document.querySelector('.hero-ranking-promo')).not.toBeInTheDocument()
-    expect(screen.queryByText('全国ランキング開催中！')).not.toBeInTheDocument()
+    expect(screen.queryByText('全国ランキング開催中')).not.toBeInTheDocument()
     expect(screen.queryByText('NET SPEED RUN')).not.toBeInTheDocument()
   })
 
@@ -324,21 +324,26 @@ describe('App', () => {
     expect(screen.queryByText('今回の測定条件')).not.toBeInTheDocument()
   })
 
-  it('hero controlsはviewportに関係なく測定・条件・接続の順を保つ', async () => {
+  it('hero controlsはviewportに関係なく条件・接続の順を保ち、測定ボタンは見出しの横に置く', async () => {
     const matchMedia = installMatchMedia(false)
     const { container } = render(<App />)
 
-    expect(getHeroControlOrder(container)).toEqual(['measurement', 'condition', 'connection'])
+    expect(getHeroControlOrder(container)).toEqual(['condition', 'connection'])
 
     act(() => matchMedia.setMatches(true))
     await waitFor(() => {
-      expect(getHeroControlOrder(container)).toEqual(['measurement', 'condition', 'connection'])
+      expect(getHeroControlOrder(container)).toEqual(['condition', 'connection'])
     })
 
     act(() => matchMedia.setMatches(false))
     await waitFor(() => {
-      expect(getHeroControlOrder(container)).toEqual(['measurement', 'condition', 'connection'])
+      expect(getHeroControlOrder(container)).toEqual(['condition', 'connection'])
     })
+
+    const start = container.querySelector('.hero__start')
+    expect(start?.querySelector('.hero__measurement')).toBeInTheDocument()
+    expect(start?.compareDocumentPosition(container.querySelector('.horse-visualization') as Node))
+      .toBe(Node.DOCUMENT_POSITION_FOLLOWING)
   })
 
   it('viewport変更で条件editorのdraftを失わず、listenerを解除する', async () => {
@@ -353,7 +358,7 @@ describe('App', () => {
 
     act(() => matchMedia.setMatches(true))
     await waitFor(() => {
-      expect(getHeroControlOrder(container)).toEqual(['measurement', 'condition', 'connection'])
+      expect(getHeroControlOrder(container)).toEqual(['condition', 'connection'])
     })
     expect(screen.getByRole('textbox', { name: '比較条件のメモ' })).toHaveValue('リビング 5GHz')
     expect(screen.getByRole('button', { name: '測定開始' })).toBeDisabled()
