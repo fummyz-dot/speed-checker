@@ -239,7 +239,7 @@ function App() {
       </div>
     </div>
   )
-  const heroControls = [measurementControl, conditionSelector, connectionInfo]
+  const heroControls = [conditionSelector, connectionInfo]
 
   return (
     <div className={`site-shell${isRaceFocused ? ' site-shell--race-focused' : ''}`}>
@@ -274,23 +274,24 @@ function App() {
                 相手は地方馬と無敗の三冠馬。何着に入れるか確かめましょう。
               </p>
             </div>
-            <div className="hero__intro-aside">
+            <div className="hero__start">
+              {measurementControl}
               {rankingEnabled && (
                 <div className="hero-ranking-promo">
                   <div className="hero-ranking-promo__copy">
                     <strong>全国ランキング開催中</strong>
-                    <span>測定後に参加すると、今日の順位がわかります。</span>
+                    <span>測定後に参加すると今日の順位がわかり、スコアで持ち時間が決まるミニゲーム「Net Speed Run」にも挑戦できます。</span>
                   </div>
                 </div>
               )}
-              <div className="hero__summary" aria-label="測定でわかること">
-                <strong>測定でわかること</strong>
-                <ul>
-                  <li><b>速度</b>ダウンロードとアップロード</li>
-                  <li><b>応答性</b>Ping、Jitter、通信中の遅延</li>
-                  <li><b>比較</b>Wi-Fiと有線、部屋、時間帯の違い</li>
-                </ul>
-              </div>
+            </div>
+            <div className="hero__summary" aria-label="測定でわかること">
+              <strong>測定でわかること</strong>
+              <ul>
+                <li><b>速度</b>ダウンロードとアップロード</li>
+                <li><b>応答性</b>Ping、Jitter、通信中の遅延</li>
+                <li><b>比較</b>Wi-Fiと有線、部屋、時間帯の違い</li>
+              </ul>
             </div>
           </div>
 

@@ -3394,10 +3394,27 @@ body {
 
 .hero__intro {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(240px, 320px);
-  align-items: end;
-  gap: 32px;
-  margin-bottom: 24px;
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 400px);
+  grid-template-areas:
+    'copy start'
+    'summary start';
+  align-items: start;
+  gap: 20px 48px;
+  margin-bottom: 28px;
+}
+
+.hero__intro-copy {
+  grid-area: copy;
+}
+
+.hero__start {
+  display: grid;
+  grid-area: start;
+  gap: 12px;
+}
+
+.hero__summary {
+  grid-area: summary;
 }
 
 .hero__racecard {
@@ -3435,12 +3452,6 @@ body {
   display: none;
 }
 
-.hero__intro-aside {
-  display: grid;
-  gap: 14px;
-  padding-bottom: 4px;
-}
-
 .hero-ranking-promo {
   padding: 14px 16px;
   border-left: 4px solid var(--led);
@@ -3462,18 +3473,21 @@ body {
 }
 
 .hero__summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 18px;
   font-size: 0.85rem;
 }
 
 .hero__summary > strong {
-  display: block;
-  margin-bottom: 6px;
   font-size: 0.85rem;
 }
 
 .hero__summary ul {
-  display: grid;
-  gap: 4px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 18px;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -3481,8 +3495,7 @@ body {
 }
 
 .hero__summary b {
-  display: inline-block;
-  min-width: 4em;
+  margin-right: 6px;
   color: var(--text);
 }
 
@@ -3689,7 +3702,7 @@ body {
 
 .hero__controls {
   display: grid;
-  grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: 0;
   margin-top: 0;
   border-bottom: 1px solid var(--line);
@@ -3706,13 +3719,11 @@ body {
 
 .hero__measurement {
   display: grid;
-  gap: 14px;
+  gap: 12px;
+  padding: 18px 20px;
+  border-radius: 4px;
   background: var(--tote);
-  padding-left: 0;
-}
-
-.hero__controls > .hero__measurement {
-  padding-left: 24px;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06);
 }
 
 .speed-display {
@@ -4211,16 +4222,9 @@ body {
 /* Breakpoints --------------------------------------------------------- */
 
 @media (max-width: 900px) {
-  .hero__controls {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  }
-
-  .hero__controls > .hero__measurement {
-    grid-column: 1 / -1;
-  }
-
-  .hero__controls > .measurement-condition {
-    border-left: 0;
+  .hero__intro {
+    grid-template-columns: minmax(0, 1fr) minmax(280px, 340px);
+    gap: 16px 28px;
   }
 }
 
@@ -4248,12 +4252,19 @@ body {
 
   .hero__intro {
     grid-template-columns: minmax(0, 1fr);
-    gap: 0;
-    margin-bottom: 18px;
+    grid-template-areas:
+      'copy'
+      'start';
+    gap: 16px;
+    margin-bottom: 20px;
   }
 
-  .hero__intro-aside {
+  .hero__summary {
     display: none;
+  }
+
+  .hero__start .hero-ranking-promo {
+    padding: 10px 12px;
   }
 
   .hero__racecard {
@@ -4294,8 +4305,9 @@ body {
     border-top: 1px solid var(--line);
   }
 
-  .hero__controls > .hero__measurement {
-    padding: 16px;
+  .hero__measurement {
+    padding: 14px 16px;
+    gap: 10px;
   }
 
   .speed-display__reading strong {
@@ -4385,4 +4397,30 @@ body {
 .ranking-card__top3 h4,
 .ranking-card__run-eyebrow {
   letter-spacing: 0.04em;
+}
+
+@media (max-width: 760px) {
+  /* Keep the course peeking into the first view: the promo shrinks to its title. */
+  .hero__start .hero-ranking-promo {
+    padding: 8px 12px;
+  }
+
+  .hero__start .hero-ranking-promo__copy span {
+    display: none;
+  }
+
+  .hero__start .hero-ranking-promo__copy strong::after {
+    content: '（測定後に参加できます）';
+    color: var(--muted);
+    font-size: 0.8rem;
+    font-weight: 400;
+  }
+
+  .hero__start {
+    gap: 8px;
+  }
+
+  .hero__measurement .button-hint {
+    display: none;
+  }
 }
