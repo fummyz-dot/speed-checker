@@ -29,23 +29,20 @@
     </div></header>
     <main class="site-pages__main" id="main-content"><article class="site-pages__article">
       <h1>Wi-Fiが遅いときは、条件を変えて比較する</h1>
-      <p class="site-pages__lead">Wi-Fiが遅いと感じたとき、1回の速度測定だけで原因を特定することはできません。Net Speed Raceで同じ条件と異なる条件の結果を比べると、どの場面で変化しやすいかを整理しやすくなります。</p>
+      <p class="site-pages__lead">Wi-Fiが遅いときは、条件を一つずつ変えて測り、結果を比べます。1回の測定だけでは原因を特定できません。</p>
       <p class="site-pages__article-meta"><span>運営・編集: Net Speed Race</span><span>最終更新: 2026年8月27日</span></p>
-      <p class="site-pages__note"><a href="/methodology/">測定方法について</a>と<a href="/about/">このサイトについて</a>で、ブラウザ測定で分かる範囲を確認できます。</p>
+      <p class="site-pages__note">ブラウザ測定で分かる範囲は<a href="/methodology/">測定方法について</a>と<a href="/about/">このサイトについて</a>で確認できます。</p>
       <a class="site-pages__article-cta" href="/">今の回線品質を測定する</a>
-
-      <h2>まずは今いる場所の状態を測る</h2>
-      <p>体感が気になるときの状態を、できるだけ普段どおりの条件で測定します。その結果は、その場所・端末・時間・同時通信を含む一時点の記録です。数値だけからWi-Fi、ルーター、回線事業者、端末のどれかを原因と決めつけることはできません。</p>
 
       <h2>Downloadだけを見ない</h2>
       <dl>
-        <dt>Download（下り）</dt><dd>動画視聴やWebページ、ファイル受信など、<span class="site-pages__keep-together">端末がデータを受け取る速さを見る材料です。</span></dd>
-        <dt>Upload（上り）</dt><dd>写真・ファイルの送信、クラウド保存、映像送信など、端末からデータを送る速さを見る材料です。</dd>
-        <dt>Ping</dt><dd>Cloudflare側との応答時間です。Mbpsとは別の指標で、操作や会話の反応を考える手掛かりになります。</dd>
-        <dt>Jitter</dt><dd>応答時間の揺れを見る補助指標です。Pingと合わせて、その時点の安定性を確認します。</dd>
-        <dt>Loaded Latency</dt><dd>DownloadまたはUploadの通信中に、応答時間がどの程度変わるかを見る材料です。</dd>
+        <dt>Download（下り）</dt><dd>動画やWebページ、ファイル受信など、<span class="site-pages__keep-together">データを受け取る速さです。</span></dd>
+        <dt>Upload（上り）</dt><dd>写真・ファイルの送信や映像送信など、データを送る速さです。</dd>
+        <dt>Ping</dt><dd>Cloudflare側との応答時間です。操作や会話の反応の手掛かりになります。</dd>
+        <dt>Jitter</dt><dd>応答時間の揺れです。Pingと合わせて安定性を見ます。</dd>
+        <dt>Loaded Latency</dt><dd>DownloadやUploadの通信中に、応答時間がどれだけ変わるかを見ます。</dd>
       </dl>
-      <p>たとえばDownloadだけが高くても、すべての用途で同じように感じるとは限りません。<a href="/internet-speed/">回線速度</a>、<a href="/ping/">Ping</a>、<a href="/jitter/">ジッター</a>、<a href="/loaded-latency/">混雑時の応答性</a>を分けて見ます。</p>
+      <p>Downloadが高くても、用途によって体感は変わります。<a href="/internet-speed/">回線速度</a>、<a href="/ping/">Ping</a>、<a href="/jitter/">ジッター</a>、<a href="/loaded-latency/">混雑時の応答性</a>を分けて見ます。</p>
 
       <h2>比較する順番</h2>
       <ol class="site-pages__step-list">
@@ -55,14 +52,14 @@
         <li>別の端末でも測定する。</li>
         <li>別の時間帯でも測定する。</li>
       </ol>
-      <p>一度に複数の条件を変えるより、なるべく一つずつ変えると比較しやすくなります。ルーターに近づいたり有線接続にしたりしても、結果が必ず改善するとは限りません。違いが出た場合も、それだけで理由を確定せず、複数回の結果を見ます。</p>
+      <p>1回の結果は、その場所・端末・時間・同時通信を含む一時点の記録です。条件は一つずつ変え、違いが出たら複数回測って確かめます。</p>
 
       <h2>測定条件ラベルを付けて履歴で比べる</h2>
-      <p>測定前に、Net Speed Raceの<strong>測定条件ラベル</strong>へ「リビング 5GHz」「寝室 Wi-Fi」「有線LAN」のように入力すると、履歴で条件ごとに整理できます。これは利用者自身が入力するメモであり、接続方法や場所を自動判定する機能ではありません。</p>
-      <p>ラベル付きの履歴があると、「測定条件ごとの傾向」で同じ条件のDownload、Upload、Ping、混雑時の応答性の中央値を確認できます。時間帯やその時点のネットワーク状況も変わるため、条件だけが差の理由とは限りません。</p>
+      <p>測定前に<strong>測定条件ラベル</strong>へ「リビング 5GHz」「寝室 Wi-Fi」「有線LAN」のように入力すると、履歴を条件ごとに整理できます。ラベルは利用者自身が入力するメモで、接続方法や場所を自動判定する機能ではありません。</p>
+      <p>「測定条件ごとの傾向」では、同じ条件のDownload、Upload、Ping、混雑時の応答性の中央値を確認できます。</p>
 
       <h2>Wi-Fiの遅さと回線全体の遅さは同じとは限らない</h2>
-      <p>ブラウザ測定では、Wi-Fiを含む端末からCloudflareまでの通信を観測します。この結果だけでは、Wi-Fi内の状態とインターネット回線側の状態を完全に分けることはできません。場所・有線接続・端末・時間帯を変えた比較は、次に確認したい条件を考えるための材料です。</p>
+      <p>ブラウザ測定は、Wi-Fiを含む端末からCloudflareまでの通信をまとめて観測します。Wi-Fi内と回線側の状態は完全には分けられないため、比較結果は次に確認する条件を決める材料として使います。</p>
 
       <section class="site-pages__related" aria-labelledby="wifi-related-title"><h2 id="wifi-related-title">関連ガイド</h2><ul>
         <li><a href="/internet-speed/">回線速度の見方</a></li><li><a href="/ping/">Pingとは</a></li><li><a href="/jitter/">ジッターとは</a></li><li><a href="/loaded-latency/">混雑時の応答性とは</a></li>

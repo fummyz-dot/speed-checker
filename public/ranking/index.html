@@ -31,9 +31,9 @@
     </div></header>
     <main class="site-pages__main" id="main-content"><article class="site-pages__article site-pages__article--scoreboard">
       <h1>全国回線品質ランキング</h1>
-      <p class="site-pages__lead">Net Speed Raceで測定後に任意参加された結果を、1回の参加＝1出走として集計しています。Download・Uploadだけでなく、PingとJitterも含むNet Speed Scoreで、その日の参加測定を比べます。</p>
+      <p class="site-pages__lead">Net Speed Raceで測定後に任意参加された結果を、1回の参加＝1出走として集計しています。Download・UploadにPingとJitterを加えたNet Speed Scoreで、その日の出走を比べます。</p>
       <p class="site-pages__article-meta"><span>運営・集計: Net Speed Race</span><span>ページ内容更新: 2026年9月26日</span></p>
-      <p class="site-pages__note">ランキングは日本からの測定を対象にした任意参加データです。利用者数・契約回線数・ISP別シェアを表す統計ではありません。</p>
+      <p class="site-pages__note">日本からの任意参加データの集計で、統計的な日本全国の代表値ではありません。</p>
       <a class="site-pages__article-cta" href="/">今の回線品質を測定する</a>
 
       <section class="ranking-live" id="ranking-live" aria-labelledby="ranking-live-title" aria-busy="true">
@@ -63,11 +63,11 @@
         <section class="ranking-recent" aria-labelledby="ranking-recent-title"><h3 id="ranking-recent-title">直近7日の出走数</h3><div id="ranking-recent-days">読み込み中…</div></section>
         <button class="ranking-retry" id="ranking-retry" type="button" hidden>再読み込み</button>
       </section>
-      <noscript><p class="site-pages__note">現在のランキング数値を表示するにはJavaScriptが必要です。ランキングの考え方や集計方法の説明は、このページ上でそのまま確認できます。</p></noscript>
+      <noscript><p class="site-pages__note">ランキング数値の表示にはJavaScriptが必要です（説明文はそのまま読めます）。</p></noscript>
 
       <section aria-labelledby="score-title">
         <h2 id="score-title">Net Speed Scoreとは</h2>
-        <p>Net Speed Scoreは、Download、Upload、Ping、Jitterを組み合わせ、速度と応答性を一つの値で比較するNet Speed Race独自の参考スコアです。ランキングに任意参加した測定の比較に使用します。</p>
+        <p>Net Speed Scoreは、Download、Upload、Ping、Jitterを組み合わせて速度と応答性を一つの値にした、Net Speed Race独自の参考スコアです。</p>
         <p>算出方法 v1では、4つの測定値をそれぞれ0.1単位に丸めてから計算します。PingまたはJitterを取得できなかった測定はスコアを算出せず、ランキングに参加できません。</p>
         <div class="site-pages__table-wrap">
           <table class="site-pages__table ranking-score-table">
@@ -83,35 +83,31 @@
         <p>3つの係数を掛け合わせ、1000倍した値がスコアです。速度には対数を使い、PingとJitterは乗算の係数として効くため、一つの測定値だけが高くても他の値の影響を受けます。最終値を小数第1位に丸めて表示します。v1の理論上の範囲は0.0〜2060.8です。負荷時の遅延はこのスコアには含めません。</p>
         <h3>計算例</h3>
         <p id="score-example" data-download-tenths="3000" data-upload-tenths="1000" data-ping-tenths="200" data-jitter-tenths="50" data-score-tenths="10000">Download 300 Mbps、Upload 100 Mbps、Ping 20 ms、Jitter 5 msなら、速度・Ping・Jitterの係数はいずれも1で、Net Speed Scoreは <strong>1000.0</strong> です。</p>
-        <p>測定値そのものは「生の数値」、ゲーム・Web会議などの用途別評価は各用途の参考目安との比較、Net Speed Scoreは4値をまとめたランキング用の参考スコアです。回線速度レースは測定結果を見せるための表現で、別の品質判定ではありません。用途別評価とスコアは同じ判定ではありません。</p>
-        <p>公式の業界標準ではなく、1回の測定やスコアだけで不調の原因や契約回線の品質は断定できません。通信状況は変動し、用途によって重視する測定値も異なります。上の「Score version」は現在の集計に使う版を示します。</p>
+        <p>用途別評価とスコアは同じ判定ではありません。用途別評価はゲーム・Web会議などの参考目安との比較、Net Speed Scoreは4値をまとめたランキング用の参考スコアです。回線速度レースは結果を見せる演出で、別の品質判定ではありません。</p>
+        <p>公式の業界標準ではなく、1回の測定やスコアだけで不調の原因や契約回線の品質は断定できません。上の「Score version」は集計に使っている算出方法の版です。</p>
       </section>
 
       <section aria-labelledby="how-to-read-title">
         <h2 id="how-to-read-title">ランキングの読み方</h2>
         <dl>
-          <dt>本日の出走数</dt><dd>測定完了後にランキングへ任意参加し、有効に登録された1回を1出走として数えます。1出走は1人、1世帯、1契約回線を意味しません。</dd>
-          <dt>中央値</dt><dd>本日のNet Speed Scoreを高い順・低い順に並べた中央の値です。出走数が偶数の場合は中央2件の平均を表示します。</dd>
-          <dt>上位10%ライン</dt><dd>本日の出走数が10以上の場合に表示します。上位から10%に相当する順位のScoreを基準値として示します。同点があるため、このScore以上の出走が厳密に10%になるとは限りません。</dd>
-          <dt>TODAY'S TOP 3</dt><dd>Scoreの高い順に最大3出走を表示します。同じScoreは同順位とし、競技順位方式で1位・1位・3位のように表示する場合があります。</dd>
-          <dt>無敗の三冠馬</dt><dd>前日の有効出走が100以上の場合は、前日のScore 1位を翌日の「無敗の三冠馬」として回線速度レースの比較基準に使用します。100未満の場合は固定基準のDownload 700 Mbps / Upload 250 Mbpsを使用します。</dd>
+          <dt>本日の出走数</dt><dd>ランキングに任意参加し、有効に登録された測定1回を1出走と数えます。1出走は1人・1世帯・1契約回線を意味しません。</dd>
+          <dt>中央値</dt><dd>本日のNet Speed Scoreを並べた中央の値です。出走数が偶数なら中央2件の平均です。</dd>
+          <dt>上位10%ライン</dt><dd>本日の出走数が10以上のときに、上位10%に相当する順位のScoreを示します。同点があるため、この値以上の出走がちょうど10%とは限りません。</dd>
+          <dt>TODAY'S TOP 3</dt><dd>Scoreの高い順に最大3出走を表示します。同点は同順位とし、1位・1位・3位のように並びます。</dd>
+          <dt>無敗の三冠馬</dt><dd>前日の有効出走が100以上なら、前日のScore 1位を翌日の「無敗の三冠馬」として回線速度レースの比較基準にします。100未満なら固定基準のDownload 700 Mbps / Upload 250 Mbpsを使います。</dd>
         </dl>
       </section>
 
       <section aria-labelledby="scope-title">
         <h2 id="scope-title">集計対象と注意点</h2>
         <ul>
-          <li>ランキング参加は日本からの測定が対象です。</li>
-          <li>参加は任意で、通常の速度測定だけを利用することもできます。</li>
-          <li>測定した端末、接続方法、Wi-Fi状態、時間帯、回線契約など条件の異なる出走が混在します。</li>
-          <li>このランキングは統計的な日本全国の代表値ではありません。</li>
+          <li>ランキングに参加せず、通常の速度測定だけを使うこともできます。</li>
+          <li>端末・接続方法・Wi-Fi状態・時間帯・回線契約など、条件の異なる出走が混在します。</li>
           <li>ISP・通信事業者別のランキングではありません。</li>
-          <li>Scoreだけから通信不調の原因や契約回線の品質を断定することはできません。</li>
           <li>ランキングの日付は日本時間（JST）です。</li>
           <li>個別のIPアドレスや地域をランキングとして公開しません。</li>
-          <li>データの取扱いは<a href="/privacy/">プライバシー</a>を参照する。</li>
         </ul>
-        <p>集計の前提となる測定は<a href="/methodology/">測定方法</a>で確認できます。</p>
+        <p>データの取扱いは<a href="/privacy/">プライバシー</a>、測定の前提は<a href="/methodology/">測定方法</a>をご覧ください。</p>
       </section>
 
       <section class="site-pages__related" aria-labelledby="ranking-related-title">

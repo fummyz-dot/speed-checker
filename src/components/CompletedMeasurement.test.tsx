@@ -50,7 +50,7 @@ describe('CompletedMeasurement history', () => {
   it('条件が未設定または無効な場合は測定条件metadataを表示しない', async () => {
     const { rerender } = render(<CompletedMeasurement result={measurement('current')} />)
 
-    await screen.findByRole('heading', { name: '負荷による遅延増加' })
+    await screen.findByRole('heading', { name: '通信中の反応' })
     expect(screen.queryByText('今回の測定条件')).not.toBeInTheDocument()
 
     rerender(<CompletedMeasurement result={{ ...measurement('next'), conditionLabel: 'あ'.repeat(25) }} />)
@@ -63,27 +63,25 @@ describe('CompletedMeasurement history', () => {
       downloadLoadedLatencyMs: 220, uploadLoadedLatencyMs: 221,
     }} />)
 
-    expect(screen.getByRole('heading', { name: '負荷による遅延増加' })).toBeVisible()
+    expect(screen.getByRole('heading', { name: '通信中の反応' })).toBeVisible()
     expect(screen.getByText('良好')).toBeVisible()
     const gaming = screen.getByRole('heading', { name: 'オンラインゲーム' }).closest('article')
     const meeting = screen.getByRole('heading', { name: 'Web会議' }).closest('article')
     if (!(gaming instanceof HTMLElement) || !(meeting instanceof HTMLElement)) throw new Error('use-case card not found')
     expect(gaming).toHaveTextContent('厳しい可能性')
-    expect(gaming).toHaveTextContent('Ping 215 ms が利用可能の参考目安（100 ms以下）を超えています。')
+    expect(gaming).toHaveTextContent('Ping 215 ms（利用可能の目安は100 ms以下）')
     expect(meeting).toHaveTextContent('厳しい可能性')
-    expect(meeting).toHaveTextContent('Ping 215 ms が利用可能の参考目安（150 ms以下）を超えています。')
+    expect(meeting).toHaveTextContent('Ping 215 ms（利用可能の目安は150 ms以下）')
     expect(screen.getByRole('link', { name: '負荷時遅延の判定基準を見る' })).toHaveAttribute('href', '/loaded-latency/')
     expect(screen.getByRole('link', { name: 'ゲーム向けの判定基準を見る' })).toHaveAttribute('href', '/gaming/')
     expect(screen.getByRole('link', { name: 'Web会議の判定基準を見る' })).toHaveAttribute('href', '/video-call/')
   })
 
-  it('再測定時に比較条件を1つ変える案内と入力欄への導線を表示する', () => {
+  it('結果コメントは結論だけを示し、長い再測定の案内は出さない', () => {
     render(<CompletedMeasurement result={measurement('current')} />)
 
-    expect(screen.getByRole('heading', { name: '次に試すこと' })).toBeVisible()
-    expect(screen.getByText('同じ条件で2〜3回測った後、比較条件を1つ変えて再測定すると違いを比べやすくなります。例：Wi-Fi／有線、部屋、朝／夜。')).toBeVisible()
-    expect(screen.getByRole('link', { name: '実測14回でPing・Jitterの変動を見る' })).toHaveAttribute('href', '/lab/ping-jitter-14-runs/')
-    expect(screen.getByRole('link', { name: '比較条件を変えて再測定する' })).toHaveAttribute('href', '#measurement-condition-edit')
+    expect(screen.queryByRole('heading', { name: '次に試すこと' })).not.toBeInTheDocument()
+    expect(screen.queryByText(/特定することはできません/)).not.toBeInTheDocument()
   })
 
   it('24文字の測定条件を表示できる', async () => {

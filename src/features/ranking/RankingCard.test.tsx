@@ -67,13 +67,13 @@ describe('RankingCard', () => {
 
     expect(screen.getByRole('heading', { name: '本日の全国回線品質ランキング' })).toBeVisible()
     expect(screen.getByText('あなたの結果は全国で何位？')).toBeVisible()
-    expect(screen.getByText('匿名・任意参加。参加するとNet Speed Scoreと今日の順位を確認できます。')).toBeVisible()
+    expect(screen.getByText('参加は匿名・任意です。')).toBeVisible()
     expect(screen.getByRole('button', { name: '全国ランキングに参加して順位を見る' })).toHaveClass('ranking-card__submit--attention')
     expect(screen.getByRole('button', { name: '全国ランキングに参加して順位を見る' })).toBeEnabled()
     expect(screen.queryByRole('button', { name: 'GO TO RUN!' })).not.toBeInTheDocument()
     expect(screen.queryByText('CONGRATULATIONS')).not.toBeInTheDocument()
-    expect(screen.getByText(/一つの指標だけが突出していても高得点になりにくい/)).toBeVisible()
-    expect(screen.getByRole('link', { name: 'Net Speed Scoreの算出方法と計算例を見る' })).toHaveAttribute('href', '/ranking/#score-title')
+    expect(screen.getByText(/速さ・反応・安定性をまとめたこのサイト独自のスコアです/)).toBeVisible()
+    expect(screen.getByRole('link', { name: '計算方法' })).toHaveAttribute('href', '/ranking/#score-title')
     expect(document.body.textContent).not.toMatch(/log\(|係数|Sref|Ping\/Jitter補正式/)
   })
 

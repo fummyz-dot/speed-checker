@@ -20,7 +20,7 @@ describe('LoadedLatencyResponsiveness', () => {
     })} />)
 
     expect(screen.getByText('良好')).toBeVisible()
-    expect(screen.getByRole('heading', { name: '負荷による遅延増加は小さいです' })).toBeVisible()
+    expect(screen.getByRole('heading', { name: '通信中も反応は安定しています' })).toBeVisible()
     expect(screen.getByText('+10 ms')).toBeVisible()
     expect(screen.getByText('+15 ms')).toBeVisible()
     expect(screen.getByRole('link', { name: '負荷時遅延の判定基準を見る' })).toHaveAttribute('href', '/loaded-latency/')
@@ -33,9 +33,9 @@ describe('LoadedLatencyResponsiveness', () => {
       uploadLoadedLatencyMs: 221,
     })} />)
 
-    expect(screen.getByRole('heading', { name: '負荷による遅延増加' })).toBeVisible()
+    expect(screen.getByRole('heading', { name: '通信中の反応' })).toBeVisible()
     expect(screen.getByText('良好')).toBeVisible()
-    expect(screen.getByText('この判定は通信負荷による増加量です。基本の遅延（Ping）自体の長さは含みません。')).toBeVisible()
+    expect(screen.getByText('通信中に、反応がどれだけ遅くなったかを見ています。')).toBeVisible()
     expect(screen.getByRole('rowheader', { name: '基本の遅延（Ping）' })).toBeVisible()
     expect(screen.getByText('215 ms')).toBeVisible()
     expect(screen.getByText('+5 ms')).toBeVisible()
@@ -49,7 +49,7 @@ describe('LoadedLatencyResponsiveness', () => {
     })} />)
 
     expect(screen.getByText('注意')).toBeVisible()
-    expect(screen.getByText('大容量ダウンロード中に応答時間が増えています。他の通信で遅延を感じる可能性があります。')).toBeVisible()
+    expect(screen.getByText('ダウンロード中に反応が遅くなっています。ほかの通信と重なると遅れを感じるかもしれません。')).toBeVisible()
   })
 
   it('poorでは要注意と大きな増加を表示する', () => {
@@ -59,7 +59,7 @@ describe('LoadedLatencyResponsiveness', () => {
 
     expect(screen.getByText('要注意')).toBeVisible()
     expect(screen.getByText('大きく増加')).toBeVisible()
-    expect(screen.getByText('大容量アップロード中に応答時間が大きく増えています。Web会議やオンラインゲームなどのリアルタイム通信に影響する可能性があります。')).toBeVisible()
+    expect(screen.getByText('アップロード中に反応が大きく遅くなっています。Web会議やゲームに影響するかもしれません。')).toBeVisible()
   })
 
   it('Loaded latencyがIdle latencyより低い場合、実測値と増加なしを表示する', () => {
@@ -90,7 +90,7 @@ describe('LoadedLatencyResponsiveness', () => {
       uploadLoadedLatencyMs: 40,
     })} />)
 
-    expect(screen.getByRole('heading', { name: '負荷による遅延増加を判定できませんでした' })).toBeVisible()
-    expect(screen.getByText('比較に必要な応答時間を取得できなかったため、今回の測定では判定できませんでした。時間を置いて再測定してください。')).toBeVisible()
+    expect(screen.getByRole('heading', { name: '判定できませんでした' })).toBeVisible()
+    expect(screen.getByText('必要な値が取れませんでした。もう一度測定してください。')).toBeVisible()
   })
 })

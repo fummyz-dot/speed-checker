@@ -346,3 +346,26 @@ The browser must never calculate Net Speed Score or contain its coefficients. It
 - Bands are 10% wide: at or above the median cut it reads 「上位」, below it 「下位」, so the wording stays truthful in both directions.
 - 「前回測定との比較」 and 「測定履歴」 render only when a previous saved result exists. On phones the condition memo hides its explanation until editing.
 
+---
+
+## D-025 — Say it once: cut roundabout copy
+
+**Status:** Accepted and implemented locally; not deployed
+**Date:** 2026-10-11
+
+- AdSense is on hold, so pages no longer carry text for its own sake. Copy leads with the point, uses short sentences, and states each caution once per page.
+- Homepage: the ranking card keeps one line about Net Speed Score with a link to the calculation; the notice is two items with a concrete data-usage bound (about 200 MB, from the measurement plan); the measurement comment drops the "next steps" block; use-case cards show a reason only when a use case is not comfortable; the static "Net Speed Raceとは" is two short paragraphs.
+- Guide, trust, ranking and Lab pages were cut by about a quarter overall. Definitions, thresholds, worked examples, tables, links and one honest caveat per page remain (the static-page tests pin these). Privacy policy, terms and contact are unchanged.
+- The "do not claim a root cause" invariant still holds; it is stated once where it matters instead of repeatedly.
+
+---
+
+## D-026 — Real-time use cases respect in-use latency
+
+**Status:** Accepted and implemented locally; not deployed
+**Date:** 2026-10-11
+
+- When the loaded-latency evaluation is 'poor' (「要注意」), Web会議 and オンラインゲーム are capped one level below comfortable, with the reason shown, and the measurement comment is no longer 「良好です」 but names the in-use slowdown.
+- 'notice' does not change the use cases. Browsing, video and file upload stay speed-based.
+- This removes the contradiction where one screen said both 「Web会議には十分」 and 「通信中に反応が大きく遅くなります」. Thresholds themselves are unchanged.
+

@@ -29,38 +29,34 @@
     </div></header>
     <main class="site-pages__main" id="main-content"><article class="site-pages__article">
       <h1>夜だけネットが遅いと感じたら、時間帯で比較する</h1>
-      <p class="site-pages__lead">夜にネットが遅いと感じても、ブラウザでの1回の測定から理由を確定することはできません。場所・端末・接続方法をなるべくそろえ、時間だけを変えた結果を比べると、<span class="site-pages__keep-together">どの時間帯に変化を感じやすいかを確認できます。</span></p>
+      <p class="site-pages__lead">夜だけ遅いと感じたら、場所・端末・接続方法をそろえ、<span class="site-pages__keep-together">時間帯だけを変えて測り比べます。</span></p>
       <p class="site-pages__article-meta"><span>運営・編集: Net Speed Race</span><span>最終更新: 2026年9月9日</span></p>
-      <p class="site-pages__note"><a href="/methodology/">測定方法について</a>と<a href="/about/">このサイトについて</a>で、測定の前提と限界を確認できます。</p>
+      <p class="site-pages__note">測定の前提と限界は<a href="/methodology/">測定方法について</a>と<a href="/about/">このサイトについて</a>で確認できます。</p>
       <a class="site-pages__article-cta" href="/">今の回線品質を測定する</a>
 
       <h2>条件をそろえ、時間だけを変えて測る</h2>
-      <p>まず、同じ部屋・同じ端末・同じ接続方法で、朝や昼にも測定します。次に、夜にも同じように測定します。比較する間に端末の利用状況や他端末の通信が変わることもあるため、可能なら各時間帯で複数回記録します。</p>
-      <p>「夜は必ず回線が混雑する」「回線事業者が混んでいる」といった判断は、ブラウザ測定だけではできません。結果の違いは、次に比較する条件を考える材料として扱います。</p>
+      <p>朝や昼と夜に、それぞれ複数回測定します。測定条件ラベルは「リビング 5GHz」のように毎回同じにすると、場所や接続方法の違いを混ぜずに比べられます。ラベルは利用者が入力するメモで、自動判定ではありません。</p>
 
       <h2>時間帯で比較する指標</h2>
       <dl>
-        <dt>Download</dt><dd>Web閲覧、動画、ファイル受信に関わる受信速度の変化を確認します。</dd>
-        <dt>Upload</dt><dd>ファイル送信、クラウド保存、映像送信に関わる送信速度の変化を確認します。</dd>
-        <dt>Ping</dt><dd>Cloudflare側との応答時間が時間帯でどう変わるかを確認します。</dd>
-        <dt>Loaded Latencyの増加量</dt><dd>通信中の応答時間が、idle latencyからどの程度増えたかを確認します。</dd>
+        <dt>Download</dt><dd>Web閲覧、動画、ファイル受信に関わる受信速度です。</dd>
+        <dt>Upload</dt><dd>ファイル送信、クラウド保存、映像送信に関わる送信速度です。</dd>
+        <dt>Ping</dt><dd>Cloudflare側との応答時間です。</dd>
+        <dt>Loaded Latencyの増加量</dt><dd>通信中の応答時間が、idle latencyからどれだけ増えたかです。</dd>
       </dl>
-      <p>Jitterは測定結果で確認できますが、現行の「時間帯別の傾向」では集計対象に含まれません。時間帯の履歴では、Download、Upload、Ping、混雑時の応答性の増加量を見ます。</p>
+      <p>Jitterは現行の「時間帯別の傾向」の集計対象に含まれません。</p>
 
       <h2>Net Speed Raceの時間帯別の傾向</h2>
-      <p>履歴は次のローカル時刻の区分で表示されます。</p>
+      <p>履歴は次のローカル時刻で区分されます。</p>
       <div class="site-pages__table-wrap"><table class="site-pages__table">
         <thead><tr><th scope="col">表示</th><th scope="col">時刻</th></tr></thead>
         <tbody><tr><th scope="row">朝</th><td>05:00–10:59</td></tr><tr><th scope="row">昼</th><td>11:00–16:59</td></tr><tr><th scope="row">夜</th><td>17:00–22:59</td></tr><tr><th scope="row">深夜</th><td>23:00–04:59</td></tr></tbody>
       </table></div>
-      <p>各指標の代表値は中央値です。1〜2件の測定は参考値、3件以上で傾向として表示されます。これは自分のブラウザに保存された履歴であり、他の利用者や地域の統計ではありません。</p>
-
-      <h2>測定条件ラベルも同じにする</h2>
-      <p>時間帯の比較では、測定条件ラベルを「リビング 5GHz」のように同じにしておくと、場所や接続方法の違いを混ぜずに記録しやすくなります。ラベルは利用者が入力するメモで、自動判定ではありません。朝と夜で結果が異なっても、それだけから理由を一つに絞ることはできません。</p>
+      <p>各指標の代表値は中央値です。1〜2件の測定は参考値、3件以上で傾向として表示されます。集計するのは自分のブラウザに保存された履歴だけで、他の利用者や地域の統計ではありません。</p>
 
       <section aria-labelledby="night-example-title">
         <h2 id="night-example-title">朝と夜を3回ずつ測った例</h2>
-        <p>以下は時間帯別の履歴の読み方を示す説明用データであり、実際の利用者から収集した統計ではありません。同じ場所・端末・接続方法を想定し、6件すべてに測定条件ラベル「リビング 5GHz」を付けた例です。</p>
+        <p>以下は説明用データで、実際の利用者の統計ではありません。6件すべてに測定条件ラベル「リビング 5GHz」を付けた想定です。</p>
 
         <h3>朝の測定3件と中央値</h3>
         <div class="site-pages__table-wrap"><table class="site-pages__table">
@@ -75,8 +71,8 @@
         </table></div>
 
         <h3>この比較から読み取れること</h3>
-        <p>同じ測定条件ラベルで朝と夜に3回ずつ測ったこの例では、夜のDownload中央値が510 Mbpsから205 Mbpsへ下がり、Ping中央値は10 msから29 msへ、混雑時の応答性の中央値は+20 msから+85 msへ大きくなっています。「夜という時間帯と結果の変化が一緒に現れた」ことを確認し、次の比較を考える材料にはなります。</p>
-        <p>ただし、これは時間帯との関連を示す説明用の例にすぎません。ブラウザ測定だけでは、ISPの混雑、Wi-Fi、建物設備のどれが原因かを確定できず、夜なら必ず遅いとも言えません。</p>
+        <p>夜はDownload中央値が510 Mbpsから205 Mbpsへ下がり、Ping中央値は10 msから29 ms、混雑時の応答性の中央値は+20 msから+85 msへ大きくなっています。分かるのは「夜という時間帯と結果の変化が一緒に現れた」ことです。</p>
+        <p>ブラウザ測定だけでは、ISPの混雑、Wi-Fi、建物設備のどれが原因かを確定できず、夜なら必ず遅いと決めつけることもできません。</p>
       </section>
 
       <section class="site-pages__related" aria-labelledby="night-related-title"><h2 id="night-related-title">関連ガイド</h2><ul>

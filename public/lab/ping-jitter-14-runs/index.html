@@ -28,13 +28,12 @@
     <main class="site-pages__main" id="main-content"><article class="site-pages__article site-pages__article--report">
       <p class="site-pages__eyebrow">NET SPEED RACE LAB</p>
       <h1>同じ条件で14回測ったら、Ping・Jitter・Loaded Latencyはどれくらい変わる？</h1>
-      <p class="site-pages__lead">1回の測定結果は、次の1回でも同じでしょうか。Net Speed Raceで実際に取得した14回の測定データを並べると、速度・応答時間・通信中の応答時間には、それぞれ違う変動が見られました。</p>
+      <p class="site-pages__lead">Net Speed Raceで同じ条件ラベルのまま14回測ると、速度・応答時間・通信中の応答時間は、それぞれ違う幅で変動しました。</p>
       <p class="site-pages__article-meta"><span>運営・編集: Net Speed Race</span><span>公開日: <time datetime="2026-09-17">2026年9月17日</time></span></p>
-      <p class="site-pages__note">この記事は実測データに基づき、説明用架空データではありません。結論は1環境・約16分間の14回の観測に限定し、回線品質一般へは一般化しません。</p>
+      <p class="site-pages__note">実測データ（説明用架空データではありません）で、結論は1環境・約16分間・14回の観測に限ります。</p>
 
       <h2>なぜ14回測ったのか</h2>
-      <p>「Speed Testは1回の数字だけを見てよいのか？」を実際に確かめるためです。同じ測定条件ラベルで得た14回について、Download・Uploadだけでなく、Ping・Jitter・Loaded Latencyも比較しました。</p>
-      <p>これは特定の製品や回線を評価する比較試験ではなく、同じラベルで繰り返し測ったときに、どの指標がどの程度変わったかを確認する実測レポートです。</p>
+      <p>Speed Testは1回の数字だけを見てよいのかを確かめるためです。同じ測定条件ラベルの14回で、Download・UploadにPing・Jitter・Loaded Latencyを加えて比べました。特定の製品や回線を評価する比較試験ではありません。</p>
 
       <h2>今回の測定条件</h2>
       <dl>
@@ -44,13 +43,13 @@
         <dt>正常完了</dt><dd>14回</dd>
         <dt>測定条件ラベル</dt><dd>実測01_リビング6GHz</dd>
       </dl>
-      <p>測定条件ラベルとして「実測01_リビング6GHz」を使用しました。このラベルは利用者入力のメモです。「6GHz」の文字列があっても、実際のWi-Fi周波数帯を自動判定・検証した記録ではありません。タイトルの「同じ条件」は、この同じ条件ラベルでの測定を指します。</p>
-      <p>端末型番、ブラウザversion、回線事業者、ルーター型番などは今回の記録に含まれていません。測定中の他の通信など、すべての条件が一定だったかも確認できません。</p>
-      <p>測定指標の前提は<a href="/methodology/">測定方法</a>、運営とサイトの目的は<a href="/about/">このサイトについて</a>で説明しています。</p>
+      <p>「実測01_リビング6GHz」は利用者入力のメモで、実際のWi-Fi周波数帯を自動判定・検証した記録ではありません。タイトルの「同じ条件」は、この同じ条件ラベルでの測定を指します。</p>
+      <p>端末型番、ブラウザversion、回線事業者、ルーター型番は記録しておらず、測定中の他の通信などがすべて一定だったかも確認できません。</p>
+      <p>指標の前提は<a href="/methodology/">測定方法</a>、サイトの目的は<a href="/about/">このサイトについて</a>をご覧ください。</p>
 
       <h2>14回の測定結果</h2>
-      <p>JSTの時刻順に全14件を掲載します。Download / Uploadの単位はMbps、それ以外はmsです。表の「DL loaded」「UL loaded」は各方向の通信中の応答時間、「DL増加」「UL増加」はidle Pingからのeffective increaseです。</p>
-      <p>増加量は各回で<code>max(0, loaded latency - idle Ping)</code>として計算しています。掲載している集計値と増加量は、CSVで公開している小数1桁の測定値のみを基に算出し、平均・中央値は小数第2位を四捨五入して小数1桁で表示しています。</p>
+      <p>JSTの時刻順に全14件を掲載します。単位はDownload / UploadがMbps、ほかはmsです。「DL loaded」「UL loaded」は各方向の通信中の応答時間、「DL増加」「UL増加」はidle Pingからのeffective increaseです。</p>
+      <p>増加量は各回<code>max(0, loaded latency - idle Ping)</code>で計算しました。集計値と増加量はCSVで公開している小数1桁の測定値のみから算出し、平均・中央値は小数第2位を四捨五入して小数1桁で表示しています。</p>
       <p id="measurements-help">横に長い表はスクロールして確認できます。</p>
       <div class="site-pages__table-wrap" role="region" aria-label="14回の測定値" aria-describedby="measurements-help" tabindex="0">
         <table class="site-pages__table" id="measurements">
@@ -89,37 +88,36 @@
         </table>
       </div>
       <h3>実測データを確認する</h3>
-      <p>この記事で使用した14回分の測定値をCSVで公開しています。日時・条件ラベル・各測定値・計算した増加量を収録しています。</p>
+      <p>14回分の日時・条件ラベル・各測定値・計算した増加量をCSVで公開しています。</p>
       <p><a href="/lab/ping-jitter-14-runs/data.csv" download>14回の実測データをダウンロード（CSV）</a></p>
 
       <h2>Download / Uploadの変動</h2>
-      <p>Downloadは436.2〜612.3 Mbps、中央値は542.4 Mbpsでした。最大と最小の差は176.1 Mbpsで、この14回では毎回同じ速度が出たわけではありません。Uploadは31.4〜56.4 Mbps、中央値は40.5 Mbpsでした。</p>
-      <p>以下は測定番号順のグラフです。DownloadとUploadは桁が異なるため上下に分け、縦軸の縮尺を変えています。線の高さを直接比較するのではなく、それぞれの数値と変動を見てください。横軸は測定番号で、実際の測定間隔は均等ではありません。</p>
+      <p>Downloadは436.2〜612.3 Mbps（中央値542.4 Mbps）で、最大と最小の差は176.1 Mbpsでした。Uploadは31.4〜56.4 Mbps（中央値40.5 Mbps）です。</p>
+      <p>DownloadとUploadは桁が違うため上下に分け、縦軸の縮尺を変えています。横軸は測定番号で、実際の測定間隔は均等ではありません。</p>
       <figure class="site-pages__figure">
         <img src="/lab/ping-jitter-14-runs/throughput.svg" width="760" height="700" loading="lazy" alt="14回のDownloadは436.2〜612.3 Mbps、Uploadは31.4〜56.4 Mbps。上下2段で縦軸の縮尺を変えて表示。" />
         <figcaption>上段はDownload（0〜700 Mbps）、下段はUpload（0〜70 Mbps）。</figcaption>
       </figure>
-      <p>この範囲は今回の14回で観測した値です。他の家庭や回線でも同じ幅で変動する、という結論にはなりません。</p>
 
       <h2>Pingは比較的狭い範囲だった</h2>
-      <p>Pingは48.9〜62.1 ms、中央値は52.7 msでした。最小から最大までの幅は13.2 msです。最大値を最小値で割ると約1.27倍で、Downloadの約1.40倍と比べ、今回14回の中では相対的な変動幅が小さかったと読めます。</p>
-      <p>ただしPingも一定ではありません。この短時間の観測から「Pingは常に安定する」とは言えません。測定する応答時間の意味は<a href="/ping/">Pingの見方</a>を参照してください。</p>
+      <p>Pingは48.9〜62.1 ms（中央値52.7 ms）で、幅は13.2 msでした。最大÷最小は約1.27倍で、Downloadの約1.40倍より相対的な変動幅が小さかったと読めます。</p>
+      <p>ただしPingも一定ではありません。応答時間の意味は<a href="/ping/">Pingの見方</a>で説明しています。</p>
       <figure class="site-pages__figure">
         <img src="/lab/ping-jitter-14-runs/ping-jitter.svg" width="760" height="430" loading="lazy" alt="測定1〜14のPingとJitter。Pingは48.9〜62.1 ms、Jitterは6.2〜18.5 msで推移。" />
         <figcaption>Pingは実線と丸、Jitterは破線と四角。縦軸は共通のms、横軸は測定番号です。</figcaption>
       </figure>
 
       <h2>Jitterは6.2〜18.5 ms</h2>
-      <p>Jitterは最小6.2 ms、最大18.5 ms、中央値13.6 msでした。同じ条件ラベルでも、各回のJitterは同じ値ではありませんでした。</p>
-      <p>Jitter自体は1回の測定内での応答時間のばらつきを表す指標で、このグラフはその指標が14回の間にどう変化したかを示します。Pingの高さと同じ意味ではなく、両方をあわせて見る必要があります。詳しくは<a href="/jitter/">JitterとPingの違い</a>で説明しています。</p>
+      <p>Jitterは6.2〜18.5 ms（中央値13.6 ms）で、同じ条件ラベルでも毎回違いました。</p>
+      <p>Jitterは1回の測定内での応答時間のばらつきで、グラフはそれが14回でどう変わったかを示します。Pingとは意味が違うため、両方をあわせて見ます。詳しくは<a href="/jitter/">JitterとPingの違い</a>で説明しています。</p>
 
       <h2>Loaded Latencyが最も興味深かった</h2>
-      <p>今回、通信中の応答時間には一部の測定で大きな増加が見られました。Download loaded latencyは53.5〜141.6 ms、中央値63.6 ms。Upload loaded latencyは59.0〜120.8 ms、中央値63.2 msでした。</p>
+      <p>一部の測定で、通信中の応答時間が大きく増えました。Download loaded latencyは53.5〜141.6 ms（中央値63.6 ms）、Upload loaded latencyは59.0〜120.8 ms（中央値63.2 ms）です。</p>
       <h3>測定10：Download中に+89.2 ms</h3>
-      <p>10:23:11の測定10では、Pingは52.4 ms、Download loaded latencyは141.6 msでした。effective increaseは<code>max(0, 141.6 - 52.4) = 89.2 ms</code>です。idle Pingだけでは、Download通信中にここまで応答時間が増えたことは分かりません。</p>
+      <p>10:23:11の測定10は、Ping 52.4 msに対しDownload loaded latencyが141.6 msでした。effective increaseは<code>max(0, 141.6 - 52.4) = 89.2 ms</code>で、idle Pingだけでは分からない増加です。</p>
       <h3>測定4：Upload中に+68.1 ms</h3>
-      <p>10:15:19の測定4では、Pingは52.7 ms、Upload loaded latencyは120.8 msでした。effective increaseは<code>max(0, 120.8 - 52.7) = 68.1 ms</code>です。Upload通信中の応答性も、通常のPingとは分けて確認する必要がある例です。</p>
-      <p>測定11のDownload loaded latencyは53.5 msで、Pingの59.2 msより小さくなっています。増加量は<code>max(0, 53.5 - 59.2) = 0.0 ms</code>とし、マイナスの改善量としては扱いません。</p>
+      <p>10:15:19の測定4は、Ping 52.7 msに対しUpload loaded latencyが120.8 msで、effective increaseは<code>max(0, 120.8 - 52.7) = 68.1 ms</code>でした。Upload中の応答性もPingとは分けて確認が必要です。</p>
+      <p>測定11はDownload loaded latency 53.5 msがPing 59.2 msを下回りました。増加量は<code>max(0, 53.5 - 59.2) = 0.0 ms</code>とし、マイナスの改善量としては扱いません。</p>
       <figure class="site-pages__figure">
         <img src="/lab/ping-jitter-14-runs/loaded-latency.svg" width="760" height="460" loading="lazy" alt="各回のidle Pingからの増加量。Downloadは測定10で最大89.2 ms、Uploadは測定4で最大68.1 ms。20 msの判定境界を表示。" />
         <figcaption>Loaded Latencyそのものではなく、各回のidle Pingからの増加量を表示しています。</figcaption>
@@ -134,18 +132,18 @@
           </tbody>
         </table>
       </div>
-      <p>現在の基準は、増加量が0〜20 msなら「良好」、20 ms超〜100 msなら「注意」、100 ms超なら「要注意」です。これはNet Speed Race独自基準であり、通信業界・Cloudflare等の公式基準ではない点に注意してください。「良好」はこの増加量に対する表示であり、接続状態全体の品質保証ではありません。</p>
-      <p>計算と表示の考え方は<a href="/loaded-latency/">Loaded Latencyの見方</a>で確認できます。これらの数値だけでは原因を断定できないため、ISP・ルーター・Wi-Fiなどの特定要因に結び付けることはしません。</p>
+      <p>現在の基準は、増加量が0〜20 msなら「良好」、20 ms超〜100 msなら「注意」、100 ms超なら「要注意」です。これは通信業界・Cloudflare等の公式基準ではないNet Speed Race独自基準で、「良好」も接続状態全体の品質保証ではありません。</p>
+      <p>計算と表示の考え方は<a href="/loaded-latency/">Loaded Latencyの見方</a>で説明しています。数値だけでは原因を断定できないため、ISP・ルーター・Wi-Fiなどには結び付けません。</p>
 
       <h2>14回測って分かったこと</h2>
       <ul>
-        <li>Downloadは毎回同じではなく、436.2〜612.3 Mbpsの範囲でした。</li>
-        <li>Pingも一定ではありませんが、今回のDownloadと比べると相対的には狭い範囲でした。</li>
-        <li>Jitterも変動し、同じ条件ラベルで同じ値になるわけではありませんでした。</li>
-        <li>Loaded Latencyは、一部の測定でidle Pingから大きく増加しました。</li>
-        <li>この14回の違いを見ると、1回だけで接続状態全体を代表させることには慎重であるべきと考えます。</li>
+        <li>Downloadは毎回違い、436.2〜612.3 Mbpsの範囲でした。</li>
+        <li>Pingも一定ではないものの、Downloadより相対的に狭い範囲でした。</li>
+        <li>Jitterも同じ条件ラベルで毎回違いました。</li>
+        <li>Loaded Latencyは一部の測定でidle Pingから大きく増えました。</li>
+        <li>1回だけで接続状態全体を代表させることには慎重であるべきと考えます。</li>
       </ul>
-      <p>今回の観測から得られる実用的な読み方は、速度と応答性を分け、単発の最大値だけでなく複数回の範囲や中央値も確認することです。</p>
+      <p>実用的には、速度と応答性を分けて見て、単発の最大値だけでなく複数回の範囲や中央値も確認するのが有効です。</p>
 
       <h2>この実験では分からないこと</h2>
       <ul>
@@ -156,7 +154,6 @@
         <li>全国平均との関係。</li>
         <li>今後のサービス品質の保証。</li>
       </ul>
-      <p>これは14回・約16分間、1環境での観測結果にすぎません。別の時間帯や接続条件を比較したものではなく、他の環境を代表するデータでもありません。今回分かった変動をそのまま一般化せず、測定した時点の記録として扱います。</p>
       <a class="site-pages__article-cta" href="/">今の回線品質を測定する</a>
     </article></main>
     <footer class="site-pages__footer"><div class="site-pages__footer-inner"><nav class="site-pages__nav" aria-label="フッターナビゲーション"><ul>

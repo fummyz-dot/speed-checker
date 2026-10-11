@@ -38,32 +38,32 @@ const responsivenessMessage = (
   if (overall === 'good') {
     return {
       badge: '良好',
-      title: '負荷による遅延増加は小さいです',
-      message: '負荷がかかっても応答時間の増加は小さく、今回の測定では負荷による遅延の悪化は目立ちません。',
+      title: '通信中も反応は安定しています',
+      message: '通信中も反応はほとんど遅くなっていません。',
     }
   }
 
   if (overall === 'unknown') {
     return {
       badge: '判定不可',
-      title: '負荷による遅延増加を判定できませんでした',
-      message: '比較に必要な応答時間を取得できなかったため、今回の測定では判定できませんでした。時間を置いて再測定してください。',
+      title: '判定できませんでした',
+      message: '必要な値が取れませんでした。もう一度測定してください。',
     }
   }
 
   const downloadAffected = download.level === 'notice' || download.level === 'poor'
   const uploadAffected = upload.level === 'notice' || upload.level === 'poor'
-  const downloadIncrease = download.level === 'poor' ? '大きく増えています' : '増えています'
-  const uploadIncrease = upload.level === 'poor' ? '大きく増えています' : '増えています'
+  const downloadIncrease = download.level === 'poor' ? '大きく遅くなっています' : '遅くなっています'
+  const uploadIncrease = upload.level === 'poor' ? '大きく遅くなっています' : '遅くなっています'
   const poor = overall === 'poor'
 
   if (downloadAffected && uploadAffected) {
     const message = download.level === 'poor' && upload.level === 'poor'
-      ? 'ダウンロード・アップロードのどちらでも応答時間が大きく増えています。同じ回線で複数の通信を行う場合は影響が出る可能性があります。'
-      : `ダウンロード中に応答時間が${downloadIncrease}。アップロード中に応答時間が${uploadIncrease}。同じ回線で複数の通信を行う場合は影響が出る可能性があります。`
+      ? 'ダウンロード中もアップロード中も、反応が大きく遅くなっています。ほかの通信と重なると影響が出やすい状態です。'
+      : `ダウンロード中は反応が${downloadIncrease.replace('なっています', 'なり')}、アップロード中は${uploadIncrease}。ほかの通信と重なると影響が出やすい状態です。`
     return {
       badge: poor ? '要注意' : '注意',
-      title: poor ? '負荷時に応答時間が大きく増えています' : '負荷時に応答時間が増えています',
+      title: poor ? '通信中に反応が大きく遅くなります' : '通信中に反応が遅くなります',
       message,
     }
   }
@@ -71,15 +71,15 @@ const responsivenessMessage = (
   if (downloadAffected) {
     return {
       badge: poor ? '要注意' : '注意',
-      title: poor ? '負荷時に応答時間が大きく増えています' : '負荷時に応答時間が増えています',
-      message: `大容量ダウンロード中に応答時間が${downloadIncrease}。他の通信で遅延を感じる可能性があります。`,
+      title: poor ? '通信中に反応が大きく遅くなります' : '通信中に反応が遅くなります',
+      message: `ダウンロード中に反応が${downloadIncrease}。ほかの通信と重なると遅れを感じるかもしれません。`,
     }
   }
 
   return {
     badge: poor ? '要注意' : '注意',
-    title: poor ? '負荷時に応答時間が大きく増えています' : '負荷時に応答時間が増えています',
-    message: `大容量アップロード中に応答時間が${uploadIncrease}。Web会議やオンラインゲームなどのリアルタイム通信に影響する可能性があります。`,
+    title: poor ? '通信中に反応が大きく遅くなります' : '通信中に反応が遅くなります',
+    message: `アップロード中に反応が${uploadIncrease}。Web会議やゲームに影響するかもしれません。`,
   }
 }
 
@@ -117,11 +117,11 @@ export const LoadedLatencyResponsiveness = ({ result }: LoadedLatencyResponsiven
     <section className={`result-panel loaded-latency loaded-latency--${evaluation.overall}`} aria-labelledby="loaded-latency-title">
       <div className="result-panel__heading">
         <div>
-          <h3 id="loaded-latency-title">負荷による遅延増加</h3>
+          <h3 id="loaded-latency-title">通信中の反応</h3>
         </div>
         <span className={`loaded-latency__badge loaded-latency__badge--${evaluation.overall}`}>{summary.badge}</span>
       </div>
-      <p className="loaded-latency__lead">この判定は通信負荷による増加量です。基本の遅延（Ping）自体の長さは含みません。</p>
+      <p className="loaded-latency__lead">通信中に、反応がどれだけ遅くなったかを見ています。</p>
 
       <table className="loaded-latency__table">
         <thead>
@@ -155,9 +155,6 @@ export const LoadedLatencyResponsiveness = ({ result }: LoadedLatencyResponsiven
       </div>
       {evaluation.isPartial && (
         <p className="loaded-latency__partial">一部の測定値を取得できなかったため、取得できた値のみで判定しています。</p>
-      )}
-      {evaluation.overall !== 'unknown' && (
-        <p className="result-note">ネットワークの状態は時間帯や同時通信によって変動します。</p>
       )}
       <a className="result-guide-link" href="/loaded-latency/">負荷時遅延の判定基準を見る</a>
     </section>

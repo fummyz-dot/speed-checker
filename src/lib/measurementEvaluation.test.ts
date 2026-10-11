@@ -50,37 +50,37 @@ describe('evaluateUseCases', () => {
     const evaluations = evaluateUseCases(result(100, 100, 215))
     expect(evaluations[2]).toMatchObject({
       level: 'difficult',
-      reason: 'Ping 215 ms が利用可能の参考目安（150 ms以下）を超えています。',
+      reason: 'Ping 215 ms（利用可能の目安は150 ms以下）',
     })
     expect(evaluations[3]).toMatchObject({
       level: 'difficult',
-      reason: 'Ping 215 ms が利用可能の参考目安（100 ms以下）を超えています。',
+      reason: 'Ping 215 ms（利用可能の目安は100 ms以下）',
     })
   })
 
   it('利用可能の理由と速度不足の理由も同じ閾値から示す', () => {
     expect(evaluateUseCases(result(100, 100, 90))[2]).toMatchObject({
       level: 'available',
-      reason: 'Ping 90 ms が快適の参考目安（80 ms以下）を超えています。',
+      reason: 'Ping 90 ms（快適の目安は80 ms以下）',
     })
     expect(evaluateUseCases(result(2, 100, 20))[3]).toMatchObject({
       level: 'difficult',
-      reason: 'Download 2.0 Mbps が利用可能の参考目安（3 Mbps以上）を下回っています。',
+      reason: 'Download 2.0 Mbps（利用可能の目安は3 Mbps以上）',
     })
     expect(evaluateUseCases(result(100, 2, 20))[2]).toMatchObject({
       level: 'difficult',
-      reason: 'Upload 2.0 Mbps が利用可能の参考目安（3 Mbps以上）を下回っています。',
+      reason: 'Upload 2.0 Mbps（利用可能の目安は3 Mbps以上）',
     })
   })
 
   it('目安の近くでも丸めた値と警告理由が矛盾しない', () => {
     expect(evaluateUseCases(result(100, 100, 100.0001))[3]).toMatchObject({
       level: 'difficult',
-      reason: 'Ping 100.0001 ms が利用可能の参考目安（100 ms以下）を超えています。',
+      reason: 'Ping 100.0001 ms（利用可能の目安は100 ms以下）',
     })
     expect(evaluateUseCases(result(4.99, 100, 20))[3]).toMatchObject({
       level: 'available',
-      reason: 'Download 4.99 Mbps が快適の参考目安（5 Mbps以上）を下回っています。',
+      reason: 'Download 4.99 Mbps（快適の目安は5 Mbps以上）',
     })
   })
 
@@ -95,7 +95,7 @@ describe('evaluateUseCases', () => {
   it('Pingなしでは速度だけの参考評価にする', () => {
     const evaluations = evaluateUseCases(result(100, 100, null))
     expect(evaluations[3]).toMatchObject({ level: 'comfortable', detail: '速度のみの参考評価' })
-    expect(evaluations[3].reason).toContain('Ping未取得のため速度のみの参考評価です。')
+    expect(evaluations[3].reason).toContain('Pingが取れなかったため速度のみで判定。')
   })
 
   it('必要な測定値がない場合は判定不可にする', () => {
@@ -109,13 +109,13 @@ describe('generateMeasurementComment', () => {
   it('十分な値では明確な不足がないと表示する', () => {
     const comment = generateMeasurementComment(result(25, 5, 80))
     expect(comment.status).toBe('good')
-    expect(comment.message).toContain('明確な不足は見当たりません')
+    expect(comment.message).toContain('十分な結果です')
   })
 
   it.each([
-    [result(4, 10, 30), 'ダウンロード速度が低め'],
-    [result(50, 2, 30), 'アップロード速度が低め'],
-    [result(50, 10, 81), '応答時間が長め'],
+    [result(4, 10, 30), 'ダウンロードが遅め'],
+    [result(50, 2, 30), 'アップロードが遅め'],
+    [result(50, 10, 81), '反応が遅め'],
   ] as const)('単一の注意点を安全に説明する', (measurement, expected) => {
     expect(generateMeasurementComment(measurement).message).toContain(expected)
   })
@@ -139,3 +139,35 @@ describe('generateMeasurementComment', () => {
     expect(comments.map((comment) => comment.message).join(' ')).not.toContain(prohibited)
   })
 })
+
+describe('通信中の反応が「要注意」のとき', () => {
+  const withLoaded = (downloadLoadedLatencyMs: number, uploadLoadedLatencyMs: number) => ({
+    ...result(168, 108, 6), downloadLoadedLatencyMs, uploadLoadedLatencyMs,
+  })
+
+  it('Web会議とゲームを快適から1段階下げ、理由を示す', () => {
+    const evaluations = evaluateUseCases(withLoaded(115, 586))
+    expect(evaluations[2]).toMatchObject({ id: 'meeting', level: 'available', reason: '通信中に反応が大きく遅くなるため、1段階下げています。' })
+    expect(evaluations[3]).toMatchObject({ id: 'gaming', level: 'available', reason: '通信中に反応が大きく遅くなるため、1段階下げています。' })
+  })
+
+  it('速度だけで決まる用途は変えない', () => {
+    const evaluations = evaluateUseCases(withLoaded(115, 586))
+    expect(evaluations.filter(({ id }) => id !== 'meeting' && id !== 'gaming').map(({ level }) => level))
+      .toEqual(['comfortable', 'comfortable', 'comfortable'])
+  })
+
+  it('「注意」程度の遅れでは下げない', () => {
+    const evaluations = evaluateUseCases(withLoaded(40, 60))
+    expect(evaluations[2].level).toBe('comfortable')
+    expect(evaluations[3].level).toBe('comfortable')
+  })
+
+  it('結果コメントを「良好」にせず、通信中の遅れを伝える', () => {
+    const comment = generateMeasurementComment(withLoaded(115, 586))
+    expect(comment.status).toBe('notice')
+    expect(comment.message).toContain('通信中に反応が大きく遅くなります')
+    expect(generateMeasurementComment(withLoaded(40, 60)).status).toBe('good')
+  })
+})
+

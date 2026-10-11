@@ -29,27 +29,27 @@
     </div></header>
     <main class="site-pages__main" id="main-content"><article class="site-pages__article">
       <h1>Web会議では回線速度のどこを見る？</h1>
-      <p class="site-pages__lead">Web会議の使い心地は、下り速度だけでは整理できません。自分の映像を送る上り速度、会話の反応を見るPing、応答の揺れや通信中の変化も分けて確認すると、比較する条件を決めやすくなります。</p>
+      <p class="site-pages__lead">Web会議は下り速度だけでは判断できません。上り速度や応答時間も分けて確認します。</p>
       <p class="site-pages__article-meta"><span>運営・編集: Net Speed Race</span><span>最終更新: 2026年8月27日</span></p>
-      <p class="site-pages__note"><a href="/methodology/">測定方法について</a>と<a href="/about/">このサイトについて</a>で、測定の範囲と扱い方を確認できます。</p>
+      <p class="site-pages__note">測定の範囲は<a href="/methodology/">測定方法について</a>と<a href="/about/">このサイトについて</a>で確認できます。</p>
       <a class="site-pages__article-cta" href="/">今の回線品質を測定する</a>
 
       <h2>Web会議で見る5つの指標</h2>
       <dl>
-        <dt>Download</dt><dd>相手の映像や資料を受信する速さを見る材料です。</dd>
-        <dt>Upload</dt><dd>自分の映像・音声・画面共有を送信する速さを見る材料です。</dd>
-        <dt>Ping</dt><dd>会話の応答を考えるときの手掛かりになる応答時間です。</dd>
-        <dt>Jitter</dt><dd>応答時間の揺れを見る補助指標で、音声・映像の安定性を確認する材料です。</dd>
-        <dt>Loaded Latency</dt><dd>他の通信があるときに応答がどの程度変化するかを見る材料です。</dd>
+        <dt>Download</dt><dd>相手の映像や資料を受信する速さです。</dd>
+        <dt>Upload</dt><dd>自分の映像・音声・画面共有を送る速さです。</dd>
+        <dt>Ping</dt><dd>会話の応答に関わる応答時間です。</dd>
+        <dt>Jitter</dt><dd>応答時間の揺れで、音声・映像の安定性を見る補助指標です。</dd>
+        <dt>Loaded Latency</dt><dd>他の通信があるときに、応答がどれだけ変わるかを見ます。</dd>
       </dl>
-      <p>これらは一つずつ異なる面を見ています。数値だけで、会議サービス、Wi-Fi、端末、相手側のどこに問題があるかを断定することはできません。</p>
+      <p>数値だけでは、会議サービス、Wi-Fi、端末、相手側のどこに問題があるかを断定できません。</p>
 
-      <h2>症状から、まず比較しやすい指標を選ぶ</h2>
+      <h2>症状から見る指標を選ぶ</h2>
       <div class="site-pages__symptom-grid">
-        <div><h3>映像が止まる</h3><p>受信側のDownloadを確認し、同じ時間帯や部屋で複数回比べます。</p></div>
-        <div><h3>自分の映像だけ乱れる</h3><p>Uploadを確認し、他の送信やクラウド同期がある条件とも比べます。</p></div>
-        <div><h3>会話の返答が遅れる</h3><p>PingとJitterを確認し、時間帯や接続条件を変えた結果を見ます。</p></div>
-        <div><h3>他人が大容量通信すると不安定</h3><p>Loaded Latencyを、他の通信がある・ない条件で比較する材料にします。</p></div>
+        <div><h3>映像が止まる</h3><p>Downloadを確認します。</p></div>
+        <div><h3>自分の映像だけ乱れる</h3><p>Uploadを、クラウド同期など他の送信がある条件とも比べます。</p></div>
+        <div><h3>会話の返答が遅れる</h3><p>PingとJitterを確認します。</p></div>
+        <div><h3>他人が大容量通信すると不安定</h3><p>Loaded Latencyを、他の通信がある・ない条件で比べます。</p></div>
       </div>
 
       <h2>Net Speed RaceのWeb会議参考判定</h2>
@@ -58,17 +58,17 @@
           <thead><tr><th scope="col">目安</th><th scope="col">Download</th><th scope="col">Upload</th><th scope="col">Ping</th></tr></thead>
           <tbody><tr><th scope="row">快適</th><td>10 Mbps以上</td><td>5 Mbps以上</td><td>80 ms以下</td></tr><tr><th scope="row">利用可能</th><td>3 Mbps以上</td><td>3 Mbps以上</td><td>150 ms以下</td></tr></tbody>
         </table></div>
-        <p>これはNet Speed Race内の参考判定であり、Zoom、Google Meet、Microsoft Teams等の公式要件そのものではありません。</p>
+        <p>これはNet Speed Race内の参考判定で、Zoom、Google Meet、Microsoft Teams等の公式要件そのものではありません。通信中の反応が「要注意」のときは、快適を「利用可能」に1段階下げます。</p>
       </div>
 
       <h2>会議をする条件をそろえて比べる</h2>
       <ul class="site-pages__checklist">
         <li>会議をする部屋で測定する。</li>
-        <li>Wi-Fiと有線接続で、可能な範囲の結果を比べる。</li>
+        <li>Wi-Fiと有線接続で比べる。</li>
         <li>朝と夜など、時間帯を変えて測定する。</li>
         <li>他端末の利用がある・ない条件で比べる。</li>
       </ul>
-      <p>測定条件ラベルに「会議部屋 Wi-Fi」「会議部屋 有線」「夜・他端末利用あり」などを入力すると、ブラウザ内に保存された履歴を条件ごとに見返せます。違いが出たときも、同じ条件で複数回測定して傾向を確認します。</p>
+      <p>測定条件ラベルに「会議部屋 Wi-Fi」「会議部屋 有線」「夜・他端末利用あり」などと入力すると、ブラウザ内の履歴を条件ごとに見返せます。</p>
 
       <section class="site-pages__related" aria-labelledby="video-call-related-title"><h2 id="video-call-related-title">関連ガイド</h2><ul>
         <li><a href="/internet-speed/">回線速度の見方</a></li><li><a href="/ping/">Pingとは</a></li><li><a href="/jitter/">ジッターとは</a></li><li><a href="/loaded-latency/">混雑時の応答性とは</a></li>

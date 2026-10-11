@@ -3,6 +3,7 @@ import type {
   SpeedMeasurementResult,
   UseCaseEvaluationResult,
 } from '../types/measurement'
+import { evaluateLoadedLatencyResponsiveness } from './loadedLatencyEvaluation'
 import { toValidMetric } from './measurementValidation'
 import { formatFinalSpeedDisplay } from './speedValue'
 import { formatMilliseconds } from '../utils/formatMetric'
@@ -37,6 +38,22 @@ export const EVALUATION_LABELS: Record<EvaluationLevel, string> = {
 }
 
 type MeasurementInput = Partial<SpeedMeasurementResult>
+
+/**
+ * Real-time uses (meetings, games) suffer when responses slow down sharply during transfers.
+ * When that in-use slowdown is 'poor', those uses are capped one level below comfortable.
+ */
+const hasPoorLoadedLatency = (result: MeasurementInput): boolean =>
+  evaluateLoadedLatencyResponsiveness({
+    idleLatencyMs: result.pingMs,
+    downloadLoadedLatencyMs: result.downloadLoadedLatencyMs,
+    uploadLoadedLatencyMs: result.uploadLoadedLatencyMs,
+  }).overall === 'poor'
+
+const LOADED_LATENCY_REASON = '通信中に反応が大きく遅くなるため、1段階下げています。'
+
+const capForLoadedLatency = (level: EvaluationLevel, poor: boolean): EvaluationLevel =>
+  poor && level === 'comfortable' ? 'available' : level
 
 const basicLevel = (
   value: number,
@@ -76,7 +93,7 @@ const reasonForLevel = (level: EvaluationLevel, factors: ReasonFactor[]): string
       ? `${factors.map(describeFactor).join('・')} は快適の参考目安を満たしています。`
       : undefined
   }
-  return `${describeFactor(limitingFactor, limitingFactor[target])} が${target === 'comfortable' ? '快適' : '利用可能'}の参考目安（${limitingFactor[target]} ${limitingFactor.unit}${limitingFactor.maximum ? '以下' : '以上'}）を${limitingFactor.maximum ? '超えています' : '下回っています'}。`
+  return `${describeFactor(limitingFactor, limitingFactor[target])}（${target === 'comfortable' ? '快適' : '利用可能'}の目安は${limitingFactor[target]} ${limitingFactor.unit}${limitingFactor.maximum ? '以下' : '以上'}）`
 }
 
 export const evaluateUseCases = (
@@ -183,7 +200,12 @@ export const evaluateUseCases = (
       available: EVALUATION_THRESHOLDS.gaming.availableUpload,
     },
   ])
-  const noPingNote = ping === null ? ' Ping未取得のため速度のみの参考評価です。' : ''
+  const noPingNote = ping === null ? ' Pingが取れなかったため速度のみで判定。' : ''
+  const poorLoadedLatency = hasPoorLoadedLatency(result)
+  const cappedMeetingLevel = meetingLevel === null ? null : capForLoadedLatency(meetingLevel, poorLoadedLatency)
+  const cappedGamingLevel = gamingLevel === null ? null : capForLoadedLatency(gamingLevel, poorLoadedLatency)
+  const realtimeReason = (level: EvaluationLevel | null, capped: EvaluationLevel | null, reason: string | undefined) =>
+    level !== capped ? LOADED_LATENCY_REASON : reason === undefined ? undefined : reason + noPingNote
 
   return [
     browsingLevel === null ? unavailable('browsing', 'Web閲覧・SNS') : {
@@ -194,12 +216,12 @@ export const evaluateUseCases = (
       id: 'video', label: '動画視聴', level: videoLevel, reason: videoReason,
       detail: videoLevel === 'available' ? '画質によっては利用可能' : '動画再生の目安',
     },
-    meetingLevel === null ? unavailable('meeting', 'Web会議') : {
-      id: 'meeting', label: 'Web会議', level: meetingLevel, reason: meetingReason === undefined ? undefined : meetingReason + noPingNote,
+    cappedMeetingLevel === null ? unavailable('meeting', 'Web会議') : {
+      id: 'meeting', label: 'Web会議', level: cappedMeetingLevel, reason: realtimeReason(meetingLevel, cappedMeetingLevel, meetingReason),
       detail: ping === null ? '速度を基にした参考評価' : '送受信速度と応答時間の目安',
     },
-    gamingLevel === null ? unavailable('gaming', 'オンラインゲーム') : {
-      id: 'gaming', label: 'オンラインゲーム', level: gamingLevel, reason: gamingReason === undefined ? undefined : gamingReason + noPingNote,
+    cappedGamingLevel === null ? unavailable('gaming', 'オンラインゲーム') : {
+      id: 'gaming', label: 'オンラインゲーム', level: cappedGamingLevel, reason: realtimeReason(gamingLevel, cappedGamingLevel, gamingReason),
       detail: ping === null ? '速度のみの参考評価' : '速度と応答時間の目安',
     },
     fileLevel === null ? unavailable('file-upload', '大容量ファイル送信') : {
@@ -227,8 +249,8 @@ export const generateMeasurementComment = (
   if (download === null || upload === null || pingInvalid) {
     return {
       status: 'unknown',
-      title: '十分な評価ができませんでした',
-      message: '一部の測定値を取得できなかったため、十分な評価ができませんでした。時間を置いて再測定してください。',
+      title: '評価できませんでした',
+      message: '一部の値を取得できませんでした。もう一度測定してください。',
       suggestions: ['同じ場所でもう一度測定する'],
     }
   }
@@ -236,24 +258,26 @@ export const generateMeasurementComment = (
   const lowDownload = download < 25
   const lowUpload = upload < 5
   const highPing = ping !== null && ping > 80
+  const poorLoadedLatency = hasPoorLoadedLatency(result)
 
-  if (!lowDownload && !lowUpload && !highPing) {
+  if (!lowDownload && !lowUpload && !highPing && !poorLoadedLatency) {
     return {
       status: 'good',
-      title: '今回の測定値は良好です',
-      message: '今回の測定値では、一般的なWeb閲覧、動画視聴、Web会議で明確な不足は見当たりません。',
+      title: '良好です',
+      message: 'Web閲覧、動画、Web会議には十分な結果です。',
       suggestions: ['別の時間帯でも測定して比較する'],
     }
   }
 
   const messages: string[] = []
-  if (lowDownload) messages.push('ダウンロード速度が低めです。高画質動画や大容量ダウンロードでは時間がかかる可能性があります。')
-  if (lowUpload) messages.push('アップロード速度が低めです。大容量ファイルの送信やクラウド保存では時間がかかる可能性があります。')
-  if (highPing) messages.push('応答時間が長めです。オンラインゲームやリアルタイム通話では遅延を感じる可能性があります。')
+  if (lowDownload) messages.push('ダウンロードが遅めです。高画質動画や大きなファイルの取得に時間がかかるかもしれません。')
+  if (lowUpload) messages.push('アップロードが遅めです。大きなファイルの送信に時間がかかるかもしれません。')
+  if (highPing) messages.push('反応が遅めです。オンラインゲームや通話で遅れを感じるかもしれません。')
+  if (poorLoadedLatency) messages.push('通信中に反応が大きく遅くなります。ほかの通信と重なると、Web会議やゲームで遅れを感じるかもしれません。')
 
   return {
     status: messages.length > 1 ? 'limited' : 'notice',
-    title: messages.length > 1 ? '複数の測定値が低めです' : '確認したい測定値があります',
+    title: messages.length > 1 ? '低めの値があります' : '気になる値があります',
     message: messages.join(' '),
     suggestions: ['別の時間帯でも測定して比較する', '体感と異なる場合は別端末でも測定する'],
   }
