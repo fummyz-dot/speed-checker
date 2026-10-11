@@ -4433,3 +4433,33 @@ body {
     display: none;
   }
 }
+
+/* Where this download sits among recent runs, computed in the browser. */
+.speed-display__position {
+  grid-column: 1 / -1;
+  margin: 2px 0 0;
+  color: var(--text);
+  font-size: 0.85rem;
+  font-weight: 700;
+  line-height: 1.6;
+}
+
+.speed-display__position span {
+  display: block;
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-weight: 400;
+}
+
+@media (max-width: 760px) {
+  /* The memo is optional; on phones its explanation stays out of the way until editing. */
+  .hero__controls .measurement-condition:not(:has(.measurement-condition__editor)) .measurement-condition__description {
+    display: none;
+  }
+}
+
+.speed-display__position b {
+  display: inline-block;
+  color: var(--led);
+  white-space: nowrap;
+}
