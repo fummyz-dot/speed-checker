@@ -358,3 +358,14 @@ The browser must never calculate Net Speed Score or contain its coefficients. It
 - Guide, trust, ranking and Lab pages were cut by about a quarter overall. Definitions, thresholds, worked examples, tables, links and one honest caveat per page remain (the static-page tests pin these). Privacy policy, terms and contact are unchanged.
 - The "do not claim a root cause" invariant still holds; it is stated once where it matters instead of repeatedly.
 
+---
+
+## D-026 — Real-time use cases respect in-use latency
+
+**Status:** Accepted and implemented locally; not deployed
+**Date:** 2026-10-11
+
+- When the loaded-latency evaluation is 'poor' (「要注意」), Web会議 and オンラインゲーム are capped one level below comfortable, with the reason shown, and the measurement comment is no longer 「良好です」 but names the in-use slowdown.
+- 'notice' does not change the use cases. Browsing, video and file upload stay speed-based.
+- This removes the contradiction where one screen said both 「Web会議には十分」 and 「通信中に反応が大きく遅くなります」. Thresholds themselves are unchanged.
+

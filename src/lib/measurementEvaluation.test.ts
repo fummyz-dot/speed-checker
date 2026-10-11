@@ -139,3 +139,35 @@ describe('generateMeasurementComment', () => {
     expect(comments.map((comment) => comment.message).join(' ')).not.toContain(prohibited)
   })
 })
+
+describe('通信中の反応が「要注意」のとき', () => {
+  const withLoaded = (downloadLoadedLatencyMs: number, uploadLoadedLatencyMs: number) => ({
+    ...result(168, 108, 6), downloadLoadedLatencyMs, uploadLoadedLatencyMs,
+  })
+
+  it('Web会議とゲームを快適から1段階下げ、理由を示す', () => {
+    const evaluations = evaluateUseCases(withLoaded(115, 586))
+    expect(evaluations[2]).toMatchObject({ id: 'meeting', level: 'available', reason: '通信中に反応が大きく遅くなるため、1段階下げています。' })
+    expect(evaluations[3]).toMatchObject({ id: 'gaming', level: 'available', reason: '通信中に反応が大きく遅くなるため、1段階下げています。' })
+  })
+
+  it('速度だけで決まる用途は変えない', () => {
+    const evaluations = evaluateUseCases(withLoaded(115, 586))
+    expect(evaluations.filter(({ id }) => id !== 'meeting' && id !== 'gaming').map(({ level }) => level))
+      .toEqual(['comfortable', 'comfortable', 'comfortable'])
+  })
+
+  it('「注意」程度の遅れでは下げない', () => {
+    const evaluations = evaluateUseCases(withLoaded(40, 60))
+    expect(evaluations[2].level).toBe('comfortable')
+    expect(evaluations[3].level).toBe('comfortable')
+  })
+
+  it('結果コメントを「良好」にせず、通信中の遅れを伝える', () => {
+    const comment = generateMeasurementComment(withLoaded(115, 586))
+    expect(comment.status).toBe('notice')
+    expect(comment.message).toContain('通信中に反応が大きく遅くなります')
+    expect(generateMeasurementComment(withLoaded(40, 60)).status).toBe('good')
+  })
+})
+

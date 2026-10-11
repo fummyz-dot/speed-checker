@@ -3,6 +3,7 @@ import type {
   SpeedMeasurementResult,
   UseCaseEvaluationResult,
 } from '../types/measurement'
+import { evaluateLoadedLatencyResponsiveness } from './loadedLatencyEvaluation'
 import { toValidMetric } from './measurementValidation'
 import { formatFinalSpeedDisplay } from './speedValue'
 import { formatMilliseconds } from '../utils/formatMetric'
@@ -37,6 +38,22 @@ export const EVALUATION_LABELS: Record<EvaluationLevel, string> = {
 }
 
 type MeasurementInput = Partial<SpeedMeasurementResult>
+
+/**
+ * Real-time uses (meetings, games) suffer when responses slow down sharply during transfers.
+ * When that in-use slowdown is 'poor', those uses are capped one level below comfortable.
+ */
+const hasPoorLoadedLatency = (result: MeasurementInput): boolean =>
+  evaluateLoadedLatencyResponsiveness({
+    idleLatencyMs: result.pingMs,
+    downloadLoadedLatencyMs: result.downloadLoadedLatencyMs,
+    uploadLoadedLatencyMs: result.uploadLoadedLatencyMs,
+  }).overall === 'poor'
+
+const LOADED_LATENCY_REASON = '通信中に反応が大きく遅くなるため、1段階下げています。'
+
+const capForLoadedLatency = (level: EvaluationLevel, poor: boolean): EvaluationLevel =>
+  poor && level === 'comfortable' ? 'available' : level
 
 const basicLevel = (
   value: number,
@@ -184,6 +201,11 @@ export const evaluateUseCases = (
     },
   ])
   const noPingNote = ping === null ? ' Pingが取れなかったため速度のみで判定。' : ''
+  const poorLoadedLatency = hasPoorLoadedLatency(result)
+  const cappedMeetingLevel = meetingLevel === null ? null : capForLoadedLatency(meetingLevel, poorLoadedLatency)
+  const cappedGamingLevel = gamingLevel === null ? null : capForLoadedLatency(gamingLevel, poorLoadedLatency)
+  const realtimeReason = (level: EvaluationLevel | null, capped: EvaluationLevel | null, reason: string | undefined) =>
+    level !== capped ? LOADED_LATENCY_REASON : reason === undefined ? undefined : reason + noPingNote
 
   return [
     browsingLevel === null ? unavailable('browsing', 'Web閲覧・SNS') : {
@@ -194,12 +216,12 @@ export const evaluateUseCases = (
       id: 'video', label: '動画視聴', level: videoLevel, reason: videoReason,
       detail: videoLevel === 'available' ? '画質によっては利用可能' : '動画再生の目安',
     },
-    meetingLevel === null ? unavailable('meeting', 'Web会議') : {
-      id: 'meeting', label: 'Web会議', level: meetingLevel, reason: meetingReason === undefined ? undefined : meetingReason + noPingNote,
+    cappedMeetingLevel === null ? unavailable('meeting', 'Web会議') : {
+      id: 'meeting', label: 'Web会議', level: cappedMeetingLevel, reason: realtimeReason(meetingLevel, cappedMeetingLevel, meetingReason),
       detail: ping === null ? '速度を基にした参考評価' : '送受信速度と応答時間の目安',
     },
-    gamingLevel === null ? unavailable('gaming', 'オンラインゲーム') : {
-      id: 'gaming', label: 'オンラインゲーム', level: gamingLevel, reason: gamingReason === undefined ? undefined : gamingReason + noPingNote,
+    cappedGamingLevel === null ? unavailable('gaming', 'オンラインゲーム') : {
+      id: 'gaming', label: 'オンラインゲーム', level: cappedGamingLevel, reason: realtimeReason(gamingLevel, cappedGamingLevel, gamingReason),
       detail: ping === null ? '速度のみの参考評価' : '速度と応答時間の目安',
     },
     fileLevel === null ? unavailable('file-upload', '大容量ファイル送信') : {
@@ -236,8 +258,9 @@ export const generateMeasurementComment = (
   const lowDownload = download < 25
   const lowUpload = upload < 5
   const highPing = ping !== null && ping > 80
+  const poorLoadedLatency = hasPoorLoadedLatency(result)
 
-  if (!lowDownload && !lowUpload && !highPing) {
+  if (!lowDownload && !lowUpload && !highPing && !poorLoadedLatency) {
     return {
       status: 'good',
       title: '良好です',
@@ -250,6 +273,7 @@ export const generateMeasurementComment = (
   if (lowDownload) messages.push('ダウンロードが遅めです。高画質動画や大きなファイルの取得に時間がかかるかもしれません。')
   if (lowUpload) messages.push('アップロードが遅めです。大きなファイルの送信に時間がかかるかもしれません。')
   if (highPing) messages.push('反応が遅めです。オンラインゲームや通話で遅れを感じるかもしれません。')
+  if (poorLoadedLatency) messages.push('通信中に反応が大きく遅くなります。ほかの通信と重なると、Web会議やゲームで遅れを感じるかもしれません。')
 
   return {
     status: messages.length > 1 ? 'limited' : 'notice',
