@@ -91,7 +91,7 @@ export const ShareResultButton = ({ result, evaluations, ranking = null }: Share
     <section className="share-result" aria-labelledby="share-title">
       <div className="share-result__heading">
         <h3 id="share-title">測定結果をシェア</h3>
-        <p>1200×630pxのPNGをブラウザ内で生成します。個人情報は含みません。</p>
+        <p>画像に個人情報は含まれません。</p>
       </div>
       <div className="share-result__actions">
         <button className="share-button share-button--primary" type="button" onClick={copyImage} disabled={isCopyingImage}>

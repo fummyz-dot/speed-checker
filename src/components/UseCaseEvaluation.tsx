@@ -16,7 +16,7 @@ export const UseCaseEvaluation = ({ evaluations }: UseCaseEvaluationProps) => (
   <section className="result-panel" aria-labelledby="evaluation-title">
     <div className="result-panel__heading">
       <div>
-        <h3 id="evaluation-title">用途別の参考評価</h3>
+        <h3 id="evaluation-title">用途別の目安</h3>
       </div>
     </div>
     <div className="evaluation-grid">
@@ -25,7 +25,7 @@ export const UseCaseEvaluation = ({ evaluations }: UseCaseEvaluationProps) => (
           <span className="evaluation-card__symbol" aria-hidden="true">{levelSymbols[evaluation.level]}</span>
           <h4>{evaluation.label}</h4>
           <strong>{EVALUATION_LABELS[evaluation.level]}</strong>
-          <p>{evaluation.reason ?? evaluation.detail}</p>
+          {evaluation.level !== 'comfortable' && <p>{evaluation.reason ?? evaluation.detail}</p>}
           {evaluation.id === 'meeting' && (
             <a className="result-guide-link" href="/video-call/">Web会議の判定基準を見る</a>
           )}
@@ -35,6 +35,6 @@ export const UseCaseEvaluation = ({ evaluations }: UseCaseEvaluationProps) => (
         </article>
       ))}
     </div>
-    <p className="result-note">用途別評価は今回の測定値を基にした目安です。実際の品質は、利用サービス、時間帯、通信経路、端末などによって変わります。</p>
+    <p className="result-note">今回の測定値から見た目安です。</p>
   </section>
 )

@@ -47,22 +47,22 @@ const parsePage = (path: string): Document =>
 
 // Protected content fingerprints from add7746 (privacy updated for Web Analytics in D-021): only decorative eyebrows are excluded.
 const editorialContentBaseline: Record<string, string> = {
-  'about': 'b667d3a3f807496bfb7f70ba765a2b9f36cb2f5937351826008c13bfe7233236',
-  'methodology': '13d7e0ba659be6f74a213c0a3906b8147e60d2b0afbce73bc8bdae04801ba7c9',
+  'about': '545d982e40850d643323fc872c9f99b5f537cc997c2b4963e3eb07059977f869',
+  'methodology': '75b4768d57b958dbe6e0f5f5419908d59524fe6fe26ee935ab60abac539d0c6d',
   'privacy': '9fb61b82a14acdc03d9b95044b6e3fed0b814305a57b33d815604dac06873257',
   'contact': 'b48a14a82c282e18a3c19023c0355ff530f8ac3e2ed13bc437e968d249e369f0',
   'terms': '8fba8db5d2d0b9b0c1b6e01a48ec680f62fae5046dd934e3bc9f5b777d8e47c2',
-  'guide': '64590b2e36327d9679c8a3132c6b449195614123794f44e54853ec1306b035da',
-  'internet-speed': '78120b5f461ba6f0f7f883ab5128244e871ba5432b5625f8e98a41e08447a755',
-  'ping': '79bea22a949f9564a7e3ca6012a5201d3b71b6e631c435ca17d9dab4592fe1f7',
-  'jitter': 'df5dc8156cfd107cd561d8f79bff35e72fd3cd8171c7d606ebdd0d53eaa7864b',
-  'loaded-latency': '61aa200353b765889090fcc2beeb417ea1ac2a38b12a357d78f118c3a0c352c2',
-  'wifi-slow': '4753ee1da63cb0386928e074211056ae22ff84b0783b64c01bdf7768f039c3da',
-  'gaming': '971f637a431a5a4f48b8737e07fc45320d82c7d7970fbe715b169b919a66b01b',
-  'video-call': '30497748bcb6ac914e2a70ae21d103adaf63e831a5fa60a67d1f7879683b92d6',
-  'internet-slow-at-night': 'd14777a1bef07124bb0fe236f341ae48731cccc1c510ca1b53d5e985aaa2f3e2',
-  'ranking': '1d4473adee602288aca6462613d9871678bfe9b5f04d5e182a3c7686d1a11729',
-  'lab/ping-jitter-14-runs': '13893aab621aaef1e1a33642f4e27cbb7724c35accc98ef4d85ff40f5d141c61',
+  'guide': '2c1f64d26fd9b1d48a5727b54a3aba3c15312a2cc44b8bc23802a767a78a5cfb',
+  'internet-speed': '6e50e03e45ccdd45d7a8e0b453fe9a29718399df3b8ca231a0cd5a4058040752',
+  'ping': '1434d9e530c029e289e97fb35d883aef7846f5a821c711f7e25d2413cbd61755',
+  'jitter': '1d9b7ada546a2b56364f74eed8bfea8caf3dfe44f46dd878c9596dcfe6a9d29d',
+  'loaded-latency': 'f28d4e0540c08be221bf8cffba72059bb071dfc54ac0fd53a8063e0e92d9331c',
+  'wifi-slow': 'a0f3309173290208e815048a1a0594f14f5bf7ae5dc46a78d046d83a241c2865',
+  'gaming': 'f096441ae6448202cc205599f6ac7a0ca2c4c1dcf8c678cfc2961c3c6a2ba4a7',
+  'video-call': 'f346be6707edc74f01f9406ea01a29645d6ba2b56775569e9ed4df5ea66b6fdc',
+  'internet-slow-at-night': '9562db33f4e707a24e3c0c73b8e367a41be65af76573145a2c764eef3f3f495f',
+  'ranking': 'ad41d1dd292e135c3c54a5d766603cc84e53480d25ed81e8a00fe37f9c294ad9',
+  'lab/ping-jitter-14-runs': 'b1e210d670f6890e9cf8a61bf874fd1143b6e8154db83f2c63a27414abde4522',
 }
 
 // Supplied observations only; aggregate values are calculated from these rounded inputs.

@@ -11,8 +11,7 @@ describe('static homepage HTML', () => {
     const link = lab?.querySelector('a')
 
     expect(lab?.querySelector('h2')?.textContent).toBe('実測Lab')
-    expect(lab?.textContent).toContain('Net Speed Raceで実際に測定したデータを公開')
-    expect(lab?.textContent).toContain('14回の実測・生データCSV公開・グラフと集計付き。')
+    expect(lab?.textContent).toContain('実測データとグラフを公開しています。')
     expect(link?.getAttribute('href')).toBe('/lab/ping-jitter-14-runs/')
     expect(link?.hasAttribute('onclick')).toBe(false)
     expect(serviceInfo?.compareDocumentPosition(lab as Node)).toBe(Node.DOCUMENT_POSITION_FOLLOWING)
@@ -37,7 +36,7 @@ describe('static homepage HTML', () => {
     expect(footer).not.toBeNull()
     expect(staticContent?.textContent).toContain('Net Speed Raceとは')
     expect(staticContent?.textContent).toContain('Net Speed Score')
-    expect(staticContent?.textContent).toContain('通信品質の公式規格ではなく')
+    expect(staticContent?.textContent).toContain('独自スコア')
 
     const serviceLinks = [
       ['全国ランキングを見る', '/ranking/'],

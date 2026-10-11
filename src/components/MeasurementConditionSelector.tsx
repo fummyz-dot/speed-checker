@@ -66,7 +66,7 @@ export const MeasurementConditionSelector = ({
         </button>
       </div>
       <p className="measurement-condition__description">
-        Wi-Fi／有線、部屋、時間帯などをメモして測定を重ねると、条件別の中央値を比較できます。
+        Wi-Fi／有線や部屋をメモしておくと、条件ごとに結果を比べられます。
       </p>
 
       {isEditing && (

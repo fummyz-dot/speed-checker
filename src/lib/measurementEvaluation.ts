@@ -76,7 +76,7 @@ const reasonForLevel = (level: EvaluationLevel, factors: ReasonFactor[]): string
       ? `${factors.map(describeFactor).join('・')} は快適の参考目安を満たしています。`
       : undefined
   }
-  return `${describeFactor(limitingFactor, limitingFactor[target])} が${target === 'comfortable' ? '快適' : '利用可能'}の参考目安（${limitingFactor[target]} ${limitingFactor.unit}${limitingFactor.maximum ? '以下' : '以上'}）を${limitingFactor.maximum ? '超えています' : '下回っています'}。`
+  return `${describeFactor(limitingFactor, limitingFactor[target])}（${target === 'comfortable' ? '快適' : '利用可能'}の目安は${limitingFactor[target]} ${limitingFactor.unit}${limitingFactor.maximum ? '以下' : '以上'}）`
 }
 
 export const evaluateUseCases = (
@@ -183,7 +183,7 @@ export const evaluateUseCases = (
       available: EVALUATION_THRESHOLDS.gaming.availableUpload,
     },
   ])
-  const noPingNote = ping === null ? ' Ping未取得のため速度のみの参考評価です。' : ''
+  const noPingNote = ping === null ? ' Pingが取れなかったため速度のみで判定。' : ''
 
   return [
     browsingLevel === null ? unavailable('browsing', 'Web閲覧・SNS') : {
@@ -227,8 +227,8 @@ export const generateMeasurementComment = (
   if (download === null || upload === null || pingInvalid) {
     return {
       status: 'unknown',
-      title: '十分な評価ができませんでした',
-      message: '一部の測定値を取得できなかったため、十分な評価ができませんでした。時間を置いて再測定してください。',
+      title: '評価できませんでした',
+      message: '一部の値を取得できませんでした。もう一度測定してください。',
       suggestions: ['同じ場所でもう一度測定する'],
     }
   }
@@ -240,20 +240,20 @@ export const generateMeasurementComment = (
   if (!lowDownload && !lowUpload && !highPing) {
     return {
       status: 'good',
-      title: '今回の測定値は良好です',
-      message: '今回の測定値では、一般的なWeb閲覧、動画視聴、Web会議で明確な不足は見当たりません。',
+      title: '良好です',
+      message: 'Web閲覧、動画、Web会議には十分な結果です。',
       suggestions: ['別の時間帯でも測定して比較する'],
     }
   }
 
   const messages: string[] = []
-  if (lowDownload) messages.push('ダウンロード速度が低めです。高画質動画や大容量ダウンロードでは時間がかかる可能性があります。')
-  if (lowUpload) messages.push('アップロード速度が低めです。大容量ファイルの送信やクラウド保存では時間がかかる可能性があります。')
-  if (highPing) messages.push('応答時間が長めです。オンラインゲームやリアルタイム通話では遅延を感じる可能性があります。')
+  if (lowDownload) messages.push('ダウンロードが遅めです。高画質動画や大きなファイルの取得に時間がかかるかもしれません。')
+  if (lowUpload) messages.push('アップロードが遅めです。大きなファイルの送信に時間がかかるかもしれません。')
+  if (highPing) messages.push('反応が遅めです。オンラインゲームや通話で遅れを感じるかもしれません。')
 
   return {
     status: messages.length > 1 ? 'limited' : 'notice',
-    title: messages.length > 1 ? '複数の測定値が低めです' : '確認したい測定値があります',
+    title: messages.length > 1 ? '低めの値があります' : '気になる値があります',
     message: messages.join(' '),
     suggestions: ['別の時間帯でも測定して比較する', '体感と異なる場合は別端末でも測定する'],
   }

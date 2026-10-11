@@ -23,33 +23,33 @@
     </ul></nav></div></header>
     <main class="site-pages__main" id="main-content"><article class="site-pages__article">
       <h1>Pingとは？応答速度の見方</h1>
-      <p class="site-pages__lead">Pingは、通信の往復応答にかかる時間を確認するための指標です。回線速度と同じく大切ですが、Mbpsとは別のものです。</p>
+      <p class="site-pages__lead">Pingは、通信の往復にかかる時間です。Mbps（回線速度）とは別の指標です。</p>
       <p class="site-pages__article-meta"><span>運営・編集: Net Speed Race</span><span>最終更新: 2026年9月9日</span></p>
-      <p class="site-pages__note"><a href="/methodology/">測定方法について</a>と<a href="/about/">このサイトについて</a>で、測定の範囲を確認できます。</p>
+      <p class="site-pages__note">測定の範囲は<a href="/methodology/">測定方法について</a>と<a href="/about/">このサイトについて</a>で確認できます。</p>
       <a class="site-pages__article-cta" href="/">今の回線品質を測定する</a>
 
       <h2>Ping / latencyの基本</h2>
-      <p>Pingはlatency（レイテンシ、遅延時間）をms（ミリ秒）で表したものです。小さいほど往復応答にかかる時間が短いことを示します。DownloadやUploadが高速でも、Pingが必ず低いとは限りません。</p>
+      <p>Pingはlatency（レイテンシ、遅延時間）をms（ミリ秒）で表した値です。小さいほど応答が速いことを示します。</p>
       <h2>回線速度とは別の指標</h2>
-      <p>Mbpsはデータをどれだけ送受信できるか、Pingは通信先から応答が戻るまでの時間をみる指標です。通信先、経路、距離、混雑などによって変わり得ます。Pingが高い結果だけから、ルーターやWi-Fi、ISPのどれが原因かを断定することはできません。</p>
+      <p>Mbpsは送受信できるデータ量、Pingは応答が戻るまでの時間です。DownloadやUploadが速くてもPingが低いとは限らず、Pingは通信先、経路、距離、混雑などで変わります。</p>
       <h2>Net Speed Raceのidle latency</h2>
-      <p>Net Speed Raceで表示するPingは、回線が空いている状態で測るidle latencyです。ゲーム内のPingはゲームのサーバーなど別の相手との通信を測るため、ブラウザ測定のPingと同じ値になるとは限りません。</p>
+      <p>Net Speed RaceのPingは、回線が空いている状態で測るidle latencyです。ゲーム内のPingはゲームサーバーなど別の相手との通信なので、値は一致しないことがあります。</p>
       <h2>Cloudflare Edge RTTとの違い</h2>
-      <p>接続情報に表示されるCloudflare Edge RTTは、Cloudflareが観測するブラウザとCloudflare Edge間のtransport RTTです。通常のPingとは別指標で、速度測定の評価には使いません。双方を同じ意味の数値として比較しないようにしてください。</p>
+      <p>接続情報のCloudflare Edge RTTは、Cloudflareが観測するブラウザとCloudflare Edge間のtransport RTTです。Pingとは別の指標で、速度測定の評価には使いません。</p>
       <h2>Jitter・Loaded latencyとの違い</h2>
-      <p>Jitterは応答時間のばらつき、Loaded latencyは通信中に応答時間がどの程度変わるかを見るための値です。Pingが一度低くても、これらが常に同じ傾向になるわけではありません。複数回、条件を変えて比べると状況を確認しやすくなります。</p>
+      <p>Jitterは応答時間のばらつき、Loaded latencyは通信中の応答時間の変化を見る値です。どちらもPingとは別に確認します。</p>
 
       <section aria-labelledby="ping-example-title">
         <h2 id="ping-example-title">測定結果をどう読む？具体例</h2>
-        <p>以下は数値の読み方を示す説明用の測定例であり、実際の利用者から収集した統計ではありません。</p>
+        <p>以下は読み方を示す説明用の例で、実際の利用者の統計ではありません。</p>
         <div class="site-pages__table-wrap"><table class="site-pages__table">
           <thead><tr><th scope="col">測定</th><th scope="col">Download</th><th scope="col">Upload</th><th scope="col">Ping</th><th scope="col">Jitter</th></tr></thead>
           <tbody><tr><th scope="row">測定A</th><td>520 Mbps</td><td>110 Mbps</td><td>9 ms</td><td>2 ms</td></tr><tr><th scope="row">測定B</th><td>505 Mbps</td><td>108 Mbps</td><td>34 ms</td><td>7 ms</td></tr></tbody>
         </table></div>
-        <p>DownloadとUploadは近い値ですが、idle latencyとして表示されるPingは9 msと34 msで異なります。このように、Mbpsだけを見ても応答性の差は分かりません。Jitterも2 msと7 msなので、応答時間のばらつきを一緒に見ることで安定性の違いも確認できます。</p>
-        <p>この1回ずつの結果だけで、違いが生じた原因を確定することはできません。同じ場所・端末・接続方法で複数回測り、Download、Upload、Ping、Jitter、Loaded Latencyを並べて比較してください。Cloudflare Edge RTTはPingとは別の接続情報なので、この比較のPingとして置き換える値ではありません。</p>
+        <p>DownloadとUploadはほぼ同じでも、idle latencyのPingは9 msと34 ms、Jitterは2 msと7 msで違います。Mbpsだけでは応答性や安定性の差は分かりません。</p>
+        <p>この1回ずつの結果だけで、原因を確定することはできません。同じ場所・端末・接続方法で複数回測り、Download、Upload、Ping、Jitter、Loaded Latencyを並べて比べてください（Cloudflare Edge RTTはこの比較に使いません）。</p>
       </section>
-      <p>実際の変動は、<a href="/lab/ping-jitter-14-runs/">同じ条件ラベルで14回測った実測レポート</a>で、Ping・Jitter・通信中の応答時間を並べて確認できます。</p>
+      <p>実際の変動は<a href="/lab/ping-jitter-14-runs/">同じ条件ラベルで14回測った実測レポート</a>で確認できます。</p>
       <section class="site-pages__related" aria-labelledby="ping-related-title"><h2 id="ping-related-title">関連ガイド</h2><ul>
         <li><a href="/jitter/">ジッターとは</a></li><li><a href="/loaded-latency/">混雑時の応答性とは</a></li><li><a href="/internet-speed/">回線速度の見方</a></li><li><a href="/guide/">回線品質ガイド</a></li>
       </ul></section><a class="site-pages__article-cta" href="/">今の回線品質を測定する</a>

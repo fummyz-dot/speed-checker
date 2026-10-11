@@ -97,7 +97,7 @@ describe('App', () => {
     expect(summary).toHaveTextContent('Wi-Fiと有線、部屋、時間帯の違い')
     expect(screen.getByRole('heading', { name: '比較条件（任意）' })).toBeVisible()
     expect(document.getElementById('measurement-condition-edit')).toBe(screen.getByRole('button', { name: '入力' }))
-    expect(screen.getByText('Wi-Fi／有線、部屋、時間帯などをメモして測定を重ねると、条件別の中央値を比較できます。')).toBeVisible()
+    expect(screen.getByText('Wi-Fi／有線や部屋をメモしておくと、条件ごとに結果を比べられます。')).toBeVisible()
     expect(screen.getByRole('heading', { name: '回線速度レース' })).toBeVisible()
     expect(container.querySelector('.horse-course')).toHaveAttribute('data-animation-state', 'idle')
     expect(screen.queryByRole('heading', { name: '本日の全国回線品質ランキング' })).not.toBeInTheDocument()
@@ -158,7 +158,7 @@ describe('App', () => {
 
     const { rerender } = render(<App />)
     expect(screen.getByText('全国ランキング開催中')).toBeVisible()
-    expect(screen.getByText(/ミニゲーム「Net Speed Run」にも挑戦できます。/)).toBeVisible()
+    expect(screen.getByText(/ミニゲーム「Net Speed Run」が待っています。/)).toBeVisible()
     expect(document.querySelector('.hero__intro--with-ranking')).toBeInTheDocument()
     expect(document.querySelector('.hero__intro-copy')).toBeInTheDocument()
     expect(document.querySelectorAll('.hero-ranking-promo')).toHaveLength(1)
@@ -198,9 +198,7 @@ describe('App', () => {
     expect(screen.getByRole('button', { name: '全国ランキングに参加して順位を見る', hidden: true })).toBeEnabled()
     expect(within(measurementResults as HTMLElement).queryByText('NET SPEED RUN'))
       .not.toBeInTheDocument()
-    expect(within(measurementResults as HTMLElement).getByRole('heading', { name: '次に試すこと', hidden: true })).toBeInTheDocument()
-    expect(within(measurementResults as HTMLElement).getByRole('link', { name: '実測14回でPing・Jitterの変動を見る', hidden: true }))
-      .toHaveAttribute('href', '/lab/ping-jitter-14-runs/')
+    expect(within(measurementResults as HTMLElement).queryByRole('heading', { name: '次に試すこと', hidden: true })).not.toBeInTheDocument()
 
     fireEvent.click(screen.getByRole('button', {
       name: '全国ランキングに参加して順位を見る', hidden: true,

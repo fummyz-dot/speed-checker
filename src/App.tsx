@@ -219,7 +219,7 @@ function App() {
           <p className="speed-display__position" role="status">
             {formatDownloadPositionParts(downloadPosition)[0]}
             <b>{formatDownloadPositionParts(downloadPosition)[1]}</b>
-            {rankingEnabled && <span>総合の順位は、下のランキングに参加すると確認できます。</span>}
+            {rankingEnabled && <span>総合順位は下のランキングで確認できます。</span>}
           </p>
         )}
       </div>
@@ -239,8 +239,8 @@ function App() {
           {isConditionEditing
             ? '比較条件を確定またはキャンセルしてください'
             : hasStarted
-            ? 'Wi-Fiや回線の状態により、結果は変動します'
-            : '測定には数十秒かかる場合があります'}
+            ? '結果は時間帯や接続方法で変わります'
+            : '測定は数十秒で終わります'}
         </p>
 
         {error && (
@@ -293,7 +293,7 @@ function App() {
                 <div className="hero-ranking-promo">
                   <div className="hero-ranking-promo__copy">
                     <strong>全国ランキング開催中</strong>
-                    <span>測定後に参加すると今日の順位がわかり、スコアで持ち時間が決まるミニゲーム「Net Speed Run」にも挑戦できます。</span>
+                    <span>測定後に参加すると、今日の順位とミニゲーム「Net Speed Run」が待っています。</span>
                   </div>
                 </div>
               )}
