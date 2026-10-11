@@ -22,6 +22,14 @@ describe('CompletedMeasurement history', () => {
 
   afterEach(() => vi.restoreAllMocks())
 
+  it('初回の測定では、比較対象がない履歴パネルを表示しない', () => {
+    render(<CompletedMeasurement result={measurement('first')} />)
+
+    expect(screen.queryByRole('heading', { name: '前回測定との比較' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('heading', { name: '測定履歴' })).not.toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '測定結果をシェア' })).toBeInTheDocument()
+  })
+
   it('測定完了結果だけではNet Speed Runの起動導線を表示しない', () => {
     render(<CompletedMeasurement result={{ ...measurement('current'), jitterMs: 5 }} />)
 
@@ -112,11 +120,11 @@ describe('CompletedMeasurement history', () => {
     fireEvent.click(screen.getByRole('button', { name: '履歴を削除' }))
 
     await waitFor(() => {
-      expect(screen.getByText('あと1回以上測定すると、回線品質の変化を確認できます。')).toBeVisible()
+      expect(screen.queryByRole('heading', { name: '前回測定との比較' })).not.toBeInTheDocument()
     })
+    expect(screen.queryByRole('heading', { name: '測定履歴' })).not.toBeInTheDocument()
     expect(screen.queryByRole('heading', { name: '速度の推移' })).not.toBeInTheDocument()
     expect(screen.queryByRole('heading', { name: '測定条件ごとの傾向' })).not.toBeInTheDocument()
-    expect(screen.getAllByText('未測定')).toHaveLength(4)
     expect(loadMeasurements()).toEqual([])
   })
 })

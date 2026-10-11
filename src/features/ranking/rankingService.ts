@@ -1,6 +1,7 @@
 import type { SpeedMeasurementResult } from '../../types/measurement'
 import type { RaceChampionReference } from '../../types/raceChampion'
 import type {
+  DownloadDistribution,
   RankingContext,
   RankingOverviewPreview,
   RankingService,
@@ -84,6 +85,24 @@ const parseContext = (value: unknown): RankingContext => {
   }
 }
 
+// Optional and additive: an absent or malformed distribution must never break the overview.
+const parseDownloadDistribution = (value: unknown): DownloadDistribution | null => {
+  if (!isRecord(value)
+    || !isPositiveSafeInteger(value.windowDays)
+    || !isPositiveSafeInteger(value.totalRuns)
+    || !Array.isArray(value.decilesTenths)
+    || value.decilesTenths.length !== 9
+    || !value.decilesTenths.every(isNonNegativeSafeInteger)
+    || value.decilesTenths.some((cut, index, cuts) => index > 0 && cut < (cuts[index - 1] as number))) {
+    return null
+  }
+  return {
+    windowDays: value.windowDays,
+    totalRuns: value.totalRuns,
+    decilesTenths: [...value.decilesTenths] as number[],
+  }
+}
+
 const parseOverview = (value: unknown): RankingOverviewPreview => {
   if (!isRecord(value)
     || value.ok !== true
@@ -105,6 +124,7 @@ const parseOverview = (value: unknown): RankingOverviewPreview => {
       rank: (entry as Record<string, unknown>).rank as number,
       scoreTenths: (entry as Record<string, unknown>).scoreTenths as number,
     })),
+    downloadDistribution: parseDownloadDistribution(value.downloadDistribution),
   }
 }
 

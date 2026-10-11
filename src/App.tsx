@@ -12,6 +12,8 @@ import { useSpeedTest } from './hooks/useSpeedTest'
 import { RankingCard } from './features/ranking/RankingCard'
 import { isRankingEnabled } from './features/ranking/rankingFeature'
 import { useRanking } from './features/ranking/useRanking'
+import { useDownloadPosition } from './features/ranking/useDownloadPosition'
+import { formatDownloadPositionParts } from './lib/downloadPosition'
 import { consumeRunReturnContext } from './features/run/runReturnContext'
 import {
   bandwidthBitsToMbps,
@@ -50,6 +52,10 @@ function App() {
     service: rankingService,
     prepareMeasurement,
   } = useRanking(rankingEnabled)
+  const downloadPosition = useDownloadPosition(
+    rankingEnabled ? rankingService : null,
+    phase === 'complete' ? completedResult : null,
+  )
   const isMobileLayout = useMediaQuery('(max-width: 760px)')
   const [conditionLabel, setConditionLabel] = useState<string | null>(getInitialConditionLabel)
   const [isConditionEditing, setIsConditionEditing] = useState(false)
@@ -209,6 +215,13 @@ function App() {
           <strong>{displayedDownload}</strong>
           <span>Mbps</span>
         </div>
+        {downloadPosition && (
+          <p className="speed-display__position" role="status">
+            {formatDownloadPositionParts(downloadPosition)[0]}
+            <b>{formatDownloadPositionParts(downloadPosition)[1]}</b>
+            {rankingEnabled && <span>総合の順位は、下のランキングに参加すると確認できます。</span>}
+          </p>
+        )}
       </div>
 
       <div className="measurement-actions">

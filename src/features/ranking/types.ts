@@ -29,11 +29,20 @@ export type RankingRunAccess =
       reason: 'SERVICE_UNAVAILABLE'
     }
 
+/** Aggregate download cut points over recent days, published by the private ranking service. */
+export interface DownloadDistribution {
+  windowDays: number
+  totalRuns: number
+  /** Ascending Download Mbps x10 at 10%, 20%, ..., 90%. */
+  decilesTenths: number[]
+}
+
 export interface RankingOverviewPreview {
   ok: true
   rankingDay: string
   totalRuns: number
   top3: RankingTopEntry[]
+  downloadDistribution: DownloadDistribution | null
 }
 
 export interface RankingSubmissionResult {

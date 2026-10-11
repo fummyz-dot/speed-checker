@@ -139,6 +139,9 @@ describe('App', () => {
           { rank: 2, scoreTenths: 7594 },
           { rank: 3, scoreTenths: 7110 },
         ],
+        downloadDistribution: {
+          windowDays: 30, totalRuns: 120, decilesTenths: [500, 1000, 1500, 2000, 2500, 3000, 3500, 4000, 4500],
+        },
       }),
       submitMeasurement,
     })
@@ -177,6 +180,10 @@ describe('App', () => {
 
     expect(rankingResults).toBeInTheDocument()
     expect(rankingResults?.closest('.hero')).not.toBeNull()
+    await waitFor(() => {
+      expect(document.querySelector('.speed-display__position'))
+        .toHaveTextContent('直近30日の出走120件のうち、下り速度は上位10%以内')
+    })
     expect(within(rankingResults as HTMLElement).getByRole('heading', {
       name: '本日の全国回線品質ランキング', hidden: true,
     })).toBeInTheDocument()

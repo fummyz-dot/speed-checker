@@ -334,3 +334,15 @@ The browser must never calculate Net Speed Score or contain its coefficients. It
 - Static pages, the ranking scoreboard, the share PNG and the OG image (`/og-image-v3.png`) follow the same palette. Page text, SEO metadata, links and Lab source charts are unchanged. Run keeps its own design.
 - Measurement logic, six-decimal live readout, race timing, horse assets, focus mode, history, ranking and Run contracts are unchanged.
 
+---
+
+## D-024 — Show where a download sits among recent runs, and trim one-time clutter
+
+**Status:** Accepted and implemented locally; not deployed
+**Date:** 2026-10-11
+
+- Most visitors measure once, so value must arrive without extra steps. After a completed measurement the tote shows 「直近30日の出走N件のうち、下り速度は上位/下位◯%以内」, with a pointer to join the ranking for the overall rank.
+- The comparison uses Download only, against aggregate cut points published by the private ranking Worker (previous 30 JST days, 20+ runs). It is computed in the browser; the measurement is not sent for it, and Net Speed Score stays server-side (D-012).
+- Bands are 10% wide: at or above the median cut it reads 「上位」, below it 「下位」, so the wording stays truthful in both directions.
+- 「前回測定との比較」 and 「測定履歴」 render only when a previous saved result exists. On phones the condition memo hides its explanation until editing.
+

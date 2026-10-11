@@ -49,7 +49,7 @@ const parsePage = (path: string): Document =>
 const editorialContentBaseline: Record<string, string> = {
   'about': 'b667d3a3f807496bfb7f70ba765a2b9f36cb2f5937351826008c13bfe7233236',
   'methodology': '13d7e0ba659be6f74a213c0a3906b8147e60d2b0afbce73bc8bdae04801ba7c9',
-  'privacy': '74a7fdc0fbd3a2fae3529ebe0b8ea8ed94c122675ffa706ba3779c6a0845bb48',
+  'privacy': '9fb61b82a14acdc03d9b95044b6e3fed0b814305a57b33d815604dac06873257',
   'contact': 'b48a14a82c282e18a3c19023c0355ff530f8ac3e2ed13bc437e968d249e369f0',
   'terms': '8fba8db5d2d0b9b0c1b6e01a48ec680f62fae5046dd934e3bc9f5b777d8e47c2',
   'guide': '64590b2e36327d9679c8a3132c6b449195614123794f44e54853ec1306b035da',

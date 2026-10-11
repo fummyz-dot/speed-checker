@@ -147,8 +147,28 @@ describe('createRankingApiService', () => {
       rankingDay: '2026-08-28',
       totalRuns: 12,
       top3: overviewResponse.top3,
+      downloadDistribution: null,
     })
     expect((fetch.mock.calls[0][1] as RequestInit).body).toBeUndefined()
+  })
+
+  it('parses the optional download distribution', async () => {
+    const downloadDistribution = {
+      windowDays: 30, totalRuns: 120, decilesTenths: [500, 1000, 1500, 2000, 2500, 3000, 3500, 4000, 4500],
+    }
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(jsonResponse({ ...overviewResponse, downloadDistribution })))
+
+    await expect(createRankingApiService().getOverview()).resolves.toMatchObject({ downloadDistribution })
+  })
+
+  it.each([
+    ['too few cut points', { windowDays: 30, totalRuns: 120, decilesTenths: [1, 2, 3] }],
+    ['descending cut points', { windowDays: 30, totalRuns: 120, decilesTenths: [9, 8, 7, 6, 5, 4, 3, 2, 1] }],
+    ['zero runs', { windowDays: 30, totalRuns: 0, decilesTenths: [1, 2, 3, 4, 5, 6, 7, 8, 9] }],
+  ])('ignores a malformed distribution (%s) without failing the overview', async (_caseName, downloadDistribution) => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(jsonResponse({ ...overviewResponse, downloadDistribution })))
+
+    await expect(createRankingApiService().getOverview()).resolves.toMatchObject({ downloadDistribution: null })
   })
 
   it.each([

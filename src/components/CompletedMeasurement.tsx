@@ -55,8 +55,13 @@ export const CompletedMeasurement = ({ result, persistResult = true, ranking = n
       <LoadedLatencyResponsiveness result={result} />
       <UseCaseEvaluation evaluations={evaluations} />
       <MeasurementComment comment={comment} />
-      <PreviousMeasurementComparison current={result} previous={previous} onClear={clearHistory} />
-      <MeasurementHistoryTrend history={history} currentResult={result} />
+      {/* History panels only help once there is something to compare; most visitors measure once. */}
+      {previous && (
+        <>
+          <PreviousMeasurementComparison current={result} previous={previous} onClear={clearHistory} />
+          <MeasurementHistoryTrend history={history} currentResult={result} />
+        </>
+      )}
       <ShareResultButton result={result} evaluations={evaluations} ranking={ranking} />
     </div>
   )
