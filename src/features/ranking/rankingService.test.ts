@@ -292,3 +292,44 @@ describe('createRankingApiService', () => {
     )
   })
 })
+
+describe('fetchRankingEntryResult', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals()
+  })
+
+  const stubFetch = (response: Response) => {
+    const fetchMock = vi.fn(async () => response)
+    vi.stubGlobal('fetch', fetchMock)
+    return fetchMock
+  }
+
+  it('自分の出走IDだけを送り、確定順位を返す', async () => {
+    const { fetchRankingEntryResult } = await import('./rankingService')
+    const fetchMock = stubFetch(new Response(JSON.stringify({
+      ok: true, rankingDay: '2026-10-11', final: true, scoreTenths: 5003, rank: 4, tieCount: 1, totalRuns: 15,
+    })))
+    await expect(fetchRankingEntryResult('measurement-1')).resolves.toEqual({
+      rankingDay: '2026-10-11', final: true, scoreTenths: 5003, rank: 4, tieCount: 1, totalRuns: 15,
+    })
+    const [url, init] = fetchMock.mock.calls[0] as unknown as [string, RequestInit]
+    expect(url).toBe('/api/ranking/result')
+    expect(init.method).toBe('POST')
+    expect(init.credentials).toBe('omit')
+    expect(JSON.parse(init.body as string)).toEqual({ measurementId: 'measurement-1' })
+  })
+
+  it('404はnull、ほかの失敗と不正な応答はエラーにする', async () => {
+    const { fetchRankingEntryResult } = await import('./rankingService')
+    stubFetch(new Response(JSON.stringify({ ok: false, code: 'ENTRY_NOT_FOUND' }), { status: 404 }))
+    await expect(fetchRankingEntryResult('m')).resolves.toBeNull()
+
+    stubFetch(new Response(JSON.stringify({ ok: false, code: 'SERVICE_UNAVAILABLE' }), { status: 503 }))
+    await expect(fetchRankingEntryResult('m')).rejects.toThrow()
+
+    stubFetch(new Response(JSON.stringify({
+      ok: true, rankingDay: '2026-10-11', final: true, scoreTenths: 5003, rank: 16, tieCount: 1, totalRuns: 15,
+    })))
+    await expect(fetchRankingEntryResult('m')).rejects.toThrow()
+  })
+})

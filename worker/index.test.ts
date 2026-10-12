@@ -31,7 +31,7 @@ const createEnv = (runTicketSecret: string | null = RUN_TICKET_TEST_SECRET) => {
 }
 
 const rankingRequest = (
-  pathname: '/api/ranking/context' | '/api/ranking/overview' | '/api/ranking/entries',
+  pathname: '/api/ranking/context' | '/api/ranking/overview' | '/api/ranking/entries' | '/api/ranking/result',
   init: RequestInit = {},
   country: unknown = 'JP',
 ): Request => {
@@ -280,6 +280,56 @@ describe('ranking service proxy', () => {
 
     expect(response.status).toBe(503)
     expect(await response.json()).toEqual({ ok: false, code: 'SERVICE_UNAVAILABLE' })
+  })
+
+  it('result requestはmeasurementIdだけをクライアント情報なしで中継する', async () => {
+    const { env, rankingFetch } = createEnv()
+    const result = { ok: true, rankingDay: '2026-10-11', final: true, scoreTenths: 5003, rank: 4, tieCount: 1, totalRuns: 15 }
+    rankingFetch.mockReturnValue(new Response(JSON.stringify(result), { headers: { 'X-Private-Header': 'hidden' } }))
+
+    const response = await handleRequest(rankingRequest('/api/ranking/result', {
+      method: 'POST',
+      headers: { 'CF-Connecting-IP': '203.0.113.1', Cookie: 'session=secret' },
+      body: JSON.stringify({ measurementId: 'measurement-1' }),
+    }), env)
+    const privateRequest = rankingFetch.mock.calls[0][0] as Request
+
+    expect(privateRequest.url).toBe('https://ranking.internal/internal/ranking/result')
+    expect(privateRequest.method).toBe('POST')
+    expect(await privateRequest.json()).toEqual({ measurementId: 'measurement-1' })
+    expect([...privateRequest.headers.entries()]).toEqual([['content-type', 'application/json']])
+    expect(response.status).toBe(200)
+    expect(await response.json()).toEqual(result)
+    expect(response.headers.get('X-Private-Header')).toBeNull()
+    expect(response.headers.get('Cache-Control')).toBe('private, no-store')
+  })
+
+  it('result requestの余分な項目・不正なbody・GETは中継しない', async () => {
+    const { env, rankingFetch } = createEnv()
+    for (const body of ['{"measurementId":"m","country":"JP"}', '{"measurementId":1}', 'not-json', `{"measurementId":"${'x'.repeat(600)}"}`]) {
+      const response = await handleRequest(rankingRequest('/api/ranking/result', { method: 'POST', body }), env)
+      expect(response.status).toBe(400)
+    }
+    const get = await handleRequest(rankingRequest('/api/ranking/result'), env)
+    expect(get.status).toBe(405)
+    expect(get.headers.get('Allow')).toBe('POST')
+    expect(rankingFetch).not.toHaveBeenCalled()
+  })
+
+  it('result requestのnot foundはそのまま返し、service failureは503にする', async () => {
+    const { env, rankingFetch } = createEnv()
+    rankingFetch.mockReturnValueOnce(new Response(JSON.stringify({ ok: false, code: 'ENTRY_NOT_FOUND' }), { status: 404 }))
+    const notFound = await handleRequest(rankingRequest('/api/ranking/result', {
+      method: 'POST', body: JSON.stringify({ measurementId: 'm' }),
+    }), env)
+    expect(notFound.status).toBe(404)
+    expect(await notFound.json()).toEqual({ ok: false, code: 'ENTRY_NOT_FOUND' })
+
+    rankingFetch.mockImplementation(() => { throw new Error('private failure') })
+    const failed = await handleRequest(rankingRequest('/api/ranking/result', {
+      method: 'POST', body: JSON.stringify({ measurementId: 'm' }),
+    }), env)
+    expect(failed.status).toBe(503)
   })
 
   it('entries requestを国コード付きの許可済みpayloadだけでPrivate Workerへ中継する', async () => {

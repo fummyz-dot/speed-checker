@@ -45,11 +45,11 @@ const readProjectFile = (path: string): string =>
 const parsePage = (path: string): Document =>
   new DOMParser().parseFromString(readPublicFile(`${path}/index.html`), 'text/html')
 
-// Protected content fingerprints from add7746 (privacy updated for Web Analytics in D-021): only decorative eyebrows are excluded.
+// Protected content fingerprints from add7746 (privacy updated for Web Analytics in D-021 and the race record in D-027): only decorative eyebrows are excluded.
 const editorialContentBaseline: Record<string, string> = {
   'about': '545d982e40850d643323fc872c9f99b5f537cc997c2b4963e3eb07059977f869',
   'methodology': '75b4768d57b958dbe6e0f5f5419908d59524fe6fe26ee935ab60abac539d0c6d',
-  'privacy': '9fb61b82a14acdc03d9b95044b6e3fed0b814305a57b33d815604dac06873257',
+  'privacy': 'a85fcdc69fbbe59ee47c83fce7852041f1f364a7d8a5d31761f31b22bd4ca046',
   'contact': 'b48a14a82c282e18a3c19023c0355ff530f8ac3e2ed13bc437e968d249e369f0',
   'terms': '8fba8db5d2d0b9b0c1b6e01a48ec680f62fae5046dd934e3bc9f5b777d8e47c2',
   'guide': '2c1f64d26fd9b1d48a5727b54a3aba3c15312a2cc44b8bc23802a767a78a5cfb',

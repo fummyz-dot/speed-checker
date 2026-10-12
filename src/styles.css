@@ -4463,3 +4463,96 @@ body {
   color: var(--led);
   white-space: nowrap;
 }
+
+/* Race record: a small tote-board strip of this browser's own results. */
+.race-record {
+  display: grid;
+  gap: 6px;
+  padding: 12px 16px;
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--rail);
+  background: var(--tote);
+}
+
+.race-record__title {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.race-record__latest {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 6px;
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.race-record__latest b {
+  color: var(--led);
+  font-size: 1.35rem;
+  font-weight: 900;
+}
+
+.race-record__field {
+  color: var(--muted);
+}
+
+.race-record__latest small {
+  flex-basis: 100%;
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+
+.race-record__stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 18px;
+  margin: 0;
+  font-size: 0.8rem;
+}
+
+.race-record__stats div {
+  display: flex;
+  gap: 6px;
+}
+
+.race-record__stats dt {
+  color: var(--muted);
+}
+
+.race-record__stats dd {
+  margin: 0;
+  font-weight: 700;
+}
+
+.speed-display__best {
+  grid-column: 1 / -1;
+  justify-self: start;
+  margin: 2px 0 0;
+  padding: 1px 8px;
+  background: var(--led);
+  color: var(--tote);
+  font-size: 0.75rem;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+}
+
+.ranking-card__final-note {
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+@media (max-width: 760px) {
+  .hero__start .race-record {
+    gap: 2px;
+    padding: 8px 12px;
+  }
+
+  .hero__start .race-record__latest b {
+    font-size: 1.1rem;
+  }
+}

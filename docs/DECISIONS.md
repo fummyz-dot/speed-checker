@@ -369,3 +369,16 @@ The browser must never calculate Net Speed Score or contain its coefficients. It
 - 'notice' does not change the use cases. Browsing, video and file upload stay speed-based.
 - This removes the contradiction where one screen said both 「Web会議には十分」 and 「通信中に反応が大きく遅くなります」. Thresholds themselves are unchanged.
 
+
+---
+
+## D-027 — Race record and the final placing of the last ranking day
+
+**Status:** Accepted and implemented locally; not deployed
+**Date:** 2026-10-12
+
+- A ranking rank is only provisional when shown: later runs can push it down. Browsers that joined now see the final placing of their latest finished ranking day on their next visit (「昨日の最終順位 4位／15走」, worded like the ranking card), and the ranking card says the final placing appears tomorrow. This gives a reason to come back without adding any new daily board.
+- 「あなたの戦績」 shows lifetime starts, the download personal best and ranking starts with the best final placing. 「自己ベスト更新」 appears on the tote when a measurement beats an earlier best. The ranking promo is hidden once the browser has joined the ranking.
+- Everything is browser-local (`speed-checker:race-record:v1`), cleared together with the measurement history. Existing visitors start from their saved history (up to 30 runs).
+- The only server call is `POST /api/ranking/result` with `{ measurementId }`, relayed to the private `/internal/ranking/result`. It returns that entry's rank, tie count and day size computed like the submit response, and 404 once the entry is outside the 31-day retention. It never returns entry ids or measurements. At most three lookups per page load, only for the latest finished day; a final placing is stored and never fetched again.
+- Rejected for now: splitting the ranking into time-slot or weekly boards (too few runs per day to keep them lively), a Chrome extension (popup closes and stops the measurement), and replacing the race with abstract three.js visuals (the race is the hook for sharing and ranking).

@@ -15,6 +15,8 @@ const RANKING_MAX_BODY_BYTES = 8192
 const RANKING_CONTEXT_URL = 'https://ranking.internal/internal/ranking/context'
 const RANKING_OVERVIEW_URL = 'https://ranking.internal/internal/ranking/overview'
 const RANKING_SUBMIT_URL = 'https://ranking.internal/internal/ranking/submit'
+const RANKING_RESULT_URL = 'https://ranking.internal/internal/ranking/result'
+const RANKING_RESULT_MAX_BODY_BYTES = 512
 const RUN_TICKET_MAX_BODY_BYTES = 4096
 
 type RankingServiceEnv = Env & { RANKING_SERVICE: Fetcher }
@@ -155,6 +157,38 @@ export const handleRankingOverviewRequest = async (
   } catch {
     return serviceUnavailable()
   }
+}
+
+/** Relays only `{ measurementId }` so the browser can look up the final rank of its own past entry. */
+export const handleRankingResultRequest = async (
+  request: Request,
+  env: RankingServiceEnv,
+): Promise<Response> => {
+  if (request.method !== 'POST') {
+    const response = jsonResponse({ error: 'Method Not Allowed' }, 405)
+    response.headers.set('Allow', 'POST')
+    return response
+  }
+
+  let body: unknown
+  try {
+    const contentLength = request.headers.get('Content-Length')
+    if (contentLength !== null
+      && (!/^\d+$/u.test(contentLength) || Number(contentLength) > RANKING_RESULT_MAX_BODY_BYTES)) {
+      return invalidRankingRequest()
+    }
+    const bodyBytes = await request.arrayBuffer()
+    if (bodyBytes.byteLength > RANKING_RESULT_MAX_BODY_BYTES) return invalidRankingRequest()
+    body = JSON.parse(new TextDecoder().decode(bodyBytes))
+  } catch {
+    return invalidRankingRequest()
+  }
+
+  if (!isExactObject(body, ['measurementId']) || typeof body.measurementId !== 'string') {
+    return invalidRankingRequest()
+  }
+
+  return relayRankingRequest(env, RANKING_RESULT_URL, { measurementId: body.measurementId })
 }
 
 export const handleRankingEntriesRequest = async (
@@ -304,6 +338,10 @@ export const handleRequest = (request: Request, env: Env): Response | Promise<Re
 
   if (pathname === '/api/ranking/overview') {
     return handleRankingOverviewRequest(request, env as RankingServiceEnv)
+  }
+
+  if (pathname === '/api/ranking/result') {
+    return handleRankingResultRequest(request, env as RankingServiceEnv)
   }
 
   if (pathname === '/api/ranking/entries') {
