@@ -4,7 +4,7 @@
   const LOCAL_HOSTNAMES = new Set(["localhost", "127.0.0.1", "::1", "[::1]"]);
   const IS_LOCAL = LOCAL_HOSTNAMES.has(window.location.hostname);
 
-  const GAME_VERSION = "0.1.3";
+  const GAME_VERSION = "0.2.0";
 
   const CONFIG = Object.freeze({
     courseLength: 1000,
@@ -118,6 +118,7 @@
   const resultKicker = document.getElementById("resultKicker");
   const resultTitle = document.getElementById("resultTitle");
   const resultDetail = document.getElementById("resultDetail");
+  const resultBest = document.getElementById("resultBest");
   const retryButton = document.getElementById("retryButton");
   const changeTimeButton = document.getElementById("changeTimeButton");
   const shareResultLink = document.getElementById("shareResultLink");
@@ -155,7 +156,11 @@
       stumbleRemainingSec: 0,
       shakeRemainingSec: 0,
       clearRemainingSec: 0,
+      clearTimeSec: 0,
+      stumbles: 0,
     },
+    courseDay: null,
+    dailyOutcome: null,
   };
 
   function clamp(value, min, max) {
@@ -192,30 +197,149 @@
     };
   }
 
-  function createSeed() {
-    if (window.crypto && window.crypto.getRandomValues) {
-      const values = new Uint32Array(1);
-      window.crypto.getRandomValues(values);
-      return values[0];
-    }
-    return (Date.now() ^ Math.floor(performance.now() * 1000)) >>> 0;
+  const JST_OFFSET_MS = 9 * 60 * 60 * 1000;
+  const DAY_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
+  const COURSE_JITTER_METERS = 8;
+  // Never tighter than the fixed v0.1 course already was between the same two slots.
+  const COURSE_MIN_GAP_METERS = 40;
+  const COURSE_FIRST_METERS = 80;
+  const COURSE_LAST_METERS = 980;
+  const FLYING_OBSTACLE_COUNT = 4;
+  const DAILY_BEST_STORAGE_KEY = "net-speed-run:daily-best:v1";
+
+  function getJstDay(nowMs) {
+    return new Date(nowMs + JST_OFFSET_MS).toISOString().slice(0, 10);
   }
 
+  function getCourseDay() {
+    if (IS_LOCAL) {
+      const requested = new URLSearchParams(window.location.search).get("day");
+      if (requested && DAY_PATTERN.test(requested)) return requested;
+    }
+    return getJstDay(Date.now());
+  }
+
+  function formatCourseDay(day) {
+    const [, month, date] = day.split("-");
+    return `${Number(month)}/${Number(date)}`;
+  }
+
+  // FNV-1a: everyone gets the same course for the same JST day.
+  function seedForDay(day) {
+    let hash = 0x811c9dc5;
+    for (const character of `net-speed-run:${day}`) {
+      hash ^= character.charCodeAt(0);
+      hash = Math.imul(hash, 0x01000193);
+    }
+    return hash >>> 0;
+  }
+
+  function shuffle(items, random) {
+    const result = [...items];
+    for (let index = result.length - 1; index > 0; index -= 1) {
+      const swapIndex = Math.floor(random() * (index + 1));
+      [result[index], result[swapIndex]] = [result[swapIndex], result[index]];
+    }
+    return result;
+  }
+
+  const OBSTACLE_SHAPE_KEYS = ["type", "widthM", "heightM"];
+  const pickShape = (obstacle) => Object.fromEntries(OBSTACLE_SHAPE_KEYS.map((key) => [key, obstacle[key]]));
+
+  /**
+   * The daily course keeps the v0.1 slot structure (19 obstacles, 4 flying among the same
+   * candidate slots) so difficulty stays comparable between days. It varies three things:
+   * slot positions (±8 m), which obstacle stands in which slot (within the same group), and
+   * which candidates fly. Gaps never get tighter than the fixed course's own gap or 40 m.
+   */
   function createCourse(seed) {
     const random = mulberry32(seed);
-    const candidateIds = COURSE_TEMPLATE.filter((obstacle) => obstacle.candidate).map((obstacle) => obstacle.id);
+    const fixedShapes = shuffle(COURSE_TEMPLATE.filter((obstacle) => !obstacle.candidate).map(pickShape), random);
+    const candidateShapes = shuffle(COURSE_TEMPLATE.filter((obstacle) => obstacle.candidate).map(pickShape), random);
+    const flyingSlots = new Set(
+      shuffle(COURSE_TEMPLATE.filter((obstacle) => obstacle.candidate).map((obstacle) => obstacle.id), random)
+        .slice(0, FLYING_OBSTACLE_COUNT),
+    );
 
-    for (let index = candidateIds.length - 1; index > 0; index -= 1) {
-      const swapIndex = Math.floor(random() * (index + 1));
-      [candidateIds[index], candidateIds[swapIndex]] = [candidateIds[swapIndex], candidateIds[index]];
+    const positions = [];
+    COURSE_TEMPLATE.forEach((slot, index) => {
+      let position = slot.position + Math.round((random() * 2 - 1) * COURSE_JITTER_METERS);
+      if (index === 0) {
+        position = Math.max(COURSE_FIRST_METERS, position);
+      } else {
+        const templateGap = slot.position - COURSE_TEMPLATE[index - 1].position;
+        position = Math.max(position, positions[index - 1] + Math.min(templateGap, COURSE_MIN_GAP_METERS));
+      }
+      positions.push(position);
+    });
+    // Pull the tail back inside the course while keeping every minimum gap.
+    for (let index = positions.length - 1; index >= 0; index -= 1) {
+      const limit = index === positions.length - 1
+        ? COURSE_LAST_METERS
+        : positions[index + 1] - Math.min(
+          COURSE_TEMPLATE[index + 1].position - COURSE_TEMPLATE[index].position,
+          COURSE_MIN_GAP_METERS,
+        );
+      positions[index] = Math.min(positions[index], limit);
     }
 
-    const flyingIds = new Set(candidateIds.slice(0, 4));
-    return COURSE_TEMPLATE.map((obstacle) => ({
-      ...obstacle,
-      isFlying: flyingIds.has(obstacle.id),
-      hasCollided: false,
-    }));
+    let fixedIndex = 0;
+    let candidateIndex = 0;
+    return COURSE_TEMPLATE.map((slot, index) => {
+      const shape = slot.candidate ? candidateShapes[candidateIndex++] : fixedShapes[fixedIndex++];
+      return {
+        id: `${shape.type}-${index}`,
+        position: positions[index],
+        ...shape,
+        candidate: Boolean(slot.candidate),
+        isFlying: flyingSlots.has(slot.id),
+        hasCollided: false,
+      };
+    });
+  }
+
+  function getStorage() {
+    try {
+      return window.localStorage;
+    } catch {
+      return null;
+    }
+  }
+
+  function isBetterResult(next, best) {
+    if (!best) return true;
+    if (next.clear !== best.clear) return next.clear;
+    if (next.clear) return next.clearTimeSec < best.clearTimeSec;
+    return next.goalMeters < best.goalMeters;
+  }
+
+  function readDailyBest(day) {
+    try {
+      const raw = getStorage()?.getItem(DAILY_BEST_STORAGE_KEY);
+      if (!raw) return null;
+      const value = JSON.parse(raw);
+      if (!value || value.day !== day || typeof value.clear !== "boolean") return null;
+      if (value.clear && !(Number.isFinite(value.clearTimeSec) && value.clearTimeSec > 0)) return null;
+      if (!value.clear && !(Number.isInteger(value.goalMeters) && value.goalMeters >= 0)) return null;
+      return value;
+    } catch {
+      return null;
+    }
+  }
+
+  /** Keeps only today's best on this browser. Returns the best after this run. */
+  function recordDailyResult(result) {
+    const previous = readDailyBest(result.day);
+    const isNewBest = isBetterResult(result, previous);
+    const best = isNewBest ? result : previous;
+    if (isNewBest) {
+      try {
+        getStorage()?.setItem(DAILY_BEST_STORAGE_KEY, JSON.stringify(result));
+      } catch {
+        // Storage is optional; the run result is still shown.
+      }
+    }
+    return { best, isNewBest, hadPrevious: previous !== null };
   }
 
   function resetRun() {
@@ -226,6 +350,9 @@
     game.run.stumbleRemainingSec = 0;
     game.run.shakeRemainingSec = 0;
     game.run.clearRemainingSec = 0;
+    game.run.clearTimeSec = 0;
+    game.run.stumbles = 0;
+    game.dailyOutcome = null;
     game.celebration.phase = "IDLE";
     game.celebration.confetti = [];
     game.course.forEach((obstacle) => {
@@ -258,10 +385,62 @@
     soundToggle.setAttribute("aria-pressed", String(enabled));
   }
 
+  function getCourseLabel(day) {
+    const formatted = formatCourseDay(day);
+    return day === getJstDay(Date.now()) ? `本日のコース ${formatted}` : `${formatted}のコース`;
+  }
+
+  function updateCourseLabels() {
+    const label = getCourseLabel(game.courseDay || getCourseDay());
+    document.querySelectorAll("[data-course-day]").forEach((element) => {
+      element.textContent = label;
+      element.hidden = false;
+    });
+  }
+
+  function formatSeconds(value) {
+    return value.toFixed(1);
+  }
+
+  function formatDailyResult(result) {
+    return result.clear
+      ? `ゴールタイム ${formatSeconds(result.clearTimeSec)}秒`
+      : `GOALまであと${result.goalMeters}m`;
+  }
+
+  function getDailyOutcome(state) {
+    if (game.dailyOutcome) return game.dailyOutcome;
+    const day = game.courseDay || getCourseDay();
+    const result = state === STATES.CLEAR
+      ? { day, clear: true, clearTimeSec: Math.round(game.run.clearTimeSec * 10) / 10, goalMeters: 0, stumbles: game.run.stumbles }
+      : { day, clear: false, goalMeters: getGoalMeters(), stumbles: game.run.stumbles };
+    game.dailyOutcome = { result, ...recordDailyResult(result) };
+    return game.dailyOutcome;
+  }
+
+  function renderDailyBest(outcome) {
+    if (!resultBest) return;
+    const lines = [];
+    if (outcome.result.clear) {
+      lines.push(`<span>${formatDailyResult(outcome.result)}・つまずき ${outcome.result.stumbles}回</span>`);
+    }
+    if (outcome.isNewBest && outcome.hadPrevious) {
+      lines.push('<strong class="result-best__new">本日のベスト更新！</strong>');
+    } else if (!outcome.isNewBest) {
+      lines.push(`<span>本日のベスト ${formatDailyResult(outcome.best)}</span>`);
+    }
+    resultBest.innerHTML = lines.join("");
+    resultBest.hidden = lines.length === 0;
+  }
+
   function createRunSharePostText(state) {
+    const course = `${formatCourseDay(game.courseDay || getCourseDay())}のコース`;
     const lines = state === STATES.CLEAR
-      ? ["Net Speed RunでGOALしました！", `残り${game.run.clearRemainingSec.toFixed(1)}秒でクリア`]
-      : ["Net Speed Runに挑戦しました", `GOALまであと${getGoalMeters()}m`];
+      ? [
+        `Net Speed Run ${course}でGOAL！`,
+        `残り${formatSeconds(game.run.clearRemainingSec)}秒でクリア（ゴールタイム ${formatSeconds(game.run.clearTimeSec)}秒）`,
+      ]
+      : [`Net Speed Run ${course}に挑戦しました`, `GOALまであと${getGoalMeters()}m`];
     return [...lines, "", "あなたの回線は何着？", SHARE_HASHTAG, SHARE_PAGE_URL].join("\n");
   }
 
@@ -271,13 +450,16 @@
   }
 
   function renderResult(state) {
+    const outcome = getDailyOutcome(state);
     updateShareLink(state);
+    updateCourseLabels();
+    renderDailyBest(outcome);
     if (state === STATES.CLEAR) {
       resultPanel.dataset.result = "clear";
       resultKicker.textContent = "COURSE COMPLETE";
       resultTitle.innerHTML = '<span class="result-title-prefix">NET SPEED RUN</span><span class="result-title-main">CLEAR</span>';
-      resultDetail.innerHTML = `<span class="remaining-label">残り</span><strong class="remaining-time">${game.run.clearRemainingSec.toFixed(1)}秒</strong>`;
-      liveRegion.textContent = `ゴール。クリア。残り${game.run.clearRemainingSec.toFixed(1)}秒。`;
+      resultDetail.innerHTML = `<span class="remaining-label">残り</span><strong class="remaining-time">${formatSeconds(game.run.clearRemainingSec)}秒</strong>`;
+      liveRegion.textContent = `ゴール。クリア。残り${formatSeconds(game.run.clearRemainingSec)}秒。${resultBest?.textContent || ""}`;
       return;
     }
 
@@ -286,7 +468,7 @@
     resultKicker.textContent = "NET SPEED RUN";
     resultTitle.textContent = "TIME UP";
     resultDetail.innerHTML = `GOALまで<strong>あと ${metersLeft}m</strong>`;
-    liveRegion.textContent = `タイムアップ。ゴールまであと${metersLeft}メートル。`;
+    liveRegion.textContent = `タイムアップ。ゴールまであと${metersLeft}メートル。${resultBest?.textContent || ""}`;
   }
 
   function createClearConfetti() {
@@ -390,8 +572,10 @@
     frame.dataset.runTimeSec = runTimeSec.toFixed(1);
 
     if (!retry || !game.course.length) {
-      game.courseSeed = createSeed();
+      game.courseDay = getCourseDay();
+      game.courseSeed = seedForDay(game.courseDay);
       game.course = createCourse(game.courseSeed);
+      updateCourseLabels();
     }
 
     resetRun();
@@ -425,6 +609,7 @@
     }
     game.course = [];
     game.courseSeed = null;
+    game.courseDay = null;
     transitionTo(STATES.TITLE);
     document.querySelector(".time-button")?.focus({ preventScroll: true });
   }
@@ -533,6 +718,7 @@
 
       if (collidesWith(obstacle, previousDistance, currentDistance, jumpHeight, now)) {
         obstacle.hasCollided = true;
+        game.run.stumbles += 1;
         game.run.stumbleRemainingSec = CONFIG.stumbleDurationSec;
         game.run.shakeRemainingSec = 0.22;
         return true;
@@ -577,6 +763,7 @@
 
       if (game.run.playerDistance >= CONFIG.courseLength) {
         game.run.clearRemainingSec = getRemainingTimeSec();
+        game.run.clearTimeSec = game.run.elapsedMs / 1000;
         transitionTo(STATES.CLEAR, now);
         return;
       }
@@ -1977,9 +2164,14 @@
     start(runTimeSec) {
       startGame(runTimeSec);
     },
+    /** Read-only view of a day's course, for tests and debugging. */
+    courseForDay(day) {
+      return createCourse(seedForDay(day)).map(({ hasCollided, ...obstacle }) => obstacle);
+    },
   });
 
   updateSoundToggle();
+  updateCourseLabels();
   resizeCanvas();
   transitionTo(IS_LOCAL ? STATES.TITLE : STATES.BOOT, performance.now());
   requestAnimationFrame(frameLoop);
