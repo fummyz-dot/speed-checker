@@ -11,6 +11,7 @@ import type {
 const CONTEXT_TIMEOUT_MS = 1000
 const OVERVIEW_TIMEOUT_MS = 1500
 const SUBMISSION_TIMEOUT_MS = 8000
+const ENTRY_RESULT_TIMEOUT_MS = 3000
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value)
@@ -259,5 +260,61 @@ export const createRankingApiService = (): RankingService => {
       }, SUBMISSION_TIMEOUT_MS)
       return parseSubmission(response)
     },
+  }
+}
+
+export interface RankingEntryResult {
+  rankingDay: string
+  final: boolean
+  scoreTenths: number
+  rank: number
+  tieCount: number
+  totalRuns: number
+}
+
+const parseEntryResult = (value: unknown): RankingEntryResult => {
+  if (!isRecord(value)
+    || value.ok !== true
+    || typeof value.rankingDay !== 'string'
+    || !/^\d{4}-\d{2}-\d{2}$/u.test(value.rankingDay)
+    || typeof value.final !== 'boolean'
+    || !isNonNegativeSafeInteger(value.scoreTenths)
+    || !isPositiveSafeInteger(value.rank)
+    || !isPositiveSafeInteger(value.tieCount)
+    || !isPositiveSafeInteger(value.totalRuns)
+    || value.rank > value.totalRuns) {
+    throw new Error('Invalid ranking entry result response')
+  }
+  return {
+    rankingDay: value.rankingDay,
+    final: value.final,
+    scoreTenths: value.scoreTenths,
+    rank: value.rank,
+    tieCount: value.tieCount,
+    totalRuns: value.totalRuns,
+  }
+}
+
+/**
+ * Looks up the placing of one of this browser's own past entries. Resolves `null` when the server
+ * no longer has it (not entered or past retention); rejects on any other failure.
+ */
+export const fetchRankingEntryResult = async (measurementId: string): Promise<RankingEntryResult | null> => {
+  const controller = new AbortController()
+  const timeout = window.setTimeout(() => controller.abort(), ENTRY_RESULT_TIMEOUT_MS)
+  try {
+    const response = await fetch('/api/ranking/result', {
+      method: 'POST',
+      headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
+      credentials: 'omit',
+      cache: 'no-store',
+      body: JSON.stringify({ measurementId }),
+      signal: controller.signal,
+    })
+    if (response.status === 404) return null
+    if (!response.ok) throw new Error('Ranking API request failed')
+    return parseEntryResult(await response.json())
+  } finally {
+    window.clearTimeout(timeout)
   }
 }

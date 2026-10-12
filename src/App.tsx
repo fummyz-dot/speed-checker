@@ -15,6 +15,8 @@ import { useRanking } from './features/ranking/useRanking'
 import { useDownloadPosition } from './features/ranking/useDownloadPosition'
 import { formatDownloadPositionParts } from './lib/downloadPosition'
 import { consumeRunReturnContext } from './features/run/runReturnContext'
+import { RaceRecordPanel } from './features/raceRecord/RaceRecordPanel'
+import { useRaceRecord } from './features/raceRecord/useRaceRecord'
 import {
   bandwidthBitsToMbps,
   formatFinalSpeedDisplay,
@@ -56,6 +58,12 @@ function App() {
     rankingEnabled ? rankingService : null,
     phase === 'complete' ? completedResult : null,
   )
+  const {
+    record: raceRecord,
+    today: raceRecordToday,
+    isNewBestDownload,
+    addRankingStart,
+  } = useRaceRecord(rankingEnabled, phase === 'complete' ? completedResult : null)
   const isMobileLayout = useMediaQuery('(max-width: 760px)')
   const [conditionLabel, setConditionLabel] = useState<string | null>(getInitialConditionLabel)
   const [isConditionEditing, setIsConditionEditing] = useState(false)
@@ -215,6 +223,7 @@ function App() {
           <strong>{displayedDownload}</strong>
           <span>Mbps</span>
         </div>
+        {isNewBestDownload && <p className="speed-display__best">自己ベスト更新</p>}
         {downloadPosition && (
           <p className="speed-display__position" role="status">
             {formatDownloadPositionParts(downloadPosition)[0]}
@@ -289,7 +298,8 @@ function App() {
             </div>
             <div className="hero__start">
               {measurementControl}
-              {rankingEnabled && (
+              <RaceRecordPanel record={raceRecord} today={raceRecordToday} showRanking={rankingEnabled} />
+              {rankingEnabled && raceRecord.rankingStartCount === 0 && (
                 <div className="hero-ranking-promo">
                   <div className="hero-ranking-promo__copy">
                     <strong>全国ランキング開催中</strong>
@@ -347,13 +357,16 @@ function App() {
                 context={rankingContext}
                 service={rankingService}
                 measurement={completedResult}
-                onSubmitted={(submission: RankingSubmissionResult) => setShareRanking({
-                  measurementId: completedResult.id,
-                  rank: submission.entry.rank,
-                  tieCount: submission.entry.tieCount,
-                  totalRuns: submission.entry.totalRuns,
-                  scoreTenths: submission.entry.scoreTenths,
-                })}
+                onSubmitted={(submission: RankingSubmissionResult) => {
+                  addRankingStart(completedResult.id, submission)
+                  setShareRanking({
+                    measurementId: completedResult.id,
+                    rank: submission.entry.rank,
+                    tieCount: submission.entry.tieCount,
+                    totalRuns: submission.entry.totalRuns,
+                    scoreTenths: submission.entry.scoreTenths,
+                  })
+                }}
               />
             </div>
           )}

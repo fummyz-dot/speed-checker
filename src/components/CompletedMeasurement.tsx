@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import type { SpeedMeasurementResult } from '../types/measurement'
 import { evaluateUseCases, generateMeasurementComment } from '../lib/measurementEvaluation'
 import { clearMeasurements, loadMeasurements, saveMeasurement } from '../lib/measurementStorage'
+import { clearRaceRecord } from '../lib/raceRecord'
 import { normalizeConditionLabel } from '../lib/measurementValidation'
 import type { ShareRankingSummary } from '../lib/sharePost'
 import { MeasurementComment } from './MeasurementComment'
@@ -35,8 +36,9 @@ export const CompletedMeasurement = ({ result, persistResult = true, ranking = n
   }, [persistResult, result])
 
   const clearHistory = () => {
-    if (!window.confirm('このブラウザに保存された測定履歴を削除しますか？')) return
+    if (!window.confirm('このブラウザに保存された測定履歴と戦績を削除しますか？')) return
     clearMeasurements()
+    clearRaceRecord()
     setPrevious(null)
     setHistory([])
   }

@@ -54,6 +54,7 @@
         <h2>4. 測定履歴</h2>
         <p>正常に完了した通常の測定は、最大30件までブラウザのLocalStorageに保存されます。通常の測定履歴はbrowser-localであり、ランキングへ参加しない測定結果はランキングDBへ送信しません。</p>
         <p>保存される項目には、測定日時、download、upload、Ping、Jitter、download/upload loaded latency、timezone offset、任意のmeasurement condition labelが含まれる場合があります。condition labelもLocalStorageにのみ保存され、利用者がブラウザデータを削除すると履歴とともに削除されます。</p>
+        <p>あわせて「あなたの戦績」として、通算の測定回数、下りの自己ベスト、このブラウザでランキングに参加した出走（直近30件までのmeasurement identifier、ランキング日、スコア、順位）をLocalStorageに保存します。これらもブラウザ内だけに保存され、測定履歴の削除操作またはブラウザデータの削除で消えます。</p>
 
         <h2>5. 全国回線品質ランキング</h2>
         <p>ランキングへの参加は、測定完了後に利用者が明示的に選んだ場合だけ行われます。正常なランキング登録1件を1出走として扱い、Cloudflareが提供するcountry情報により日本国内と判定された測定だけが参加対象です。country以外のregionやcityなどを参加可否判定には利用しません。</p>
@@ -74,6 +75,7 @@
         </ul>
         <p>個別ランキングエントリーは31日、日次集計および無敗の三冠馬の履歴は400日保存します。</p>
         <p>参加データからは、直近30日の出走の下り速度の分布（10%刻みの境目の値）を1日1回集計し、出走数とともに公開します。個別の出走結果は公開しません。測定直後に表示する「直近30日の出走のうち下り速度は上位◯%以内」という目安は、公開された境目の値と今回の測定値をブラウザ内で比べたもので、この比較のために測定値をサーバーへ送信することはありません。</p>
+        <p>ランキングに参加したブラウザは、次に開いたときに、その出走のmeasurement identifierだけを送って前日までの最終順位を照会します。照会のために新たな情報は保存しません。</p>
 
         <h2>6. 外部サービス</h2>
         <p>Net Speed RaceはCloudflareを利用しています。ランキングの不正利用防止にはCloudflare Turnstileを使用し、ランキング参加操作時にだけ利用します。通常の速度測定だけではランキング参加用Turnstileを実行しません。Turnstileによる情報処理にはCloudflareのサービスを利用します。Cloudflareによる情報の取扱いについては、<a href="https://www.cloudflare.com/privacypolicy/" rel="noreferrer noopener">Cloudflare Privacy Policy</a>をご確認ください。</p>
@@ -93,7 +95,7 @@
 
         <h2>10. お問い合わせ</h2>
         <p>本ポリシーに関するお問い合わせは、<a href="/contact/">お問い合わせページ</a>をご利用ください。</p>
-        <p class="site-pages__updated">更新日: 2026年10月11日</p>
+        <p class="site-pages__updated">更新日: 2026年10月12日</p>
       </article>
     </main>
     <footer class="site-pages__footer"><div class="site-pages__footer-inner">

@@ -243,6 +243,7 @@ export const RankingCard = ({
             {submission.entry.topPercentTenths !== null && (
               <p>上位{(submission.entry.topPercentTenths / 10).toFixed(1)}%</p>
             )}
+            <p className="ranking-card__final-note">最終順位は明日、このページを開くと表示されます。</p>
             <button className="share-button ranking-card__share" type="button" onClick={shareRankOnX}>
               順位をXでシェア
             </button>
