@@ -382,3 +382,17 @@ The browser must never calculate Net Speed Score or contain its coefficients. It
 - Everything is browser-local (`speed-checker:race-record:v1`), cleared together with the measurement history. Existing visitors start from their saved history (up to 30 runs).
 - The only server call is `POST /api/ranking/result` with `{ measurementId }`, relayed to the private `/internal/ranking/result`. It returns that entry's rank, tie count and day size computed like the submit response, and 404 once the entry is outside the 31-day retention. It never returns entry ids or measurements. At most three lookups per page load, only for the latest finished day; a final placing is stored and never fetched again.
 - Rejected for now: splitting the ranking into time-slot or weekly boards (too few runs per day to keep them lively), a Chrome extension (popup closes and stops the measurement), and replacing the race with abstract three.js visuals (the race is the hook for sharing and ranking).
+
+---
+
+## D-028 — Net Speed Run daily course (no server)
+
+**Status:** Accepted and implemented locally; not deployed
+**Date:** 2026-10-12
+
+- The Run course was effectively fixed (19 obstacles at fixed positions; only 4 of 7 candidates varied in flying). It now comes from the JST date: everyone gets the same course on the same day, and a new one at midnight JST. Run v0.2.0.
+- To keep days comparable, the generator keeps the v0.1 slot structure: the same 19 obstacles, 4 flying among the same candidate slots. It varies slot positions (±8 m), which obstacle stands in which slot (within its group), and which candidates fly. A gap is never tighter than the fixed course's own gap at that slot or 40 m, and the course stays within 80–980 m. A scripted perfect run clears 60 consecutive days without a stumble (test).
+- The result shows the day's course, ゴールタイム and つまずき for a clear, and today's best on this browser (「本日のベスト更新！」). Best order: any GOAL beats TIME UP; then the shorter ゴールタイム; then the shorter remaining distance. ゴールタイム is used because the remaining time depends on the Net Speed Score that set the time limit.
+- Only today's best is stored (`net-speed-run:daily-best:v1`, browser-local). Nothing is sent. The X post names the course day.
+- Deferred: a nationwide daily leaderboard. Client-reported times are easy to forge; a fair board needs server-side replay of the input log. Reconsider once Run has regular players.
+- On localhost only, `?day=YYYY-MM-DD` pins the course for testing.

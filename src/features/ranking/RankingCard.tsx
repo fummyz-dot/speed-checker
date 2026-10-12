@@ -280,7 +280,7 @@ export const RankingCard = ({
               <div>
                 <span className="ranking-card__run-eyebrow">NET SPEED RUN</span>
                 <h4 id="ranking-run-title">今回のNET SPEED SCOREで持ち時間が決まります。</h4>
-                <p>ジャンプだけでGOALを目指します。</p>
+                <p>ジャンプだけでGOALを目指します。コースは毎日変わります。</p>
               </div>
               <button className="ranking-card__run-button" type="button" onClick={launchRun}>
                 GO TO RUN!

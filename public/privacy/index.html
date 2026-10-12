@@ -55,6 +55,7 @@
         <p>正常に完了した通常の測定は、最大30件までブラウザのLocalStorageに保存されます。通常の測定履歴はbrowser-localであり、ランキングへ参加しない測定結果はランキングDBへ送信しません。</p>
         <p>保存される項目には、測定日時、download、upload、Ping、Jitter、download/upload loaded latency、timezone offset、任意のmeasurement condition labelが含まれる場合があります。condition labelもLocalStorageにのみ保存され、利用者がブラウザデータを削除すると履歴とともに削除されます。</p>
         <p>あわせて「あなたの戦績」として、通算の測定回数、下りの自己ベスト、このブラウザでランキングに参加した出走（直近30件までのmeasurement identifier、ランキング日、スコア、順位）をLocalStorageに保存します。これらもブラウザ内だけに保存され、測定履歴の削除操作またはブラウザデータの削除で消えます。</p>
+        <p>ミニゲーム「Net Speed Run」は、その日のコースの自己ベスト（日付、GOALしたか、ゴールタイム、つまずいた回数、GOALまでの残り距離）だけをLocalStorageに保存します。サーバーへは送信しません。翌日以降の記録で上書きされます。</p>
 
         <h2>5. 全国回線品質ランキング</h2>
         <p>ランキングへの参加は、測定完了後に利用者が明示的に選んだ場合だけ行われます。正常なランキング登録1件を1出走として扱い、Cloudflareが提供するcountry情報により日本国内と判定された測定だけが参加対象です。country以外のregionやcityなどを参加可否判定には利用しません。</p>

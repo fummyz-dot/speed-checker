@@ -699,3 +699,45 @@ h1 span {
     animation: none;
   }
 }
+
+/* Daily course: everyone runs the same course on the same JST day. */
+.course-day {
+  margin: 10px 0 0;
+  color: var(--amber);
+  font-size: 0.85rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+}
+
+.course-day[hidden],
+.result-best[hidden] {
+  display: none;
+}
+
+.boot-card p.course-day {
+  margin-top: 6px;
+  color: var(--amber);
+}
+
+.course-day--result {
+  margin: 2px 0 0;
+}
+
+.result-best {
+  display: grid;
+  gap: 4px;
+  margin: -12px 0 20px;
+  color: rgba(239, 251, 254, 0.78);
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+.result-best__new {
+  color: var(--amber);
+  font-weight: 900;
+}
+
+.panel--title .course-day {
+  margin: 4px 0 18px;
+  text-align: center;
+}
