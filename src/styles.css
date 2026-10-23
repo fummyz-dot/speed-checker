@@ -4557,3 +4557,67 @@ body {
     font-size: 1.1rem;
   }
 }
+
+/* Today's going, from Tokyo's JMA forecast: the dirt darkens and wets; nothing animates. */
+.hero__racecard-going {
+  color: var(--led);
+}
+
+.horse-course.horse-course--going-yielding {
+  background:
+    repeating-linear-gradient(90deg, transparent 0 46px, rgba(0, 0, 0, 0.04) 46px 48px),
+    linear-gradient(180deg, #7f5b3c 0%, #93694a 45%, #a67b55 100%);
+}
+
+.horse-course.horse-course--going-heavy {
+  background:
+    radial-gradient(ellipse 22% 9% at 30% 62%, rgba(190, 205, 230, 0.12), transparent 70%),
+    radial-gradient(ellipse 18% 7% at 72% 38%, rgba(190, 205, 230, 0.1), transparent 70%),
+    repeating-linear-gradient(90deg, transparent 0 46px, rgba(0, 0, 0, 0.05) 46px 48px),
+    linear-gradient(180deg, #5f4330 0%, #74523a 45%, #85603f 100%);
+}
+
+.horse-course.horse-course--going-bad {
+  background:
+    radial-gradient(ellipse 26% 10% at 24% 66%, rgba(190, 205, 230, 0.2), transparent 70%),
+    radial-gradient(ellipse 20% 8% at 64% 34%, rgba(190, 205, 230, 0.18), transparent 70%),
+    radial-gradient(ellipse 16% 6% at 86% 74%, rgba(190, 205, 230, 0.16), transparent 70%),
+    repeating-linear-gradient(90deg, transparent 0 46px, rgba(0, 0, 0, 0.06) 46px 48px),
+    linear-gradient(180deg, #4a3426 0%, #5c412f 45%, #6b4c36 100%);
+}
+
+.race-going-source {
+  margin: 10px 0 0;
+  color: var(--muted);
+  font-size: 0.72rem;
+  line-height: 1.6;
+}
+
+.race-going-source a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* On dark, wet dirt the course labels switch to the rail colour to stay readable. */
+.horse-course--going-heavy .horse-course__helper,
+.horse-course--going-heavy .horse-course__start,
+.horse-course--going-heavy .horse-course__finish,
+.horse-course--going-heavy .horse-course__lane-name,
+.horse-course--going-bad .horse-course__helper,
+.horse-course--going-bad .horse-course__start,
+.horse-course--going-bad .horse-course__finish,
+.horse-course--going-bad .horse-course__lane-name {
+  color: rgba(244, 242, 234, 0.82);
+}
+
+.hero__racecard-going {
+  white-space: nowrap;
+}
+
+@media (max-width: 760px) {
+  .hero__racecard .hero__racecard-going {
+    display: block;
+    margin-left: 0;
+  }
+}

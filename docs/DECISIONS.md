@@ -396,3 +396,18 @@ The browser must never calculate Net Speed Score or contain its coefficients. It
 - Only today's best is stored (`net-speed-run:daily-best:v1`, browser-local). Nothing is sent. The X post names the course day.
 - Deferred: a nationwide daily leaderboard. Client-reported times are easy to forge; a fair board needs server-side replay of the input log. Reconsider once Run has regular players.
 - On localhost only, `?day=YYYY-MM-DD` pins the course for testing.
+
+---
+
+## D-029 — Today's main race: rotating race name and Tokyo going
+
+**Status:** Accepted and implemented locally; not deployed
+**Date:** 2026-10-23
+
+- The homepage racecard shows a race name that rotates daily by JST date across ten fictional names (光回線ステークス, パケット記念, …), the same for everyone. No real racecourse or race names are used.
+- When available, it also shows Tokyo's weather and a going (「東京 雨・馬場 重」), and the course dirt darkens and wets accordingly (static CSS only; nothing animates, so measurement is not affected).
+- Source: the JMA forecast JSON for the Tokyo area (130010), fetched by the public Worker at `GET /api/race-day` with a 30-minute edge cache and served with `Cache-Control: public, max-age=600`. JMA content is usable under PDL 1.0 (commercial use allowed with attribution; edits must be stated), so the race panel credits 気象庁ホームページ and says the going is the site's own conversion. Open-Meteo was rejected because its free API is non-commercial only.
+- Conversion: 晴れ・くもり → 良, but 稍重 when the forecast text includes rain or snow (一時／時々); 雨・雪 → 重; 大雨・暴風雨・大雪・暴風雪 → 不良. Real going depends on accumulated rain; this is a playful approximation from today's forecast.
+- The JMA JSON is undocumented and may change. Any fetch or parse failure, or a forecast without today's date (just after midnight), returns `weather: null`; the page then shows only the race name. The weather lookup follows the same production switch as the ranking API.
+- The X post adds the race line as its second line. The share PNG is unchanged (decided with the user).
+- Not chosen: a going derived from each measurement's loaded latency. The race runs during measurement, while those values are final only at the end.

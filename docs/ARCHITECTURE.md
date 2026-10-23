@@ -65,6 +65,8 @@ Race timing/value mappings belong in small deterministic helpers such as `src/li
 
 On page load, a browser that joined the ranking on an earlier JST day looks up the final placing of its latest finished day with `POST /api/ranking/result` (`{ measurementId }` only, at most three entries, relayed to the private `/internal/ranking/result`). A stored final placing is never fetched again, and a 404 drops the entry from the local race record (`src/lib/raceRecord.ts`, `speed-checker:race-record:v1`). This small request is made once at load; it can overlap a measurement only if the visitor starts one within its 3-second timeout.
 
+`GET /api/race-day` returns `{ ok, day, weather }`, where `weather` is Tokyo's JMA forecast for the current JST day converted to a going (`worker/raceDay.ts`), or `null` on any upstream problem. The browser fetches it once at page load when the Worker API is enabled; the rotating race name is computed locally (`src/lib/raceDay.ts`).
+
 Before the speed-test engine starts, the ranking context is retrieved through `GET /api/ranking/context`, fixing the optional race champion reference for that run. Context failure falls back to the established 700 Mbps / 250 Mbps benchmark and never fails the speed measurement. No ranking network activity occurs after the measurement starts or while it runs.
 
 After measurement completion, Turnstile is loaded and executed only if the user explicitly selects ranking participation; it is never loaded at page load. A successful Turnstile challenge is followed by `POST /api/ranking/entries`. Ranking tickets and results remain memory-only and are not added to LocalStorage. Only a successful ranking submission can return Net Speed Run access.

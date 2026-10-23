@@ -2,6 +2,7 @@ import { act, fireEvent, render, screen, waitFor, within } from '@testing-librar
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import App from './App'
+import { getRaceName, jstDayFromMs } from './lib/raceDay'
 import { useConnectionInfo } from './hooks/useConnectionInfo'
 import { useSpeedTest } from './hooks/useSpeedTest'
 import { createRankingApiService } from './features/ranking/rankingService'
@@ -87,6 +88,9 @@ describe('App', () => {
     const { container } = render(<App />)
 
     expect(screen.getByRole('button', { name: '測定開始' })).toBeVisible()
+    expect(container.querySelector('.hero__racecard')).toHaveTextContent(
+      new RegExp(`本日のメインレース${getRaceName(jstDayFromMs(Date.now()))}3頭立て`),
+    )
     expect(screen.getByText(/相手は地方馬と無敗の三冠馬。/)).toBeVisible()
     const summary = screen.getByLabelText('測定でわかること')
     expect(summary).toHaveTextContent('速度')
