@@ -160,6 +160,23 @@ describe('HorseSpeedVisualization runner presentation', () => {
     expect(screen.queryByRole('link', { name: '詳しい測定結果を見る' })).not.toBeInTheDocument()
   })
 
+  it('東京の馬場に合わせてコースの色を変え、気象庁の出典を示す', () => {
+    const raceDay = {
+      day: '2026-10-23',
+      raceName: '光回線ステークス',
+      weather: { area: '東京', label: '雨', going: '不良', reportDatetime: '2026-10-23T17:00:00+09:00' },
+    } as const
+    const { container, rerender } = render(
+      <HorseSpeedVisualization downloadMbps={null} uploadMbps={null} phase="idle" result={null} raceDay={raceDay} />,
+    )
+    expect(container.querySelector('.horse-course')).toHaveClass('horse-course--going-bad')
+    expect(screen.getByRole('link', { name: '気象庁ホームページ' })).toHaveAttribute('href', expect.stringContaining('jma.go.jp'))
+
+    rerender(<HorseSpeedVisualization downloadMbps={null} uploadMbps={null} phase="idle" result={null} raceDay={{ ...raceDay, weather: null }} />)
+    expect(container.querySelector('.horse-course')?.className).not.toMatch(/going-/)
+    expect(screen.queryByRole('link', { name: '気象庁ホームページ' })).not.toBeInTheDocument()
+  })
+
   it('集中時は同じレースcomponentをdialogとして表示し、縮小とEscapeを要求できる', () => {
     const onRequestExitFocus = vi.fn()
     const { container } = render(

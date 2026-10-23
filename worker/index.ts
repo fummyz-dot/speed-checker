@@ -1,4 +1,5 @@
 import { buildConnectionInfo } from './connectionInfo'
+import { fetchRaceDay } from './raceDay'
 import {
   mapScoreTenthsToRunTimeTenths,
   RUN_SCORE_MAX_TENTHS,
@@ -295,6 +296,18 @@ export const handleRunTicketVerifyRequest = async (
   }
 }
 
+/** Today's race-day context (Tokyo weather → going). Shared by everyone, so it may be cached briefly. */
+export const handleRaceDayRequest = async (request: Request): Promise<Response> => {
+  if (request.method !== 'GET') {
+    const response = jsonResponse({ error: 'Method Not Allowed' }, 405)
+    response.headers.set('Allow', 'GET')
+    return response
+  }
+  const response = jsonResponse(await fetchRaceDay(Date.now()))
+  response.headers.set('Cache-Control', 'public, max-age=600')
+  return response
+}
+
 export const handleConnectionRequest = (request: Request): Response => {
   if (request.method !== 'GET') {
     const response = jsonResponse({ error: 'Method Not Allowed' }, 405)
@@ -330,6 +343,10 @@ export const handleRequest = (request: Request, env: Env): Response | Promise<Re
 
   if (pathname === '/api/connection') {
     return handleConnectionRequest(request)
+  }
+
+  if (pathname === '/api/race-day') {
+    return handleRaceDayRequest(request)
   }
 
   if (pathname === '/api/ranking/context') {

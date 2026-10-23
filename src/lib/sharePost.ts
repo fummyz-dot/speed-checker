@@ -1,6 +1,7 @@
 import type { SpeedMeasurementResult } from '../types/measurement'
 import { formatMilliseconds } from '../utils/formatMetric'
 import { PUBLIC_SITE_URL } from './publicSite'
+import { formatRaceDayLine, type RaceDay } from './raceDay'
 import { formatFinalSpeedDisplay } from './speedValue'
 
 /** 匿名ランキングへ参加した場合だけ投稿文へ含める、本日の順位とスコア。 */
@@ -55,8 +56,10 @@ export const createSharePostText = (
   result: SpeedMeasurementResult,
   currentUrl: string,
   ranking: ShareRankingSummary | null = null,
+  raceDay: RaceDay | null = null,
 ): string => {
   const lines = ['Net Speed Raceで回線を測定しました']
+  if (raceDay) lines.push(formatRaceDayLine(raceDay))
 
   const validRanking = getShareRankingFor(result, ranking)
   if (validRanking) lines.push(formatShareRankingLine(validRanking))

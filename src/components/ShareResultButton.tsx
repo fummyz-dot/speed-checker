@@ -6,6 +6,7 @@ import {
   downloadBlob,
 } from '../lib/shareImage'
 import { createSharePostText, createXIntentUrl, type ShareRankingSummary } from '../lib/sharePost'
+import { useRaceDayContext } from '../features/raceDay/useRaceDay'
 
 interface ShareResultButtonProps {
   result: SpeedMeasurementResult
@@ -14,6 +15,7 @@ interface ShareResultButtonProps {
 }
 
 export const ShareResultButton = ({ result, evaluations, ranking = null }: ShareResultButtonProps) => {
+  const raceDay = useRaceDayContext()
   const [isCopyingImage, setIsCopyingImage] = useState(false)
   const [isDownloading, setIsDownloading] = useState(false)
   const [isCopyingText, setIsCopyingText] = useState(false)
@@ -72,7 +74,7 @@ export const ShareResultButton = ({ result, evaluations, ranking = null }: Share
 
     setIsCopyingText(true)
     try {
-      await navigator.clipboard.writeText(createSharePostText(result, window.location.href, ranking))
+      await navigator.clipboard.writeText(createSharePostText(result, window.location.href, ranking, raceDay))
       setMessage('投稿文をコピーしました。')
     } catch {
       setMessage('投稿文をコピーできませんでした。')
@@ -83,7 +85,7 @@ export const ShareResultButton = ({ result, evaluations, ranking = null }: Share
 
   const postToX = () => {
     setMessage(null)
-    const postText = createSharePostText(result, window.location.href, ranking)
+    const postText = createSharePostText(result, window.location.href, ranking, raceDay)
     window.open(createXIntentUrl(postText), '_blank', 'noopener,noreferrer')
   }
 

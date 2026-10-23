@@ -7,6 +7,7 @@ import {
   SHARE_PAGE_URL,
   type ShareRankingSummary,
 } from './sharePost'
+import { createRaceDay } from './raceDay'
 
 const result = (overrides: Partial<SpeedMeasurementResult> = {}): SpeedMeasurementResult => ({
   id: 'measurement-1',
@@ -30,6 +31,15 @@ describe('sharePost', () => {
     expect(text).not.toContain('source=share')
     expect(text).not.toContain('localhost')
     expect(text).not.toContain('workers.dev')
+  })
+
+  it('本日のレース名と東京の馬場を2行目に入れる', () => {
+    const raceDay = createRaceDay('2026-10-23', { area: '東京', label: '雨', going: '重', reportDatetime: '2026-10-23T17:00:00+09:00' })
+    const lines = createSharePostText(result(), 'https://example.com/', null, raceDay).split('\n')
+    expect(lines[1]).toBe(`${raceDay.raceName}（東京 雨・馬場 重）`)
+
+    const withoutWeather = createSharePostText(result(), 'https://example.com/', null, createRaceDay('2026-10-23')).split('\n')
+    expect(withoutWeather[1]).toBe(raceDay.raceName)
   })
 
   it('Pingが欠損している場合はPing行を省略する', () => {

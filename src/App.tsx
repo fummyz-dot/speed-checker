@@ -17,6 +17,7 @@ import { formatDownloadPositionParts } from './lib/downloadPosition'
 import { consumeRunReturnContext } from './features/run/runReturnContext'
 import { RaceRecordPanel } from './features/raceRecord/RaceRecordPanel'
 import { useRaceRecord } from './features/raceRecord/useRaceRecord'
+import { RaceDayContext, useRaceDay } from './features/raceDay/useRaceDay'
 import {
   bandwidthBitsToMbps,
   formatFinalSpeedDisplay,
@@ -47,6 +48,8 @@ function App() {
     start,
   } = useSpeedTest()
   const rankingEnabled = isRankingEnabled()
+  // The weather lookup uses the same Worker API as the ranking, so it follows the same switch.
+  const raceDay = useRaceDay(rankingEnabled)
   const {
     context: rankingContext,
     championReference,
@@ -264,6 +267,7 @@ function App() {
   const heroControls = [conditionSelector, connectionInfo]
 
   return (
+    <RaceDayContext.Provider value={raceDay}>
     <div className={`site-shell${isRaceFocused ? ' site-shell--race-focused' : ''}`}>
       <header
         className="site-header"
@@ -288,7 +292,16 @@ function App() {
             inert={isRaceFocused}
           >
             <div className="hero__intro-copy">
-              <p className="hero__racecard"><span>本日のメインレース</span><span>回線速度ステークス</span><span>3頭立て</span></p>
+              <p className="hero__racecard">
+                <span>本日のメインレース</span>
+                <span>{raceDay.raceName}</span>
+                <span>3頭立て</span>
+                {raceDay.weather && (
+                  <span className="hero__racecard-going">
+                    {raceDay.weather.area} {raceDay.weather.label}・馬場 {raceDay.weather.going}
+                  </span>
+                )}
+              </p>
               <h1 id="page-title"><span>回線速度を、</span><span>競馬で測る。</span></h1>
               <p className="hero__lead">
                 あなたの回線が、下りの速さで走り、上りの速さで跳びます。
@@ -326,6 +339,7 @@ function App() {
               result={completedResult}
               championReference={championReference}
               showChampionReference={rankingEnabled}
+              raceDay={raceDay}
               focused={isRaceFocused}
               focusExiting={isRaceFocusExiting}
               showExpandButton={!isMobileLayout}
@@ -404,6 +418,7 @@ function App() {
         </div>
       </main>
     </div>
+    </RaceDayContext.Provider>
   )
 }
 

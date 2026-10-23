@@ -18,6 +18,7 @@ import { DEFAULT_RACE_CHAMPION_REFERENCE, type RaceChampionReference } from '../
 import type { TestPhase } from '../types/speedTest'
 import { GoalFocusFrontView } from './GoalFocusFrontView'
 import { HorseSprite } from './HorseSprite'
+import { GOING_CLASS, JMA_TOKYO_FORECAST_PAGE, type RaceDay } from '../lib/raceDay'
 
 interface HorseSpeedVisualizationProps {
   downloadMbps: number | null
@@ -33,6 +34,7 @@ interface HorseSpeedVisualizationProps {
   onRequestFocus?: () => void
   onRequestExitFocus?: () => void
   onShowDetails?: () => void
+  raceDay?: RaceDay | null
 }
 
 type RaceStyle = CSSProperties & {
@@ -80,6 +82,7 @@ export const HorseSpeedVisualization = ({
   onRequestFocus,
   onRequestExitFocus,
   onShowDetails,
+  raceDay = null,
 }: HorseSpeedVisualizationProps) => {
   const raceContainerRef = useRef<HTMLElement | null>(null)
   const {
@@ -276,7 +279,7 @@ export const HorseSpeedVisualization = ({
       )}
 
       <div
-        className={`horse-course horse-course--${state}`}
+        className={`horse-course horse-course--${state}${raceDay?.weather ? ` horse-course--going-${GOING_CLASS[raceDay.weather.going]}` : ''}`}
         style={raceStyle}
         data-animation-state={state}
       >
@@ -358,6 +361,12 @@ export const HorseSpeedVisualization = ({
         <a className="race-results-cta" href="#measurement-results" onClick={handleShowDetails}>
           <span>詳しい測定結果を見る</span>
         </a>
+      )}
+      {raceDay?.weather && (
+        <p className="race-going-source">
+          馬場は東京地方の天気予報（{raceDay.weather.label}）をもとに、当サイトが置き換えたものです。出典：
+          <a href={JMA_TOKYO_FORECAST_PAGE} target="_blank" rel="noopener noreferrer">気象庁ホームページ</a>
+        </p>
       )}
     </section>
   )

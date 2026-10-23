@@ -4,6 +4,7 @@ import { saveRunReturnContext } from '../run/runReturnContext'
 import type { IssuedRunTicket } from '../run/types'
 import type { SpeedMeasurementResult } from '../../types/measurement'
 import { createSharePostText, createXIntentUrl } from '../../lib/sharePost'
+import { useRaceDayContext } from '../raceDay/useRaceDay'
 import { requestRankingTurnstileToken } from './turnstile'
 import type {
   RankingContext,
@@ -43,6 +44,7 @@ export const RankingCard = ({
   onSubmitted,
 }: RankingCardProps) => {
   const [state, setState] = useState<RankingSubmitState>(() => initialState(context))
+  const raceDay = useRaceDayContext()
   const [submission, setSubmission] = useState<RankingSubmissionResult | null>(null)
   const [overview, setOverview] = useState<RankingOverviewPreview | null>(null)
   const [isOverviewLoading, setIsOverviewLoading] = useState(
@@ -121,7 +123,7 @@ export const RankingCard = ({
       tieCount: submission.entry.tieCount,
       totalRuns: submission.entry.totalRuns,
       scoreTenths: submission.entry.scoreTenths,
-    })
+    }, raceDay)
     window.open(createXIntentUrl(postText), '_blank', 'noopener,noreferrer')
   }
 
