@@ -430,13 +430,15 @@ describe('App', () => {
     expect(staticContent).toHaveAttribute('inert')
 
     await user.keyboard('{Escape}')
+    // The lock is released in a passive effect cleanup, which can run just after the dialog unmounts.
     await waitFor(() => {
       expect(screen.queryByRole('dialog', { name: '回線速度レース' })).not.toBeInTheDocument()
+      expect(document.documentElement).not.toHaveClass('race-focus-lock')
+      expect(document.body).not.toHaveClass('race-focus-lock')
+      expect(staticContent).not.toHaveAttribute('aria-hidden')
+      expect(staticContent).not.toHaveAttribute('inert')
     })
     expect(start).toHaveBeenCalledTimes(1)
-    expect(document.body).not.toHaveClass('race-focus-lock')
-    expect(staticContent).not.toHaveAttribute('aria-hidden')
-    expect(staticContent).not.toHaveAttribute('inert')
     staticContent.remove()
   })
 
